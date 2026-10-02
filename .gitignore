@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# build output (attached to GitHub releases instead)
+main.js
+*.map
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# local test vaults
+test-vault/
