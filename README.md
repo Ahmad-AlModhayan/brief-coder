@@ -153,6 +153,8 @@ npm test        # unit tests + runs real snippets in every language installed on
 
 The test suite runs snippets in 32 languages end to end, and also covers Stop, the time limit, typed input, output limits, temporary-file cleanup and error messages.
 
+**Releasing:** run `npm version patch` (or `minor` / `major`), update `.github/RELEASE_NOTES.md`, and push to `main`. GitHub Actions builds, tests and publishes the release with `main.js`, `manifest.json` and `styles.css`.
+
 ## Name in the community directory
 
 Obsidian's plugin directory doesn't allow "Obsidian" in plugin names. A directory submission would therefore need a different display name; the plugin ID is already `coder-studio`.

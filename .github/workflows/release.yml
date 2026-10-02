@@ -1,10 +1,12 @@
 name: Release
 
-# Push a tag that matches the version in manifest.json (e.g. 1.0.1) to publish a release
-# with the three files Obsidian and BRAT need.
+# Publishes a release whenever main has a version (in manifest.json) that isn't released yet.
+# To ship a new version: `npm version patch` (or minor/major), update .github/RELEASE_NOTES.md,
+# and push to main. The release gets the three files Obsidian and BRAT need.
 on:
   push:
-    tags: ["*"]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,21 +16,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npm run test:unit
-      - name: Check the tag matches manifest.json
-        run: test "$(node -p "require('./manifest.json').version")" = "${GITHUB_REF_NAME}"
-      - name: Create release
+
+      - name: Read the version
+        id: version
+        run: echo "value=$(node -p "require('./manifest.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether it is already released
+        id: released
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" main.js manifest.json styles.css --clobber
+          if gh release view "${{ steps.version.outputs.value }}" > /dev/null 2>&1; then
+            echo "yes=true" >> "$GITHUB_OUTPUT"
           else
-            gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css --title "$GITHUB_REF_NAME" --generate-notes
+            echo "yes=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - uses: actions/setup-node@v4
+        if: steps.released.outputs.yes == 'false'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build and test
+        if: steps.released.outputs.yes == 'false'
+        run: |
+          npm ci
+          npm run build
+          npm run test:unit
+
+      - name: Create the release
+        if: steps.released.outputs.yes == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.value }}" main.js manifest.json styles.css \
+            --target "$GITHUB_SHA" \
+            --title "${{ steps.version.outputs.value }}" \
+            --notes-file .github/RELEASE_NOTES.md
