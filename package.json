@@ -9,7 +9,7 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "typecheck": "tsc -noEmit -skipLibCheck",
     "test": "tsx --test tests/*.test.ts",
-    "test:unit": "tsx --test tests/fence.test.ts tests/text.test.ts tests/output.test.ts tests/languages.test.ts tests/preview.test.ts tests/liveBlocks.test.ts",
+    "test:unit": "tsx --test tests/fence.test.ts tests/text.test.ts tests/output.test.ts tests/languages.test.ts tests/preview.test.ts tests/liveBlocks.test.ts tests/pagedText.test.ts",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "keywords": [

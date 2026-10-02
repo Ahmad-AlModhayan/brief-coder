@@ -1,6 +1,6 @@
 # Obsidian Coder
 
-Run, view and edit code inside Obsidian. Every code block gets **Run** and **Copy**, output appears live under the block, and code files open in a real editor. It supports 40 languages and stays light: about 70 KB, with nothing running until you press Run.
+Run, view and edit code inside Obsidian. Every code block gets **Run** and **Copy**, output appears live under the block, and code files open in a real editor. It supports 40 languages and stays light: under 80 KB, with nothing running until you press Run.
 
 ![Code blocks with Run, Copy and live output](docs/code-blocks.png)
 
@@ -115,15 +115,16 @@ Assign hotkeys to any of them in Settings → Hotkeys.
 
 Coder was built to keep Obsidian fast. Measured in Obsidian 1.13:
 
-- **Small:** about 70 KB, with no bundled libraries. The code editor and syntax colours reuse what Obsidian already ships.
+- **Small:** under 80 KB, with no bundled libraries. The code editor and syntax colours reuse what Obsidian already ships.
 - **Quick to load:** its own startup work is a few milliseconds.
   - Desktop-only modules load the first time you press Run.
   - File types are registered in one step, so the file list refreshes once instead of 70 times.
 - **Cheap in notes:**
-  - A note is parsed once, however many code blocks it has.
-  - Bars are added only to blocks on screen.
-  - Output panels are created only after a block runs.
-  - Typing in a note costs about 0.06 ms per keystroke (under 1% of the editor's own work).
+  - A note is parsed once, however many code blocks it has. While you type, only the code block you're in is read again.
+  - In Live Preview, bars are drawn only for blocks on screen.
+  - Output panels are created only after a block runs, and HTML previews load only when they come on screen.
+  - Typing costs about 0.06 ms per keystroke in ordinary text, and about 0.6 ms inside a code block of a 3,000-line note.
+- **Idle means idle:** no timers run while nothing is running, and memory doesn't grow as you open notes and code files.
 - **Never blocks Obsidian:**
   - Programs run in their own process; JavaScript in a background worker; HTML previews in a separate sandboxed frame.
   - Obsidian stayed at about 60 frames per second while a program printed 300,000 lines. Output is drawn incrementally in small pages, and pages scrolled out of view aren't drawn at all.
