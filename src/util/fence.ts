@@ -88,6 +88,11 @@ export function hashString(text: string): string {
 	return (h >>> 0).toString(16).padStart(8, "0");
 }
 
+/** A block's key without its order number: note, language and a hash of the code. */
+export function keyBase(path: string, lang: string, code: string): string {
+	return `${path}|${lang.toLowerCase()}|${hashString(code)}`;
+}
+
 /**
  * Stable identity for a block inside a note: survives edits elsewhere in the note,
  * and distinguishes identical blocks by their order.
@@ -95,7 +100,7 @@ export function hashString(text: string): string {
 export function blockKeys(path: string, blocks: readonly FencedBlock[]): string[] {
 	const seen = new Map<string, number>();
 	return blocks.map((b) => {
-		const base = `${path}|${b.lang.toLowerCase()}|${hashString(b.code)}`;
+		const base = keyBase(path, b.lang, b.code);
 		const n = seen.get(base) ?? 0;
 		seen.set(base, n + 1);
 		return `${base}|${n}`;

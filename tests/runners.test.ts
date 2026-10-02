@@ -99,7 +99,8 @@ describe("alternative runtimes", () => {
  */
 const ENVIRONMENT_PROBLEMS: Array<[RegExp, string]> = [
 	[/NU1301|Unable to load the service index/, "NuGet is offline on this machine"],
-	[/ClassNotFoundException: javax\.tools\.DiagnosticListener/, "this machine's Scala 2.11 can't run on its JDK"],
+	// Reported as ClassNotFoundException, or by Scala's compile server when it is already running.
+	[/javax[./]tools[./]DiagnosticListener/, "this machine's Scala 2.11 can't run on its JDK"],
 	[/needs \.NET 10 or newer/, "this machine has .NET older than 10 (single-file C# needs 10+)"],
 ];
 

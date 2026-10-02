@@ -43,7 +43,8 @@ export class RunSession implements RunSink {
 	private listeners = new Set<() => void>();
 	private frame = 0;
 
-	constructor(readonly key: string, maxChars: number) {
+	/** `onUnused` runs when the last bar or view showing this session goes away. */
+	constructor(readonly key: string, maxChars: number, private onUnused?: (s: RunSession) => void) {
 		this.buffer = new OutputBuffer(maxChars);
 	}
 
@@ -69,8 +70,9 @@ export class RunSession implements RunSink {
 		this.listeners.add(fn);
 		this.lastSeen = Date.now();
 		return () => {
-			this.listeners.delete(fn);
+			if (!this.listeners.delete(fn)) return;
 			this.lastSeen = Date.now();
+			if (!this.listeners.size) this.onUnused?.(this);
 		};
 	}
 
@@ -148,6 +150,7 @@ const IDLE_MS = 10 * 60 * 1000;
 
 export class SessionStore {
 	private sessions = new Map<string, RunSession>();
+	private lastPrune = Date.now();
 	/** Bumped by stopAll(), so "Run all" loops know to stop starting new blocks. */
 	stopGeneration = 0;
 
@@ -156,10 +159,18 @@ export class SessionStore {
 	get(key: string): RunSession {
 		let s = this.sessions.get(key);
 		if (!s) {
-			s = new RunSession(key, this.maxChars());
+			// Old output is dropped while Coder is being used, not by a timer: nothing runs while Obsidian is idle.
+			const now = Date.now();
+			if (now - this.lastPrune > 60_000) this.prune(now);
+			s = new RunSession(key, this.maxChars(), (unused) => this.release(unused));
 			this.sessions.set(key, s);
 		}
 		return s;
+	}
+
+	/** A session that never ran is dropped as soon as nothing shows it, so scrolling and typing don't pile them up. */
+	private release(s: RunSession): void {
+		if (!s.running && !s.hasContent && this.sessions.get(s.key) === s) this.sessions.delete(s.key);
 	}
 
 	peek(key: string): RunSession | undefined {
@@ -191,10 +202,17 @@ export class SessionStore {
 	 * running — at once when they hold no output, after IDLE_MS when they do.
 	 */
 	prune(now = Date.now()): void {
+		this.lastPrune = now;
 		for (const [k, s] of this.sessions) {
 			if (s.running || s.inUse) continue;
 			if (!s.hasContent || now - s.lastSeen > IDLE_MS) this.sessions.delete(k);
 		}
+	}
+
+	/** Stops every run and forgets all output (the plugin is being disabled). */
+	dispose(): void {
+		this.stopAll();
+		this.sessions.clear();
 	}
 
 	get size(): number {

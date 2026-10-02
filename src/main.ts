@@ -59,13 +59,10 @@ export default class CoderPlugin extends Plugin {
 		this.registerEditorExtension(livePreviewExtension(this));
 		this.addSettingTab(new CoderSettingTab(this.app, this));
 		this.registerCommands();
-
-		// Keep memory flat during long sessions.
-		this.registerInterval(window.setInterval(() => this.store.prune(), 10 * 60 * 1000));
 	}
 
 	onunload(): void {
-		this.store.stopAll();
+		this.store.dispose();
 		for (const unmount of Array.from(this.mounted)) unmount();
 	}
 
@@ -193,7 +190,8 @@ export default class CoderPlugin extends Plugin {
 			this.starting.delete(session);
 		}
 		if (!confirmed) return;
-		await this.run({ session, lang, code: target.code, cwd: this.blockCwd(target.path), isBlock: true });
+		// The bar may have been redrawn while the user confirmed: run in the session it shows now.
+		await this.run({ session: this.store.get(target.key), lang, code: target.code, cwd: this.blockCwd(target.path), isBlock: true });
 	}
 
 	/**
