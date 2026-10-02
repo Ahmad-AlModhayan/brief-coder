@@ -136,6 +136,54 @@ describe("SessionStore", () => {
 		store.clearPath("a.md");
 		assert.equal(store.peek("a.md|py|1|0"), undefined);
 	});
+
+	it("drops a block that never ran as soon as nothing shows it, without a timer", () => {
+		const store = new SessionStore(() => 1000);
+		const bar = store.get("a.md|py|1|0").subscribe(() => undefined);
+		const panel = store.get("a.md|py|1|0").subscribe(() => undefined);
+		bar();
+		assert.ok(store.peek("a.md|py|1|0"), "still shown by the output panel");
+		panel();
+		panel(); // unsubscribing twice is harmless
+		assert.equal(store.size, 0);
+	});
+
+	it("keeps output after its bar goes away, until it has been unseen for 10 minutes", () => {
+		const store = new SessionStore(() => 1000);
+		const s = store.get("a.md|py|1|0");
+		const off = s.subscribe(() => undefined);
+		s.begin("Python");
+		s.write("out", "hi\n");
+		s.finish({ code: 0 });
+		off();
+		assert.equal(store.peek("a.md|py|1|0"), s);
+		store.prune(Date.now() + 9 * 60 * 1000);
+		assert.equal(store.peek("a.md|py|1|0"), s);
+		store.prune(Date.now() + 11 * 60 * 1000);
+		assert.equal(store.peek("a.md|py|1|0"), undefined);
+	});
+
+	it("keeps a running block even when nothing shows it", () => {
+		const store = new SessionStore(() => 1000);
+		const s = store.get("a.md|py|1|0");
+		const off = s.subscribe(() => undefined);
+		s.begin("Python");
+		off();
+		assert.equal(store.peek("a.md|py|1|0"), s);
+		s.finish({ code: 0 });
+		assert.equal(store.peek("a.md|py|1|0"), s);
+	});
+
+	it("stops and forgets everything when disposed", () => {
+		const store = new SessionStore(() => 1000);
+		const s = store.get("a.md|py|1|0");
+		let stopped = false;
+		s.begin("Python");
+		s.handle = { stop: () => (stopped = true), done: new Promise(() => undefined) };
+		store.dispose();
+		assert.ok(stopped);
+		assert.equal(store.size, 0);
+	});
 });
 
 /** A fake view that records what was drawn, the way the output panel does with DOM nodes. */

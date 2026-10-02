@@ -25,6 +25,8 @@ export class OutputView {
 	private parts: Parts | null = null;
 	private previewWrap: HTMLElement | null = null;
 	private previewHtml: string | null = null;
+	/** Waits for a preview's panel to come on screen before loading the page. */
+	private previewObserver: IntersectionObserver | null = null;
 	private messageHandler: ((e: MessageEvent) => void) | null = null;
 	private messageWin: Window | null = null;
 	private unsubscribe: () => void;
@@ -180,8 +182,21 @@ export class OutputView {
 		this.removePreview();
 		this.previewHtml = html;
 		if (html === null) return;
-		const token = Math.random().toString(36).slice(2);
 		const wrap = (this.previewWrap = p.el.createDiv({ cls: "coder-preview" }));
+		// The page loads once its panel is on screen. A note's Reading view and its hidden editor both
+		// show this output; without this, the page would load (and log) twice.
+		const win = wrap.ownerDocument.defaultView ?? window;
+		const observer = (this.previewObserver = new win.IntersectionObserver((entries) => {
+			if (!entries.some((e) => e.isIntersecting) || this.previewWrap !== wrap) return;
+			observer.disconnect();
+			this.previewObserver = null;
+			this.loadPreview(wrap, html);
+		}));
+		observer.observe(wrap);
+	}
+
+	private loadPreview(wrap: HTMLElement, html: string): void {
+		const token = Math.random().toString(36).slice(2);
 		const frame = wrap.createEl("iframe", {
 			cls: "coder-preview-frame",
 			attr: { sandbox: "allow-scripts allow-forms allow-modals", title: "HTML preview", loading: "lazy" },
@@ -211,6 +226,8 @@ export class OutputView {
 	}
 
 	private removePreview(): void {
+		this.previewObserver?.disconnect();
+		this.previewObserver = null;
 		if (this.messageHandler) this.messageWin?.removeEventListener("message", this.messageHandler);
 		this.messageHandler = null;
 		this.messageWin = null;

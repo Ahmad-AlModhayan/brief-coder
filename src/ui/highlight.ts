@@ -110,12 +110,24 @@ function ensureLoaded(c: CM5, mode: string): Promise<boolean> {
 	});
 }
 
+/**
+ * One language per mode and tab size, made once: CodeMirror keeps every StreamLanguage ever
+ * defined in a global table, so making one per opened file would grow memory with each file.
+ */
+const languages = new Map<string, Extension>();
+
 /** Returns a CodeMirror 6 language extension for a file extension, or [] if unknown. */
 export async function languageFor(ext: string, tabSize: number): Promise<Extension> {
 	const c = cm5();
 	if (!c) return [];
 	const info = modeInfoFor(c, ext);
-	if (!info || !(await ensureLoaded(c, info.mode))) return [];
+	if (!info) return [];
+	const cacheKey = `${info.spec}|${tabSize}`;
+	const known = languages.get(cacheKey);
+	if (known) return known;
+	if (!(await ensureLoaded(c, info.mode))) return [];
+	const loaded = languages.get(cacheKey); // another editor may have made it meanwhile
+	if (loaded) return loaded;
 	let mode: CM5Mode;
 	try {
 		mode = c.getMode({ indentUnit: tabSize, tabSize }, info.spec);
@@ -142,7 +154,9 @@ export async function languageFor(ext: string, tabSize: number): Promise<Extensi
 			},
 		},
 	};
-	return [StreamLanguage.define(parser), tokenClasses];
+	const language = [StreamLanguage.define(parser), tokenClasses];
+	languages.set(cacheKey, language);
+	return language;
 }
 
 // ---------- token classes (cm-keyword, cm-string, …) ----------

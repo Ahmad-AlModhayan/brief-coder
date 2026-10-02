@@ -1,9 +1,9 @@
-import { EditorState, Extension, RangeSetBuilder, StateEffect, StateField, Transaction } from "@codemirror/state";
+import { ChangeSet, EditorState, Extension, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, WidgetType } from "@codemirror/view";
 import { editorInfoField } from "obsidian";
 import type CoderPlugin from "../main";
 import { isDecoratedFence } from "../languages";
-import { blockKeys, findFencedBlocks } from "../util/fence";
+import { BlockSpan, scanBlocks, trackEdit } from "./liveBlocks";
 
 /** Dispatched when settings change so editors rebuild their decorations. */
 export const refreshEffect = StateEffect.define<null>();
@@ -47,63 +47,58 @@ class RunBarWidget extends WidgetType {
 	}
 }
 
-interface Range {
-	from: number;
-	to: number;
-}
-
 interface FieldValue {
 	deco: DecorationSet;
-	/** Document ranges of the code blocks (opening fence to closing fence). */
-	ranges: Range[];
+	/** Where every fenced block is (opening fence to closing fence). */
+	spans: BlockSpan[];
+	path: string;
 }
 
-const EMPTY: FieldValue = { deco: Decoration.none, ranges: [] };
 const FENCE_START = Decoration.line({ class: "coder-hide-copy" });
 
+function barWidget(plugin: CoderPlugin, key: string, path: string, s: BlockSpan, code: string): Decoration {
+	return Decoration.widget({ widget: new RunBarWidget(plugin, key, path, s.meta.lang, s.meta.info, code), block: true, side: 1 });
+}
+
+function notePath(state: EditorState): string {
+	return state.field(editorInfoField, false)?.file?.path ?? "";
+}
+
 function build(plugin: CoderPlugin, state: EditorState): FieldValue {
-	if (!plugin.settings.showRunBar) return EMPTY;
-	const doc = state.doc;
-	const text = doc.toString();
-	if (!text.includes("```") && !text.includes("~~~")) return EMPTY;
-	const path = state.field(editorInfoField, false)?.file?.path ?? "";
-	const blocks = findFencedBlocks(text.split("\n"));
-	const keys = blockKeys(path, blocks);
+	const path = notePath(state);
+	if (!plugin.settings.showRunBar) return { deco: Decoration.none, spans: [], path };
+	const { spans, blocks, keys } = scanBlocks(state.doc, path);
 	const builder = new RangeSetBuilder<Decoration>();
-	const ranges: Range[] = [];
 	blocks.forEach((b, i) => {
-		const start = doc.line(b.startLine + 1);
-		ranges.push({ from: start.from, to: doc.line(b.endLine + 1).to });
 		if (!b.closed || !isDecoratedFence(b.lang)) return;
 		// Marks the opening line so CSS can hide Obsidian's own copy flair on blocks that have the bar.
-		if (plugin.settings.hideNativeCopy) builder.add(start.from, start.from, FENCE_START);
-		const pos = doc.line(b.endLine + 1).to;
-		builder.add(
-			pos,
-			pos,
-			Decoration.widget({ widget: new RunBarWidget(plugin, keys[i], path, b.lang, b.info, b.code), block: true, side: 1 }),
-		);
+		if (plugin.settings.hideNativeCopy) builder.add(spans[i].from, spans[i].from, FENCE_START);
+		builder.add(spans[i].to, spans[i].to, barWidget(plugin, keys[i], path, spans[i], b.code));
 	});
-	return { deco: builder.finish(), ranges };
+	return { deco: builder.finish(), spans, path };
 }
 
 /**
- * Typing in ordinary text (the common case) only shifts the bars; the note is re-scanned when an
- * edit touches a code block or adds/removes fence characters.
+ * Typing in ordinary text (the common case) only shifts the bars, and typing inside a code block
+ * re-reads just that block. The whole note is scanned again only when fences change.
  */
-function needsRebuild(value: FieldValue, tr: Transaction): boolean {
-	let rebuild = false;
-	tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-		if (rebuild) return;
-		for (const r of value.ranges) {
-			if (fromA <= r.to && toA >= r.from) {
-				rebuild = true;
-				return;
-			}
-		}
-		if (/[`~]/.test(inserted.toString()) || /[`~]/.test(tr.startState.doc.sliceString(fromA, toA))) rebuild = true;
-	});
-	return rebuild;
+function update(plugin: CoderPlugin, value: FieldValue, state: EditorState, changes: ChangeSet): FieldValue {
+	const path = notePath(state);
+	const next = path === value.path ? trackEdit(value.spans, state.doc, changes, path) : null;
+	if (!next) return build(plugin, state);
+	let deco = value.deco.map(changes);
+	const edited = next.edited;
+	if (edited && isDecoratedFence(next.spans[edited.index].meta.lang)) {
+		// The edited block's bar gets the new code, and with it the block's new key.
+		const s = next.spans[edited.index];
+		deco = deco.update({
+			filter: (_from, _to, d) => !(d.spec.widget instanceof RunBarWidget),
+			filterFrom: s.to,
+			filterTo: s.to,
+			add: [barWidget(plugin, `${s.meta.base}|0`, path, s, edited.code).range(s.to)],
+		});
+	}
+	return { deco, spans: next.spans, path };
 }
 
 /** Live Preview / source mode: a block widget with the Coder bar after each code block. */
@@ -113,11 +108,7 @@ export function livePreviewExtension(plugin: CoderPlugin): Extension {
 		update(value, tr) {
 			if (tr.effects.some((e) => e.is(refreshEffect))) return build(plugin, tr.state);
 			if (!tr.docChanged) return value;
-			if (needsRebuild(value, tr)) return build(plugin, tr.state);
-			return {
-				deco: value.deco.map(tr.changes),
-				ranges: value.ranges.map((r) => ({ from: tr.changes.mapPos(r.from), to: tr.changes.mapPos(r.to, 1) })),
-			};
+			return update(plugin, value, tr.state, tr.changes);
 		},
 		provide: (f) => EditorView.decorations.from(f, (v) => v.deco),
 	});
