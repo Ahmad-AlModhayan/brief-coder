@@ -1,0 +1,42 @@
+{
+  "name": "obsidian-coder",
+  "version": "1.0.0",
+  "description": "Run, view and edit code in 40 languages inside Obsidian: Run and Copy on every code block, live output, and an editor for code files.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "test": "tsx --test tests/*.test.ts",
+    "test:unit": "tsx --test tests/fence.test.ts tests/text.test.ts tests/output.test.ts tests/languages.test.ts tests/preview.test.ts",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "code-runner",
+    "code-editor"
+  ],
+  "author": "Ahmad AlModhayan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ahmad-AlModhayan/obsidian-coder.git"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "6.18.6",
+    "@codemirror/commands": "6.8.1",
+    "@codemirror/language": "6.11.0",
+    "@codemirror/search": "6.5.11",
+    "@codemirror/state": "6.5.0",
+    "@codemirror/view": "6.38.6",
+    "@lezer/common": "^1.5.3",
+    "@lezer/highlight": "^1.2.5",
+    "@types/node": "^22.20.4",
+    "esbuild": "^0.25.12",
+    "obsidian": "^1.13.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
