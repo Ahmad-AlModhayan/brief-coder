@@ -1,0 +1,20 @@
+{
+  "id": "coder",
+  "name": {
+    "en": "Obsidian Coder",
+    "ar": "Obsidian Coder"
+  },
+  "bg": "#3a3835",
+  "ink": "#f5f3f0",
+  "accent": "#3a3835",
+  "headline": {
+    "en": "Code that runs where you think.",
+    "ar": "كودٌ يعمل حيث تفكّر."
+  },
+  "sub": {
+    "en": "Run and Copy on every code block in Obsidian",
+    "ar": "زرّا «تشغيل» و«نسخ» على كل كتلة كود في Obsidian"
+  },
+  "short": "Coder",
+  "description": "Run and Copy on every code block in your Obsidian notes."
+}
