@@ -1,0 +1,235 @@
+---
+/* coder.kahflabs.com home. Coder has no design canvas of its own, so the page is built from the Kahf family and
+   the product's line on kahflabs.com; the note below is an illustration of the plugin, drawn in HTML. */
+import Base from '@kahf/design/layouts/Base.astro';
+import Button from '@kahf/design/components/Button.astro';
+import Eyebrow from '@kahf/design/components/Eyebrow.astro';
+import SectionHead from '@kahf/design/components/SectionHead.astro';
+import StatusChip from '@kahf/design/components/StatusChip.astro';
+import SpecList from '@kahf/design/components/SpecList.astro';
+import Strengths from '@kahf/design/components/Strengths.astro';
+import Icon from '@kahf/design/components/Icon.astro';
+import { KAHF, type Lang } from '@kahf/design/lib/product';
+import { P, repo } from './product';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ar = lang === 'ar';
+
+const code = 'from math import sqrt\n\ndef cosine(a, b):\n    dot = sum(x * y for x, y in zip(a, b))\n    na = sqrt(sum(x * x for x in a))\n    nb = sqrt(sum(y * y for y in b))\n    return dot / (na * nb)\n\nq = [0.2, 0.7, 0.1]\nd = [0.25, 0.6, 0.2]\nprint(round(cosine(q, d), 2))';
+// The same code, marked up for colour. Kept by hand so the page ships no highlighter.
+const codeHtml = [
+  '<span class="k">from</span> math <span class="k">import</span> sqrt',
+  '',
+  '<span class="k">def</span> <span class="f">cosine</span>(a, b):',
+  '    dot = <span class="f">sum</span>(x * y <span class="k">for</span> x, y <span class="k">in</span> <span class="f">zip</span>(a, b))',
+  '    na = <span class="f">sqrt</span>(<span class="f">sum</span>(x * x <span class="k">for</span> x <span class="k">in</span> a))',
+  '    nb = <span class="f">sqrt</span>(<span class="f">sum</span>(y * y <span class="k">for</span> y <span class="k">in</span> b))',
+  '    <span class="k">return</span> dot / (na * nb)',
+  '',
+  'q = [<span class="n">0.2</span>, <span class="n">0.7</span>, <span class="n">0.1</span>]',
+  'd = [<span class="n">0.25</span>, <span class="n">0.6</span>, <span class="n">0.2</span>]',
+  '<span class="f">print</span>(<span class="f">round</span>(cosine(q, d), <span class="n">2</span>))',
+].join('\n');
+const jsHtml = '<span class="k">const</span> words = <span class="s">"the hard part"</span>.<span class="f">split</span>(<span class="s">" "</span>);\nconsole.<span class="f">log</span>(words.length);';
+
+const T = ar ? {
+  title: 'Obsidian Coder · كودٌ يعمل حيث تفكّر.',
+  description: 'إضافة لتطبيق Obsidian تضع زرّي «تشغيل» و«نسخ» على كل كتلة كود، والنتيجة تحتها مباشرة، بألوان السمة التي تستخدمها. مفتوحة المصدر.',
+  h1: 'كودٌ يعمل حيث تفكّر.',
+  lede: 'تتوقف ملاحظاتك عن كونها مكانًا يُلصق فيه الكود، وتصبح مكانًا يعمل فيه. زرّا «تشغيل» و«نسخ» على كل كتلة، والنتيجة تحتها مباشرة، بلغاتٍ عديدة، وبألوان سمة Obsidian التي تستخدمها أصلًا.',
+  try: 'جرّب المثال',
+  noteTitle: 'هل هذان المتّجهان متقاربان؟',
+  noteText: 'تشابه جيب التمام، قبل أن أثق بنتائج البحث.',
+  notePath: 'ملاحظات / التشابه.md',
+  run: 'تشغيل', running: 'يعمل…', copy: 'نسخ', copied: 'نُسخ', output: 'النتيجة', ran: 'تمّ التشغيل',
+  demoNote: 'مثال توضيحي مرسوم في الصفحة، والنتيجة محسوبة مسبقًا.',
+  strengthsLabel: 'ثلاثة أسباب',
+  strengths: [
+    { icon: 'terminal', claim: 'الجواب يبقى مع السؤال.', because: 'النتيجة تظهر تحت الكتلة التي أنتجتها، فتجمع الملاحظة السؤال والكود والجواب في مكانٍ واحد، بدل نافذة طرفية تُغلق وتُنسى.' },
+    { icon: 'palette', claim: 'يبدو كأنه جزءٌ من Obsidian.', because: 'Coder يرسم بألوان سمتك بدل أن يفرض ألوانه، فتبقى الخزنة الداكنة داكنة، وتبقى سمتك المخصّصة كما اخترتها.' },
+  { icon: 'content_copy', claim: 'انسخ دون أن تحدّد.', because: 'لكل كتلة زرّ «نسخ»، فإخراج الكود من الملاحظة نقرةٌ واحدة، لا سحبٌ حذر عبر الأسطر.' },
+  ],
+  howEyebrow: 'كيف يعمل',
+  howTitle: 'لا شيء جديد لتتعلّمه.',
+  howLede: 'تكتب الكود كما كنت تكتبه دائمًا. Coder يضيف ما ينقصه فقط.',
+  how: [
+    ['data_object', 'اكتب الكتلة كعادتك', 'ثلاث علامات ‎```‎ واسم اللغة، كما في أي ملاحظة.'],
+    ['play_arrow', 'اضغط «تشغيل»', 'تعمل الكتلة، وتظهر نتيجتها تحتها مباشرة.'],
+    ['edit', 'غيّر، وشغّل مجددًا', 'عدّل رقمًا وأعد التشغيل. صارت الملاحظة مكانًا للتجربة، لا للحفظ فقط.'],
+  ],
+  themeEyebrow: 'السمات',
+  themeTitle: 'كتلةٌ واحدة، بثلاث سمات.',
+  themeLede: 'الكود نفسه كما يظهر في ثلاث خزائن مختلفة. لا ألوان خاصة بالإضافة: كل لونٍ تراه من السمة.',
+  themes: [['light', 'فاتحة'], ['dark', 'داكنة'], ['custom', 'سمتك أنت']],
+  installEyebrow: 'التثبيت',
+  installTitle: 'ثلاث خطوات، ثم ملاحظتك الأولى.',
+  install: [
+    ['download', 'نزّل آخر إصدار', 'من صفحة الإضافة على GitHub: الملفات main.js وmanifest.json وstyles.css.'],
+    ['folder', 'ضعها في خزنتك', 'في مجلد جديد داخل .obsidian/plugins في خزنتك.'],
+    ['check_circle', 'فعّلها', 'في Obsidian: الإعدادات › الإضافات المجتمعية، ثم شغّل Obsidian Coder.'],
+  ],
+  facts: [
+    { term: 'النوع', value: 'إضافة لتطبيق Obsidian' },
+    { term: 'الرخصة', value: 'مفتوحة المصدر' },
+    { term: 'السعر', value: 'مجانية' },
+    { term: 'الحالة', value: 'متاحة', tone: 'positive' },
+  ],
+  closingTitle: 'ملاحظتك القادمة قد تعمل.',
+  closingBody: 'الشيفرة مفتوحة على GitHub. نزّلها، أو اقرأها، أو حسّنها.',
+  source: 'الشيفرة على GitHub',
+  tm: 'Obsidian علامة تجارية لشركة Dynalist Inc. وObsidian Coder إضافة مستقلة، ليست من صنعها ولا بتأييدها.',
+} : {
+  title: 'Obsidian Coder · Code that runs where you think.',
+  description: 'An Obsidian plugin that puts Run and Copy on every code block, with the output right beneath, in the colours of the theme you use. Open source.',
+  h1: 'Code that runs where you think.',
+  lede: 'Your notes stop being a place where code is pasted and become a place where it runs. Run and Copy on every block, the output right beneath it, many languages, and the colours of whatever Obsidian theme you already use.',
+  try: 'Try the example',
+  noteTitle: 'Are these two embeddings close?',
+  noteText: 'Cosine similarity, before I trust the search results.',
+  notePath: 'Notes / Similarity.md',
+  run: 'Run', running: 'Running…', copy: 'Copy', copied: 'Copied', output: 'Output', ran: 'Ran',
+  demoNote: 'An illustration drawn on this page; the output is worked out in advance.',
+  strengthsLabel: 'Three reasons',
+  strengths: [
+    { icon: 'terminal', claim: 'The answer stays with the question.', because: 'the output lands right beneath the block that produced it, so the note holds the question, the code and the result together, instead of a terminal window you close and forget.' },
+    { icon: 'palette', claim: 'It looks like it belongs.', because: 'Coder draws with your theme’s colours instead of bringing its own, so a dark vault stays dark and a custom theme stays yours.' },
+    { icon: 'content_copy', claim: 'Copy without selecting.', because: 'every block gets a Copy button, so taking code out of a note is one click, not a careful drag across lines.' },
+  ],
+  howEyebrow: 'How it works',
+  howTitle: 'Nothing new to learn.',
+  howLede: 'You write code the way you always have. Coder only adds what was missing.',
+  how: [
+    ['data_object', 'Write the block as usual', 'Three backticks and the language, like any note.'],
+    ['play_arrow', 'Press Run', 'The block runs, and its output appears right underneath.'],
+    ['edit', 'Change it, run it again', 'Edit a number and run again. The note becomes a place to try things, not only to keep them.'],
+  ],
+  themeEyebrow: 'Themes',
+  themeTitle: 'One block, three themes.',
+  themeLede: 'The same code as it appears in three different vaults. The plugin has no colours of its own: every colour you see comes from the theme.',
+  themes: [['light', 'Light'], ['dark', 'Dark'], ['custom', 'Your theme']],
+  installEyebrow: 'Install',
+  installTitle: 'Three steps, then your first note.',
+  install: [
+    ['download', 'Download the latest release', 'From the plugin’s page on GitHub: main.js, manifest.json and styles.css.'],
+    ['folder', 'Put it in your vault', 'In a new folder inside your vault’s .obsidian/plugins.'],
+    ['check_circle', 'Turn it on', 'In Obsidian: Settings › Community plugins, then enable Obsidian Coder.'],
+  ],
+  facts: [
+    { term: 'Type', value: 'Obsidian plugin' },
+    { term: 'Licence', value: 'Open source' },
+    { term: 'Price', value: 'Free' },
+    { term: 'Status', value: 'Available', tone: 'positive' },
+  ],
+  closingTitle: 'Your next note might run.',
+  closingBody: 'The source is open on GitHub. Download it, read it, or make it better.',
+  source: 'Source on GitHub',
+  tm: 'Obsidian is a trademark of Dynalist Inc. Obsidian Coder is an independent plugin, not made or endorsed by them.',
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Obsidian Coder',
+  applicationCategory: 'DeveloperApplication', operatingSystem: 'Obsidian', url: P.url, inLanguage: ['en', 'ar'],
+  description: T.description, offers: { '@type': 'Offer', price: '0', priceCurrency: 'SAR' }, codeRepository: repo,
+  publisher: { '@type': 'Organization', name: 'Kahf Labs', url: KAHF },
+};
+---
+<Base p={P} lang={lang} page="home" title={T.title} description={T.description} jsonLd={jsonLd}>
+<main id="main">
+
+<section class="pp-hero" aria-labelledby="hero-title">
+  <div class="kf-wrap pp-hero-inner cd-hero">
+    <div class="pp-hero-text">
+      <div class="pp-chips"><StatusChip group="release" state="open" lang={lang} compact /><span class="kf-tag">{ar ? 'إضافة لتطبيق Obsidian' : 'Obsidian plugin'}</span></div>
+      <h1 id="hero-title" class="pp-hero-title">{T.h1}</h1>
+      <p class="pp-lede">{T.lede}</p>
+      <div class="pp-actions">
+        <Button href={repo} icon="code">{P.cta[lang].label}</Button>
+        <Button href="#try" variant="gray">{T.try}</Button>
+      </div>
+    </div>
+    <div class="pp-hero-visual" id="try">
+      <figure class="cd-note" aria-labelledby="cd-note-title">
+        <div class="cd-bar" aria-hidden="true"><span class="cd-dots"><i></i><i></i><i></i></span><span class="cd-path">{T.notePath}</span></div>
+        <div class="cd-body">
+          <h2 id="cd-note-title" class="cd-h">{T.noteTitle}</h2>
+          <p class="cd-p">{T.noteText}</p>
+          <div class="cd-block" data-run-block>
+            <div class="cd-tools">
+              <span class="cd-lang">python</span>
+              <button type="button" class="cd-btn cd-btn-run" data-run data-running={T.running} data-ran={T.ran}><Icon name="play_arrow" size={16} fill /><span data-run-label>{T.run}</span></button>
+              <button type="button" class="cd-btn" data-copy={code} aria-label={ar ? 'انسخ الكود' : 'Copy the code'}><span class="ks-copy"><Icon name="content_copy" size={16} />{T.copy}</span><span class="ks-copied"><Icon name="check" size={16} />{T.copied}</span></button>
+            </div>
+            <pre><code set:html={codeHtml}></code></pre>
+            <div class="cd-out" data-run-output hidden><span class="cd-out-label">{T.output}</span><samp>0.98</samp></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+    <p class="cd-demo-note">{T.demoNote}</p>
+  </div>
+</section>
+
+<Strengths lang={lang} label={T.strengthsLabel} items={T.strengths} />
+
+<section id="how" class="kf-wrap pp-section" aria-labelledby="how-title">
+  <SectionHead titleId="how-title" index={ar ? '٠١' : '01'} eyebrow={T.howEyebrow} title={T.howTitle} lede={T.howLede} />
+  <ol class="cd-cards">
+    {T.how.map(([icon, title, body], i) => (
+      <li class="pp-card cd-card">
+        <span class="pp-point-icon"><Icon name={icon} size={20} /></span>
+        <p class={ar ? 'pp-kicker' : 'pp-kicker ks-mono'}>{ar ? ['٠١', '٠٢', '٠٣'][i] : `0${i + 1}`}</p>
+        <h3 class="cd-card-title">{title}</h3>
+        <p class="pp-muted cd-card-body">{body}</p>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<section class="kf-wrap pp-section" aria-labelledby="theme-title">
+  <SectionHead titleId="theme-title" index={ar ? '٠٢' : '02'} eyebrow={T.themeEyebrow} title={T.themeTitle} lede={T.themeLede} />
+  <ul class="cd-themes">
+    {T.themes.map(([id, label]) => (
+      <li class={`cd-theme cd-theme-${id}`}>
+        <div class="cd-block">
+          <div class="cd-tools" aria-hidden="true">
+            <span class="cd-lang">javascript</span>
+            <span class="cd-btn cd-btn-run"><Icon name="play_arrow" size={16} fill />{T.run}</span>
+            <span class="cd-btn"><Icon name="content_copy" size={16} />{T.copy}</span>
+          </div>
+          <pre><code set:html={jsHtml}></code></pre>
+          <div class="cd-out"><span class="cd-out-label">{T.output}</span><samp>3</samp></div>
+        </div>
+        <p class="pp-cap">{label}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<section id="install" class="kf-wrap pp-section" aria-labelledby="install-title">
+  <div class="pp-facts">
+    <div class="pp-facts-text">
+      <Eyebrow index={ar ? '٠٣' : '03'}>{T.installEyebrow}</Eyebrow>
+      <h2 id="install-title" class="pp-moment-title">{T.installTitle}</h2>
+      <ol class="pp-points">
+        {T.install.map(([icon, title, body]) => <li><span class="pp-point-icon"><Icon name={icon} size={20} /></span><span><strong>{title}.</strong> <span class="pp-muted">{body}</span></span></li>)}
+      </ol>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <SpecList items={T.facts} />
+      <p class="pp-muted" style="font-size: 14px; line-height: 1.6;">{T.tm}</p>
+    </div>
+  </div>
+</section>
+
+<section class="kf-wrap pp-closing" aria-labelledby="closing-title">
+  <h2 id="closing-title" class="pp-closing-title">{T.closingTitle}</h2>
+  <p class="pp-lede">{T.closingBody}</p>
+  <div class="pp-actions"><Button href={repo} icon="code">{T.source}</Button></div>
+</section>
+
+</main>
+</Base>
+<script>
+  import './scripts/run-demo.ts';
+</script>
