@@ -1,0 +1,23 @@
+---
+/* Claim, then cause: a few strengths, each with the reason it is true. */
+import Icon from './Icon.astro';
+import type { Lang } from '../lib/product';
+
+interface Item { icon: string; claim: string; because: string }
+interface Props { lang: Lang; label: string; items: Item[] }
+const { lang, label, items } = Astro.props;
+const because = lang === 'ar' ? 'لأن' : 'Because';
+---
+<section aria-label={label} class="pp-strengths">
+  <div class="kf-wrap ks-caps-band" style="padding-block: clamp(32px, 4vw, 48px);">
+    <h2 class="ks-caps-label">{label}</h2>
+    <ul class="ks-caps pp-caps">
+      {items.map((it) => (
+        <li class="ks-cap">
+          <h3 class="ks-cap-name"><span class="ks-cap-icon"><Icon name={it.icon} size={22} /></span>{it.claim}</h3>
+          <p class="ks-cap-sub"><span class="ks-because">{because}</span> {it.because}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

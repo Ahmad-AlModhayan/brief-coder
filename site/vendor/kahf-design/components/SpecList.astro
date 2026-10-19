@@ -1,0 +1,10 @@
+---
+interface Item { term: string; value: string; tone?: string }
+interface Props { items: Item[]; class?: string }
+const { items, class: className } = Astro.props;
+---
+<dl class={['kf-spec', className].filter(Boolean).join(' ')}>
+  {items.map((it) => (
+    <div><dt>{it.term}</dt><dd>{it.tone && <span class={`kf-dot kf-tone-${it.tone}`} aria-hidden="true"></span>}{it.value}</dd></div>
+  ))}
+</dl>

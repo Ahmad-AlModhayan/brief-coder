@@ -1,0 +1,49 @@
+{
+  "name": "@kahf/design",
+  "version": "1.0.0",
+  "description": "The Kahf family design system: tokens, fonts, theme switch, and the Astro components and layouts every Kahf site is built from. Each product site adds its own touches on top.",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": "github:Ahmad-AlModhayan/kahf-design",
+  "keywords": [
+    "astro-component",
+    "withastro",
+    "kahf",
+    "design-system"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "peerDependencies": {
+    "astro": "^7.3.0"
+  },
+  "exports": {
+    "./integration": "./integration.mjs",
+    "./headers": "./tools/headers.mjs",
+    "./styles/*": "./styles/*",
+    "./components/*": "./components/*",
+    "./layouts/*": "./layouts/*",
+    "./lib/*": "./lib/*",
+    "./scripts/*": "./scripts/*",
+    "./public/*": "./public/*"
+  },
+  "bin": {
+    "kahf-assets": "./tools/assets.mjs",
+    "kahf-screens": "./tools/screens.mjs"
+  },
+  "files": [
+    "integration.mjs",
+    "components",
+    "layouts",
+    "lib",
+    "scripts",
+    "styles",
+    "public",
+    "tools",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "css": "python3 tools/build_css.py"
+  }
+}

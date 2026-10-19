@@ -4,7 +4,7 @@ import { defineConfig } from 'astro/config';
 import kahf from '@kahf/design/integration';
 
 export default defineConfig({
-  site: 'https://coder.kahflabs.com',
+  site: process.env.PUBLIC_SITE_URL || 'https://coder.kahflabs.com',
   trailingSlash: 'ignore',
   build: { format: 'directory', inlineStylesheets: 'never' },
   compressHTML: true,

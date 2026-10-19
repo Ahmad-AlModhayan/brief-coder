@@ -1,0 +1,24 @@
+---
+import Icon from './Icon.astro';
+import { STATUS, type Tone } from '../lib/status';
+
+interface Props {
+  group?: string;
+  state?: string;
+  tone?: Tone;
+  icon?: string;
+  label?: string;
+  lang?: 'en' | 'ar';
+  compact?: boolean;
+  class?: string;
+}
+
+const p = Astro.props;
+const lang = p.lang ?? 'en';
+const s = p.group && STATUS[p.group] ? STATUS[p.group][p.state ?? ''] : undefined;
+const tone = p.tone ?? s?.tone ?? 'neutral';
+const icon = p.icon ?? s?.icon ?? 'info';
+const label = p.label ?? (s ? s[lang] : '');
+const cls = ['kf-status', `kf-tone-${tone}`, p.compact ? 'kf-status-compact' : null, p.class].filter(Boolean).join(' ');
+---
+<span class={cls}><Icon name={icon} size={p.compact ? 16 : 18} fill={tone !== 'neutral'} /><span>{label}</span></span>

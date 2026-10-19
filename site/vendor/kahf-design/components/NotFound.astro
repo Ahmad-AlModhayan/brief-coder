@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from './Button.astro';
+import { path, type Product } from '../lib/product';
+
+interface Props { p: Product }
+const { p } = Astro.props;
+---
+<Base p={p} lang="en" page="home" title={`Not found · ${p.name.en}`} description={`This page is not on ${p.url.replace('https://', '')}.`} noindex notFound>
+  <main id="main" class="kf-wrap" style="padding-block: clamp(72px, 12vw, 160px); display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+    <p class="pp-kicker">404</p>
+    <h1 class="pp-hero-title" style="max-inline-size: 760px;">Nothing here.</h1>
+    <p class="pp-lede">The address may have changed, or it was never here. The home page has everything.</p>
+    <p class="pp-lede" lang="ar" dir="rtl" style="font-family: var(--font-arabic); line-height: 1.9;">لا شيء هنا. لعلّ العنوان تغيّر، أو لم يكن موجودًا أصلًا.</p>
+    <div class="pp-actions">
+      <Button href={path(p, 'en')} iconEnd="arrow_forward">{p.name.en} home</Button>
+      <Button href={path(p, 'ar')} variant="gray"><span lang="ar">الصفحة الرئيسية</span></Button>
+    </div>
+  </main>
+</Base>

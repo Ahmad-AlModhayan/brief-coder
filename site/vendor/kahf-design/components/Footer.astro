@@ -1,0 +1,52 @@
+---
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import Mark from './Mark.astro';
+import { path, other, digits, kahf, type Product, type Lang } from '../lib/product';
+
+interface Props { p: Product; lang: Lang }
+const { p, lang } = Astro.props;
+const ar = lang === 'ar';
+const home = path(p, lang);
+const alt = other(lang);
+const year = new Date().getFullYear();
+const head = ar
+  ? 'margin-bottom: 8px; font: 600 14px/20px var(--font-arabic); color: var(--md-sys-color-on-surface-variant);'
+  : 'margin-bottom: 8px; font: 500 12px/16px var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--md-sys-color-on-surface-variant);';
+const L = ar
+  ? { product: p.name.ar, legal: 'الخصوصية والشروط', privacy: 'سياسة الخصوصية', terms: 'شروط الاستخدام', elsewhere: 'روابط أخرى', by: 'من كهف', kahfLine: 'مختبر مستقل للبرمجيات والذكاء الاصطناعي في الخبر.', lab: 'زر موقع كهف', tail: 'بلا ملفات تعريف ارتباط ولا متتبعات', copy: 'مختبرات كهف' }
+  : { product: p.name.en, legal: 'Legal', privacy: 'Privacy policy', terms: 'Terms of service', elsewhere: 'Elsewhere', by: 'Made by Kahf', kahfLine: 'An independent software and AI lab in Al Khobar.', lab: 'Visit kahflabs.com', tail: 'No cookies, no trackers', copy: 'Kahf Labs' };
+const sections = p.nav[lang].map((l) => ({ ...l, href: l.href.startsWith('#') ? home + l.href : l.href }));
+---
+<footer class="pp-footer">
+  <div class="kf-wrap" style="padding-block: 56px 28px; display: flex; flex-direction: column; gap: 48px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 40px 32px;">
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 14px;">
+        <a href={home} class="pp-foot-brand" aria-label={ar ? `${p.name.ar}، الرئيسية` : `${p.name.en}, home`}><Mark product={p.id} size={40} /><span>{p.name[lang]}</span></a>
+        <p class="pp-foot-line">{p.line[lang]}</p>
+      </div>
+      <nav aria-label={L.product} style="display: flex; flex-direction: column; gap: 2px;">
+        <h2 style={head}>{L.product}</h2>
+        {sections.map((l) => <a class="ks-foot-link" href={l.href}>{l.label}</a>)}
+        <a class="ks-foot-link" href={path(p, alt)} lang={alt} hreflang={alt}>{ar ? 'English' : 'العربية'}</a>
+      </nav>
+      <nav aria-label={L.elsewhere} style="display: flex; flex-direction: column; gap: 2px;">
+        <h2 style={head}>{L.elsewhere}</h2>
+        {p.pages.includes('privacy') && <a class="ks-foot-link" href={path(p, lang, 'privacy')}>{L.privacy}</a>}
+        {p.pages.includes('terms') && <a class="ks-foot-link" href={path(p, lang, 'terms')}>{L.terms}</a>}
+        {p.elsewhere[lang].map((l) => <a class="ks-foot-link" href={l.href} rel="noopener">{l.label}{/^https?:/.test(l.href) && <Icon name="open_in_new" size={16} />}</a>)}
+        <a class="ks-foot-link ks-mono" href={`mailto:${p.email}`} style="font-family: var(--font-mono); font-size: 14px;">{p.email}</a>
+      </nav>
+      <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px;">
+        <h2 style={head}>{L.by}</h2>
+        <a href={kahf(lang)} class="pp-kahf" aria-label={ar ? 'كهف' : 'Kahf'}><Logo variant="lockup" size={22} lang={lang} decorative /></a>
+        <p class="pp-foot-line">{L.kahfLine}</p>
+        <a class="ks-out" href={kahf(lang)} style={ar ? 'font-family: var(--font-arabic);' : undefined}>{L.lab}<Icon name="arrow_forward" size={18} /></a>
+      </div>
+    </div>
+    <div class="pp-foot-base">
+      <p>© {digits(year, lang)} {L.copy}</p>
+      <p><span class="ks-mono" style="font: 500 12px/18px var(--font-mono);">{p.url.replace('https://', '')}</span> · {L.tail}</p>
+    </div>
+  </div>
+</footer>

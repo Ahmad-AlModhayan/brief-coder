@@ -1,0 +1,21 @@
+---
+/* A walk through the product: each step is a screen from its design canvas beside what it does and why. */
+import Phone from './Phone.astro';
+import type { Lang } from '../lib/product';
+
+interface Step { key: string; title: string; body: string; screen: string; alt: string }
+interface Props { lang: Lang; steps: Step[] }
+const { lang, steps } = Astro.props;
+---
+<ol class="pp-steps">
+  {steps.map((s, i) => (
+    <li class="pp-step">
+      <Phone src={s.screen} alt={s.alt} class="pp-step-phone" />
+      <div class="pp-step-text">
+        <p class={lang === 'ar' ? 'pp-step-key' : 'pp-step-key ks-mono'}>{s.key}</p>
+        <h3 class="pp-step-title">{s.title}</h3>
+        <p class="pp-step-body">{s.body}</p>
+      </div>
+    </li>
+  ))}
+</ol>

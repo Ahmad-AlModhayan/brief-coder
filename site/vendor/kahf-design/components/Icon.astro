@@ -1,0 +1,21 @@
+---
+import { ICONS } from '../lib/icons';
+
+interface Props {
+  name: string;
+  size?: number;
+  fill?: boolean;
+  label?: string;
+  color?: string;
+  class?: string;
+  mirror?: boolean;
+}
+
+const { name, size = 24, fill = false, label, color, class: className, mirror = true } = Astro.props;
+const MIRROR = new Set(['arrow_back', 'arrow_forward', 'chevron_right', 'chevron_left', 'trending_up', 'open_in_new', 'send', 'logout', 'label']);
+const entry = ICONS[name];
+if (!entry) throw new Error(`Kahf Icon: unknown icon "${name}"`);
+const d = fill && entry[1] ? entry[1] : entry[0];
+const classes = ['kf-icon', mirror && MIRROR.has(name) ? 'kf-mirror' : null, className].filter(Boolean).join(' ');
+---
+<svg class={classes} width={size} height={size} viewBox="0 -960 960 960" focusable="false" aria-hidden={label ? undefined : 'true'} role={label ? 'img' : undefined} aria-label={label} style={color ? `color: ${color}` : undefined}><path d={d}></path></svg>

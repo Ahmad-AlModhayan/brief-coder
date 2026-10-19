@@ -1,0 +1,5 @@
+---
+interface Props { index?: string; class?: string }
+const { index, class: className } = Astro.props;
+---
+<p class={['kf-eyebrow', className].filter(Boolean).join(' ')}>{index && <span class="kf-eyebrow-index">{index}</span>}<span><slot /></span></p>

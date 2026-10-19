@@ -1,0 +1,17 @@
+---
+import Icon from './Icon.astro';
+
+interface Props { code: string; filename?: string; output?: string; lang?: 'en' | 'ar'; class?: string; style?: string; runnable?: boolean }
+const { code, filename, output, lang = 'en', class: className, style } = Astro.props;
+const t = lang === 'ar' ? { copy: 'نسخ', copied: 'نُسخ', copyLabel: 'انسخ الكود' } : { copy: 'Copy', copied: 'Copied', copyLabel: 'Copy the code' };
+---
+<figure class={['kf-code', className].filter(Boolean).join(' ')} style={`margin: 0;${style ? ' ' + style : ''}`}>
+  <figcaption class="kf-code-head">
+    <span class="kf-code-name">{filename ?? 'code'}</span>
+    <button type="button" class="kf-code-btn" data-copy={code} aria-label={t.copyLabel}>
+      <span class="ks-copy"><Icon name="content_copy" size={16} />{t.copy}</span><span class="ks-copied"><Icon name="check" size={16} />{t.copied}</span>
+    </button>
+  </figcaption>
+  <pre><code>{code}</code></pre>
+  {output && <div class="kf-code-out"><span class="kf-code-out-label">Output</span>{output}</div>}
+</figure>

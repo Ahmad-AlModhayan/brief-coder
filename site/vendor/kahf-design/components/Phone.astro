@@ -1,0 +1,14 @@
+---
+/* An app screen from the product's design canvas, in a phone frame.
+   Each screen ships twice: <name>-1x.webp (412 wide) and <name>.webp (824 wide, for sharp screens). */
+interface Props { src: string; alt: string; eager?: boolean; class?: string; style?: string; sizes?: string }
+const { src, alt, eager, class: className, style, sizes = '(max-width: 640px) 64vw, 300px' } = Astro.props;
+---
+<figure class={['pp-phone', className].filter(Boolean).join(' ')} style={style}>
+  <img
+    src={`/screens/${src}-1x.webp`}
+    srcset={`/screens/${src}-1x.webp 412w, /screens/${src}.webp 824w`}
+    sizes={sizes}
+    width="412" height="915" alt={alt}
+    loading={eager ? 'eager' : 'lazy'} decoding="async" fetchpriority={eager ? 'high' : undefined} />
+</figure>
