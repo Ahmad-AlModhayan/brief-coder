@@ -11,10 +11,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "assets": "npm i --no-save sharp playwright && kahf-assets"
+    "assets": "npm i --no-save sharp playwright && kahf-assets",
+    "kahf:sync": "node scripts/sync-kahf.mjs"
   },
   "dependencies": {
-    "@kahf/design": "github:Ahmad-AlModhayan/kahf-design#v1.0.0",
+    "@kahf/design": "file:vendor/kahf-design",
     "astro": "7.3.5"
   }
 }

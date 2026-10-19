@@ -1,0 +1,37 @@
+---
+/* A product's mark. variant="tile": the app icon (for brand rows and the footer). variant="word": the wordmark
+   or lockup each product uses as its logo (Qasd: the word alone; Mizwala: the sun-path lockup). */
+import { BRAND } from '../lib/brand';
+import type { ProductId, Lang } from '../lib/product';
+
+interface Props { product: ProductId; variant?: 'tile' | 'word'; lang?: Lang; size?: number; class?: string; label?: string }
+const { product, variant = 'tile', lang = 'en', size = 32, class: className, label } = Astro.props;
+const a11y = label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' };
+
+const TILE: Record<ProductId, { bg: string; ink: string }> = {
+  qasd: { bg: '#2c7a73', ink: '#f5f3f0' },
+  mizwala: { bg: '#efdcba', ink: '#0f4d38' },
+  wasl: { bg: '#1f3d6b', ink: '#f5f3f0' },
+  coder: { bg: '#3a3835', ink: '#f5f3f0' },
+};
+const t = TILE[product];
+let svg = '';
+if (variant === 'tile') {
+  const inner =
+    product === 'qasd' ? `<svg x="18.56" y="14.08" width="26.88" height="35.84" viewBox="${size <= 24 ? BRAND.qasd.small.viewBox : BRAND.qasd.mark.viewBox}">${(size <= 24 ? BRAND.qasd.small.body : BRAND.qasd.mark.body).replace(/fill="[^"]*"/, '')}</svg>`
+    : product === 'mizwala' ? `<svg x="0" y="0" width="64" height="64" viewBox="18 18 72 72">${BRAND.mizwala.icon.body}</svg>`
+    : `<svg x="9.6" y="9.6" width="44.8" height="44.8" viewBox="0 0 24 24">${BRAND[product].body}</svg>`;
+  svg = `<svg class="pp-mark ${className ?? ''}" width="${size}" height="${size}" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="${t.bg}"/><g fill="${t.ink}" color="${t.ink}">${inner}</g></svg>`;
+} else {
+  const w =
+    product === 'qasd' ? (lang === 'ar' ? BRAND.qasd.wordAr : BRAND.qasd.wordEn)
+    : product === 'mizwala' ? (lang === 'ar' ? BRAND.mizwala.lockupAr : BRAND.mizwala.lockupEn)
+    : null;
+  if (w) {
+    const [, , vw, vh] = w.viewBox.split(/\s+/).map(Number);
+    svg = `<svg class="pp-word ${className ?? ''}" height="${size}" width="${((vw / vh) * size).toFixed(1)}" viewBox="${w.viewBox}" fill="currentColor">${w.body}</svg>`;
+  }
+}
+const html = svg.replace('<svg ', `<svg ${Object.entries(a11y).map(([k, v]) => `${k}="${v}"`).join(' ')} `);
+---
+<Fragment set:html={html} />

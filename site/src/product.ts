@@ -5,7 +5,8 @@ export const repo = 'https://github.com/Ahmad-AlModhayan';
 
 export const P: Product = {
   id: 'coder',
-  url: 'https://coder.kahflabs.com',
+  // The site's own address. PUBLIC_SITE_URL overrides it while the site is served from a temporary domain (coder.getrihla.com).
+  url: import.meta.env.PUBLIC_SITE_URL || 'https://coder.kahflabs.com',
   rootLang: 'en',
   scope: 'kf-scope-coder',
   name: { en: 'Obsidian Coder', ar: 'Obsidian Coder' },

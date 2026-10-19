@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  variant?: 'filled' | 'tinted' | 'gray' | 'plain' | 'danger' | 'danger-tinted';
+  size?: 'small' | 'regular';
+  href?: string;
+  icon?: string;
+  iconEnd?: string;
+  type?: 'button' | 'submit' | 'reset';
+  block?: boolean;
+  class?: string;
+  style?: string;
+  [attr: string]: unknown;
+}
+
+const { variant = 'filled', size, href, icon, iconEnd, type = 'button', block, class: className, style, ...rest } = Astro.props;
+const cls = ['kf-btn', `kf-btn-${variant}`, size === 'small' ? 'kf-btn-sm' : null, block ? 'kf-btn-block' : null, className].filter(Boolean).join(' ');
+const isz = size === 'small' ? 18 : 20;
+const external = typeof href === 'string' && /^https?:\/\//.test(href);
+---
+{href ? (
+  <a class={cls} href={href} style={style} rel={external ? 'noopener' : undefined} {...rest}>{icon && <Icon name={icon} size={isz} />}<slot />{iconEnd && <Icon name={iconEnd} size={isz} />}</a>
+) : (
+  <button type={type} class={cls} style={style} {...rest}>{icon && <Icon name={icon} size={isz} />}<slot />{iconEnd && <Icon name={iconEnd} size={isz} />}</button>
+)}

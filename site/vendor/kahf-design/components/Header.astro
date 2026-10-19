@@ -1,0 +1,46 @@
+---
+import Icon from './Icon.astro';
+import Mark from './Mark.astro';
+import { path, other, type Product, type Lang, type Page } from '../lib/product';
+
+interface Props { p: Product; lang: Lang; page: Page; notFound?: boolean }
+const { p, lang, page, notFound } = Astro.props;
+const ar = lang === 'ar';
+const alt = other(lang);
+const home = path(p, lang);
+// In-page links point at the home page's sections, so they work from the legal pages too.
+const nav = p.nav[lang].map((l) => ({ ...l, href: l.href.startsWith('#') ? (page === 'home' && !notFound ? l.href : home + l.href) : l.href }));
+const T = ar
+  ? { home: `${p.name.ar}، الرئيسية`, nav: 'القائمة الرئيسية', menu: 'القائمة', toDark: 'التبديل إلى المظهر الداكن', toLight: 'التبديل إلى المظهر الفاتح', alt: 'English' }
+  : { home: `${p.name.en}, home`, nav: 'Main', menu: 'Menu', toDark: 'Switch to dark theme', toLight: 'Switch to light theme', alt: 'العربية' };
+const word = p.id === 'qasd' || p.id === 'mizwala';
+---
+<header class="kf-site-header">
+  <div class="kf-wrap kf-site-header-inner">
+    <a class="kf-site-brand pp-brand" href={home} aria-label={T.home}>
+      {word
+        ? <Mark product={p.id} variant="word" lang={lang} size={p.id === 'qasd' ? (ar ? 30 : 26) : 30} />
+        : <><Mark product={p.id} size={30} /><span>{p.name[lang]}</span></>}
+    </a>
+    <nav class="kf-site-links" aria-label={T.nav}>
+      {nav.map((l) => <a class="kf-site-link" href={l.href}>{l.label}</a>)}
+    </nav>
+    <div class="kf-site-tools">
+      <a class="kf-lang" href={path(p, alt, page)} lang={alt} hreflang={alt}>{T.alt}</a>
+      <button type="button" class="kf-circle kf-circle-plain" data-theme-toggle>
+        <span class="ks-theme-to-dark"><Icon name="dark_mode" size={22} /><span class="ks-sr">{T.toDark}</span></span>
+        <span class="ks-theme-to-light"><Icon name="light_mode" size={22} /><span class="ks-sr">{T.toLight}</span></span>
+      </button>
+      <a class="kf-btn kf-btn-filled kf-btn-sm pp-head-cta" href={p.cta[lang].href}>{p.cta[lang].label}</a>
+      <span class="ks-menu-btn">
+        <button type="button" class="kf-circle kf-circle-plain" aria-expanded="false" aria-controls="ks-mobile-nav" data-menu-toggle>
+          <Icon name="menu" size={22} class="ks-icon-open" /><Icon name="close" size={22} class="ks-icon-close" /><span class="ks-sr">{T.menu}</span>
+        </button>
+      </span>
+    </div>
+  </div>
+  <nav id="ks-mobile-nav" class="kf-wrap ks-mobile-nav" aria-label={T.nav} style="flex-direction: column; padding-block: 4px 16px;" hidden>
+    {nav.map((l) => <a class="ks-mobile-link" href={l.href}>{l.label}<Icon name="chevron_right" size={20} /></a>)}
+    <a class="kf-btn kf-btn-filled kf-btn-block" style="margin-top: 12px;" href={p.cta[lang].href}>{p.cta[lang].label}</a>
+  </nav>
+</header>

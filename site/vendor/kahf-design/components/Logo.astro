@@ -1,0 +1,65 @@
+---
+/* Refuge: a solid hill with the cave mouth cut out, the sun outside. 32 grid.
+   The small cut (wider mouth, bigger sun, shorter tail) takes over at 24 px and below. */
+import { LOCKUP } from '../lib/logo';
+
+interface Props {
+  variant?: 'mark' | 'lockup' | 'stacked' | 'tile';
+  size?: number;
+  lang?: 'en' | 'ar';
+  decorative?: boolean;
+  animate?: boolean;
+  small?: boolean;
+  color?: string;
+  ink?: string;
+  class?: string;
+}
+
+const p = Astro.props;
+const size = p.size ?? 32;
+const variant = p.variant ?? 'mark';
+const lang = p.lang ?? 'en';
+const label = lang === 'ar' ? 'كهف' : 'Kahf';
+const small = p.small != null ? !!p.small : size <= 24;
+const a11y = p.decorative ? { 'aria-hidden': 'true' } : { role: 'img', 'aria-label': label };
+const style = `color: ${p.color ?? 'var(--md-sys-color-primary)'}; display: block; flex: none;`;
+const cls = ['kf-mark', p.animate && variant === 'mark' ? 'kf-mark-animated' : null, p.class].filter(Boolean).join(' ');
+const dims = (vb: string) => { const v = vb.split(' ').map(Number); return [v[2], v[3]]; };
+const M = small ? LOCKUP.small : LOCKUP.mark;
+const r = (n: number) => Math.round(n * 100) / 100;
+
+let lock: { viewBox: string; text: string; markX: number; w: number; h: number } | null = null;
+if (variant === 'lockup' || variant === 'stacked') {
+  const L = variant === 'stacked' ? LOCKUP.stacked : LOCKUP[lang === 'ar' ? 'ar' : 'en'];
+  const d = dims(L.viewBox);
+  const unit = size / (variant === 'stacked' ? d[1] : LOCKUP.unit);
+  lock = { viewBox: L.viewBox, text: L.text, markX: L.markX, w: r(d[0] * unit), h: r(d[1] * unit) };
+}
+const A = LOCKUP.mark;
+const u = size / 19.7;
+const mv = dims(M.viewBox);
+---
+{variant === 'tile' ? (
+  <svg class={cls} viewBox="0 0 64 64" width={size} height={size} style="display: block; flex: none;" {...a11y}>
+    <rect width="64" height="64" rx="15" fill={p.color ?? 'var(--kf-product-kahf)'}></rect>
+    <g transform={small ? LOCKUP.tile.small : LOCKUP.tile.standard} style={`color: ${p.ink ?? 'var(--kf-product-kahf-on)'}`}>
+      <g fill="currentColor"><path d={M.d} fill-rule="evenodd"></path><circle cx={M.sun[0]} cy={M.sun[1]} r={M.sun[2]}></circle></g>
+    </g>
+  </svg>
+) : lock ? (
+  <svg class={cls} viewBox={lock.viewBox} width={lock.w} height={lock.h} style={style} {...a11y}>
+    <path d={lock.text} fill="currentColor"></path>
+    <g transform={lock.markX ? `translate(${lock.markX} 0)` : undefined} fill="currentColor"><path d={LOCKUP.mark.d} fill-rule="evenodd"></path><circle cx={LOCKUP.mark.sun[0]} cy={LOCKUP.mark.sun[1]} r={LOCKUP.mark.sun[2]}></circle></g>
+  </svg>
+) : p.animate ? (
+  <svg class={cls} viewBox="-4.5 6 42 23" width={r(42 * u)} height={r(23 * u)} style={style} {...a11y}>
+    <path class="kf-mark-hill" d={A.d} fill-rule="evenodd" fill="currentColor"></path>
+    <svg x="-10" y="0" width="60" height="27" viewBox="-10 0 60 27" overflow="hidden">
+      <circle class="kf-mark-sun" cx={A.sun[0]} cy={A.sun[1]} r={A.sun[2]} fill="currentColor"></circle>
+    </svg>
+  </svg>
+) : (
+  <svg class={cls} viewBox={M.viewBox} width={r(size * mv[0] / mv[1])} height={size} style={style} {...a11y}>
+    <g fill="currentColor"><path d={M.d} fill-rule="evenodd"></path><circle cx={M.sun[0]} cy={M.sun[1]} r={M.sun[2]}></circle></g>
+  </svg>
+)}

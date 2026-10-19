@@ -1,0 +1,21 @@
+---
+/* Privacy policy and terms: one readable column. The page content is written in the site's pages. */
+import Base from './Base.astro';
+import type { Product, Lang, Page } from '../lib/product';
+import { digits } from '../lib/product';
+
+interface Props { p: Product; lang: Lang; page: Page; title: string; description: string; effective: string; lede?: string }
+const { p, lang, page, title, description, effective, lede } = Astro.props;
+const ar = lang === 'ar';
+---
+<Base p={p} lang={lang} page={page} title={`${title} · ${p.name[lang]}`} description={description}>
+  <main id="main" class="kf-wrap pp-legal">
+    <header class="pp-legal-head">
+      <p class="kf-eyebrow"><span>{p.name[lang]}</span></p>
+      <h1>{title}</h1>
+      <p class="pp-legal-date">{ar ? 'تاريخ السريان: ' : 'Effective '}{ar ? digits(effective, 'ar') : effective}</p>
+      {lede && <p class="pp-legal-lede">{lede}</p>}
+    </header>
+    <div class="pp-prose"><slot /></div>
+  </main>
+</Base>

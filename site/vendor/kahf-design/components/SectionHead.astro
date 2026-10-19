@@ -1,0 +1,10 @@
+---
+import Eyebrow from './Eyebrow.astro';
+
+interface Props { index?: string; eyebrow?: string; title: string; lede?: string; titleId?: string; class?: string; style?: string }
+const { index, eyebrow, title, lede, titleId, class: className, style } = Astro.props;
+---
+<div class={['kf-shead', className].filter(Boolean).join(' ')} style={style}>
+  <div class="kf-shead-main">{eyebrow && <Eyebrow index={index}>{eyebrow}</Eyebrow>}<h2 class="kf-shead-title" id={titleId}>{title}</h2></div>
+  {lede && <p class="kf-shead-lede">{lede}</p>}
+</div>
