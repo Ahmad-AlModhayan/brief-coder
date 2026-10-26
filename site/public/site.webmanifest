@@ -1,7 +1,7 @@
 {
   "name": "Brief Coder",
   "short_name": "Coder",
-  "description": "Run and Copy on every code block in your Obsidian notes.",
+  "description": "Run and Copy on every code block in your Obsidian notes, in English and Arabic.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "/",

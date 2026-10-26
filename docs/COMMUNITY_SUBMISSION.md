@@ -21,7 +21,7 @@ Fork <https://github.com/obsidianmd/obsidian-releases>, and add this at the **en
 	"name": "Brief Coder",
 	"author": "Ahmad AlModhayan",
 	"description": "Run, view and edit code in 40 languages: Run and Copy on code blocks with live output, an editor for code files, and a local, opt-in bridge for AI agents.",
-	"repo": "Ahmad-AlModhayan/obsidian-coder"
+	"repo": "Ahmad-AlModhayan/brief-coder"
 }
 ```
 
@@ -50,7 +50,7 @@ Checks against the directory rules:
 
 ## Repo URL
 
-Link to my plugin: https://github.com/Ahmad-AlModhayan/obsidian-coder
+Link to my plugin: https://github.com/Ahmad-AlModhayan/brief-coder
 
 ## Release Checklist
 - [x] I have tested the plugin on
