@@ -13,7 +13,15 @@ Run on 2026-10-26, Windows 11 Pro (10.0.26300), Node 24.5, Obsidian 1.14.5 deskt
 | `tests/i18n.test.ts` | Every `t("…")` string in `src/` has Arabic text, Arabic keeps every `{placeholder}`, English fallback; trusted-folder parsing and matching. |
 | `tests/prune.test.ts` | Build caches unused for 14 days and run folders a crash left behind are removed; fresh ones stay. |
 
-`npm test` also runs real snippets in every language installed on the machine (`tests/runners.test.ts`); that suite is unchanged in 1.1.0.
+`npm test` also runs real snippets in every language installed on the machine (`tests/runners.test.ts`). On this
+machine: 22 passed (Python, JavaScript, TypeScript, Shell, Perl, Rust, Java, SQL, PowerShell and the runner behaviour
+tests), 31 skipped because the language isn't installed.
+
+That run found one bug that 1.0.1 has too (the base commit fails the same way): on Windows, **Stop never finished**
+when a Git Bash block had started a background job (`sleep 300 &`). The background job held the output pipes open.
+Fixed: once the program itself exits after Stop, the run ends (Stop now takes about 1.3 s in that test). The
+background job itself still outlives Stop on Windows. Git Bash moves it out of the Windows process tree, so
+`taskkill /T` can't reach it. That's a known limit; the test checks it only on macOS and Linux.
 
 ## 2. Obsidian's directory lint
 
@@ -72,5 +80,5 @@ through the Chrome DevTools protocol: it clicked the real buttons, read the real
 - **A screen reader in use.** The attributes are checked, but not the experience with NVDA or VoiceOver.
 - **Claude Code and Raqeeb connected for real.** The bridge was driven by a scripted MCP client and the unit tests,
   not by either agent.
-- **The language suite** (`tests/runners.test.ts`) was not re-run for 1.1.0; the process runner's run path changed
-  only in how Node modules load, and that path was exercised in Obsidian with Python, Bash, JavaScript and Stop.
+- **Languages not installed here** (Go, C, C++, Ruby, PHP, Kotlin, Swift and others) weren't run.
+- **A Git Bash background job (`cmd &`) on Windows still outlives Stop** (see section 1).
