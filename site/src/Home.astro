@@ -34,8 +34,8 @@ const codeHtml = [
 const jsHtml = '<span class="k">const</span> words = <span class="s">"the hard part"</span>.<span class="f">split</span>(<span class="s">" "</span>);\nconsole.<span class="f">log</span>(words.length);';
 
 const T = ar ? {
-  title: 'Obsidian Coder · كودٌ يعمل حيث تفكّر.',
-  description: 'إضافة لتطبيق Obsidian تضع زرّي «تشغيل» و«نسخ» على كل كتلة كود، والنتيجة تحتها مباشرة، بألوان السمة التي تستخدمها. مفتوحة المصدر.',
+  title: 'Brief Coder لـ Obsidian · كودٌ يعمل حيث تفكّر.',
+  description: 'إضافة لتطبيق Obsidian تضع زرّي «تشغيل» و«نسخ» على كل كتلة كود، والنتيجة تحتها مباشرة، بألوان السمة التي تستخدمها، وبواجهة عربية. مفتوحة المصدر.',
   h1: 'كودٌ يعمل حيث تفكّر.',
   lede: 'تتوقف ملاحظاتك عن كونها مكانًا يُلصق فيه الكود، وتصبح مكانًا يعمل فيه. زرّا «تشغيل» و«نسخ» على كل كتلة، والنتيجة تحتها مباشرة، بلغاتٍ عديدة، وبألوان سمة Obsidian التي تستخدمها أصلًا.',
   try: 'جرّب المثال',
@@ -44,11 +44,12 @@ const T = ar ? {
   notePath: 'ملاحظات / التشابه.md',
   run: 'تشغيل', running: 'يعمل…', copy: 'نسخ', copied: 'نُسخ', output: 'النتيجة', ran: 'تمّ التشغيل',
   demoNote: 'مثال توضيحي مرسوم في الصفحة، والنتيجة محسوبة مسبقًا.',
-  strengthsLabel: 'ثلاثة أسباب',
+  strengthsLabel: 'أربعة أسباب',
   strengths: [
     { icon: 'terminal', claim: 'الجواب يبقى مع السؤال.', because: 'النتيجة تظهر تحت الكتلة التي أنتجتها، فتجمع الملاحظة السؤال والكود والجواب في مكانٍ واحد، بدل نافذة طرفية تُغلق وتُنسى.' },
     { icon: 'palette', claim: 'يبدو كأنه جزءٌ من Obsidian.', because: 'Coder يرسم بألوان سمتك بدل أن يفرض ألوانه، فتبقى الخزنة الداكنة داكنة، وتبقى سمتك المخصّصة كما اخترتها.' },
   { icon: 'content_copy', claim: 'انسخ دون أن تحدّد.', because: 'لكل كتلة زرّ «نسخ»، فإخراج الكود من الملاحظة نقرةٌ واحدة، لا سحبٌ حذر عبر الأسطر.' },
+    { icon: 'shield', claim: 'الوكلاء يقترحون، وأنت تقرّر.', because: 'جسرٌ محلي اختياري يتيح لـ Claude Code ورقيب قراءة المجلدات التي تختارها فقط. وأي تعديل يقترحونه يبقى معلّقًا حتى تقبله، ويمكنك التراجع عنه بنقرة.' },
   ],
   howEyebrow: 'كيف يعمل',
   howTitle: 'لا شيء جديد لتتعلّمه.',
@@ -65,9 +66,9 @@ const T = ar ? {
   installEyebrow: 'التثبيت',
   installTitle: 'ثلاث خطوات، ثم ملاحظتك الأولى.',
   install: [
-    ['download', 'نزّل آخر إصدار', 'من صفحة الإضافة على GitHub: الملفات main.js وmanifest.json وstyles.css.'],
-    ['folder', 'ضعها في خزنتك', 'في مجلد جديد داخل .obsidian/plugins في خزنتك.'],
-    ['check_circle', 'فعّلها', 'في Obsidian: الإعدادات › الإضافات المجتمعية، ثم شغّل Obsidian Coder.'],
+    ['download', 'ثبّتها بـ BRAT', 'أضف Ahmad-AlModhayan/obsidian-coder في BRAT، أو نزّل main.js وmanifest.json وstyles.css من آخر إصدار.'],
+    ['folder', 'أو ضعها يدويًا', 'في المجلد ‎.obsidian/plugins/brief-coder داخل خزنتك.'],
+    ['check_circle', 'فعّلها', 'في Obsidian: الإعدادات › الإضافات المجتمعية، ثم شغّل Brief Coder.'],
   ],
   facts: [
     { term: 'النوع', value: 'إضافة لتطبيق Obsidian' },
@@ -78,10 +79,10 @@ const T = ar ? {
   closingTitle: 'ملاحظتك القادمة قد تعمل.',
   closingBody: 'الشيفرة مفتوحة على GitHub. نزّلها، أو اقرأها، أو حسّنها.',
   source: 'الشيفرة على GitHub',
-  tm: 'Obsidian علامة تجارية لشركة Dynalist Inc. وObsidian Coder إضافة مستقلة، ليست من صنعها ولا بتأييدها.',
+  tm: 'Obsidian علامة تجارية لشركة Dynalist Inc. وBrief Coder إضافة مستقلة، ليست من صنعها ولا بتأييدها.',
 } : {
-  title: 'Obsidian Coder · Code that runs where you think.',
-  description: 'An Obsidian plugin that puts Run and Copy on every code block, with the output right beneath, in the colours of the theme you use. Open source.',
+  title: 'Brief Coder for Obsidian · Code that runs where you think.',
+  description: 'An Obsidian plugin that puts Run and Copy on every code block, with the output right beneath, in the colours of the theme you use, in English and Arabic. Open source.',
   h1: 'Code that runs where you think.',
   lede: 'Your notes stop being a place where code is pasted and become a place where it runs. Run and Copy on every block, the output right beneath it, many languages, and the colours of whatever Obsidian theme you already use.',
   try: 'Try the example',
@@ -90,11 +91,12 @@ const T = ar ? {
   notePath: 'Notes / Similarity.md',
   run: 'Run', running: 'Running…', copy: 'Copy', copied: 'Copied', output: 'Output', ran: 'Ran',
   demoNote: 'An illustration drawn on this page; the output is worked out in advance.',
-  strengthsLabel: 'Three reasons',
+  strengthsLabel: 'Four reasons',
   strengths: [
     { icon: 'terminal', claim: 'The answer stays with the question.', because: 'the output lands right beneath the block that produced it, so the note holds the question, the code and the result together, instead of a terminal window you close and forget.' },
     { icon: 'palette', claim: 'It looks like it belongs.', because: 'Coder draws with your theme’s colours instead of bringing its own, so a dark vault stays dark and a custom theme stays yours.' },
     { icon: 'content_copy', claim: 'Copy without selecting.', because: 'every block gets a Copy button, so taking code out of a note is one click, not a careful drag across lines.' },
+    { icon: 'shield', claim: 'Agents propose, you decide.', because: 'an opt-in local bridge lets Claude Code and Raqeeb read only the folders you choose, and any change they suggest waits for your Accept, with Revert one click away.' },
   ],
   howEyebrow: 'How it works',
   howTitle: 'Nothing new to learn.',
@@ -111,9 +113,9 @@ const T = ar ? {
   installEyebrow: 'Install',
   installTitle: 'Three steps, then your first note.',
   install: [
-    ['download', 'Download the latest release', 'From the plugin’s page on GitHub: main.js, manifest.json and styles.css.'],
-    ['folder', 'Put it in your vault', 'In a new folder inside your vault’s .obsidian/plugins.'],
-    ['check_circle', 'Turn it on', 'In Obsidian: Settings › Community plugins, then enable Obsidian Coder.'],
+    ['download', 'Install with BRAT', 'Add Ahmad-AlModhayan/obsidian-coder in BRAT, or download main.js, manifest.json and styles.css from the latest release.'],
+    ['folder', 'Or put it in place yourself', 'In your vault’s .obsidian/plugins/brief-coder folder.'],
+    ['check_circle', 'Turn it on', 'In Obsidian: Settings › Community plugins, then enable Brief Coder.'],
   ],
   facts: [
     { term: 'Type', value: 'Obsidian plugin' },
@@ -124,11 +126,11 @@ const T = ar ? {
   closingTitle: 'Your next note might run.',
   closingBody: 'The source is open on GitHub. Download it, read it, or make it better.',
   source: 'Source on GitHub',
-  tm: 'Obsidian is a trademark of Dynalist Inc. Obsidian Coder is an independent plugin, not made or endorsed by them.',
+  tm: 'Obsidian is a trademark of Dynalist Inc. Brief Coder is an independent plugin, not made or endorsed by them.',
 };
 
 const jsonLd = {
-  '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Obsidian Coder',
+  '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Brief Coder',
   applicationCategory: 'DeveloperApplication', operatingSystem: 'Obsidian', url: P.url, inLanguage: ['en', 'ar'],
   description: T.description, offers: { '@type': 'Offer', price: '0', priceCurrency: 'SAR' }, codeRepository: repo,
   publisher: { '@type': 'Organization', name: 'Kahf Labs', url: KAHF },

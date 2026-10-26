@@ -1,5 +1,5 @@
 /* ==========================================================
-   Obsidian Coder — styles (theme-aware: only Obsidian CSS variables)
+   Brief Coder — styles (theme-aware: only Obsidian CSS variables)
    ========================================================== */
 
 /* ---------- Bar under a code block ---------- */
@@ -208,6 +208,9 @@
 	font-size: var(--code-size, 0.875em);
 	line-height: 1.5;
 	white-space: pre-wrap;
+	/* Output reads left to right like code, even in a right-to-left vault ... */
+	direction: ltr;
+	text-align: left;
 	word-break: break-word;
 	color: var(--text-normal);
 	user-select: text;
@@ -325,6 +328,161 @@ body:not(.is-mobile) .coder-view-output .coder-output {
 .is-mobile .coder-icon-btn {
 	width: 32px;
 	height: 32px;
+}
+
+/* ... but each line takes its direction from its own text, so Arabic lines read right to left.
+   (unicode-bidi isn't inherited: it goes on the page blocks that hold the text.) */
+.coder-output-text .coder-page {
+	unicode-bidi: plaintext;
+	text-align: start;
+}
+
+/* Code reads left to right in right-to-left vaults too. */
+.coder-has-bar > pre {
+	direction: ltr;
+	text-align: left;
+}
+
+/* ---------- Run confirmation ---------- */
+.coder-confirm-code {
+	max-height: 40vh;
+	overflow: auto;
+	padding: 8px 10px;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	background: var(--code-background);
+	border-radius: var(--radius-s);
+	white-space: pre-wrap;
+	direction: ltr;
+	text-align: left;
+}
+
+/* ---------- Agent bridge ---------- */
+.coder-bridge-config {
+	margin: 6px 0 0;
+	padding: 6px 8px;
+	font-size: var(--font-ui-smaller);
+	background: var(--background-secondary);
+	border-radius: var(--radius-s);
+	white-space: pre-wrap;
+	word-break: break-all;
+	user-select: text;
+	direction: ltr;
+	text-align: left;
+}
+.coder-agent-view {
+	padding: var(--size-4-3);
+}
+.coder-agent-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.coder-agent-empty,
+.coder-agent-status,
+.coder-agent-time,
+.coder-agent-outcome {
+	color: var(--text-muted);
+}
+.coder-agent-card {
+	margin-block: var(--size-4-2);
+	padding: var(--size-4-2) var(--size-4-3);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+}
+.coder-agent-card.is-held {
+	border-color: var(--interactive-accent);
+}
+.coder-agent-top,
+.coder-agent-files li {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	align-items: baseline;
+}
+.coder-agent-top {
+	font-size: var(--font-ui-small);
+}
+.coder-agent-actor,
+.coder-agent-kind {
+	font-weight: var(--font-semibold);
+}
+.coder-agent-label {
+	margin-block: 4px;
+}
+.coder-agent-files {
+	margin: 4px 0;
+	padding-inline-start: var(--size-4-4);
+	font-size: var(--font-ui-small);
+}
+.coder-agent-kind.is-added {
+	color: var(--color-green);
+}
+.coder-agent-kind.is-deleted {
+	color: var(--color-red);
+}
+.coder-agent-kind.is-changed {
+	color: var(--color-orange);
+}
+.coder-agent-path,
+.coder-agent-diff-path {
+	font-family: var(--font-monospace);
+	word-break: break-all;
+}
+.coder-agent-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	justify-content: flex-end;
+}
+.coder-agent-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+.coder-agent-btn svg {
+	width: var(--icon-s);
+	height: var(--icon-s);
+}
+.coder-agent-diff-path {
+	margin-top: var(--size-4-2);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+.coder-agent-diff pre {
+	margin: 4px 0;
+	padding: 6px 0;
+	max-height: 50vh;
+	overflow: auto;
+	font-size: var(--font-ui-smaller);
+	background: var(--code-background);
+	border-radius: var(--radius-s);
+}
+.coder-agent-diff pre > div {
+	display: flex;
+	gap: 6px;
+	padding-inline: 8px;
+	direction: ltr;
+}
+.coder-diff-op {
+	flex: none;
+	width: 1ch;
+	color: var(--text-muted);
+}
+.coder-diff-text {
+	flex: 1;
+	white-space: pre-wrap;
+	unicode-bidi: plaintext;
+	text-align: start;
+}
+.coder-diff-add {
+	background: rgba(var(--color-green-rgb), 0.15);
+}
+.coder-diff-del {
+	background: rgba(var(--color-red-rgb), 0.15);
+}
+.coder-diff-gap {
+	color: var(--text-faint);
 }
 
 /* ---------- Printing / PDF export: plain code blocks, no buttons ---------- */

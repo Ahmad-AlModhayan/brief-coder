@@ -5,6 +5,7 @@
  * plugin still loads on mobile where they don't exist.
  */
 import type { ChildProcess, SpawnOptions } from "child_process";
+import { t } from "../i18n";
 import type { LanguageDef } from "../languages";
 import type { CoderSettings } from "../settings";
 import type { RunExit, RunHandle, RunSink } from "./session";
@@ -19,17 +20,26 @@ interface NodeMods {
 }
 
 let mods: NodeMods | null = null;
+
+/**
+ * Loads Node's modules on first use. Every entry point below awaits this; mobile never gets here.
+ * It has to be require(): esbuild leaves import() of a built-in as a real ES-module import, which
+ * Obsidian's renderer can't resolve ("Failed to resolve module specifier 'child_process'").
+ */
+async function loadNode(): Promise<NodeMods> {
+	/* eslint-disable @typescript-eslint/no-require-imports -- desktop-only modules, loaded on first run (see above) */
+	mods ??= {
+		cp: require("child_process") as NodeMods["cp"],
+		fs: require("fs") as NodeMods["fs"],
+		path: require("path") as NodeMods["path"],
+		os: require("os") as NodeMods["os"],
+	};
+	/* eslint-enable @typescript-eslint/no-require-imports -- end of the desktop-only modules */
+	return mods;
+}
+
 function node(): NodeMods {
-	if (!mods) {
-		const m = {
-			cp: require("child_process"),
-			fs: require("fs"),
-			path: require("path"),
-			os: require("os"),
-		};
-		if (!m.cp || !m.fs || !m.path || !m.os) throw new Error("Running programs needs Obsidian for desktop.");
-		mods = m;
-	}
+	if (!mods) throw new Error("Running programs needs Obsidian for desktop.");
 	return mods;
 }
 
@@ -57,7 +67,7 @@ function pathKey(env: NodeJS.ProcessEnv): string {
 }
 
 async function buildEnv(): Promise<NodeJS.ProcessEnv> {
-	const { path, os } = node();
+	const { path, os } = await loadNode();
 	const env: NodeJS.ProcessEnv = { ...process.env };
 	const key = pathKey(env);
 	const home = os.homedir();
@@ -271,8 +281,8 @@ function killTree(child: ChildProcess): void {
 function notFoundMessage(lang: LanguageDef, tried: readonly string[]): string {
 	const names = tried.map((t) => splitCommandLine(t)[0]).filter((n) => n && n !== "{out}");
 	return (
-		`${lang.name} isn't installed, or Obsidian can't find it (tried: ${Array.from(new Set(names)).join(", ")}).\n` +
-		`Install it, or set its command in Settings → Obsidian Coder → Languages.`
+		t("{lang} isn't installed, or Obsidian can't find it (tried: {tried}).", { lang: lang.name, tried: Array.from(new Set(names)).join(", ") }) +
+		`\n${t("Install it, or set its command in Settings → Brief Coder → Languages.")}`
 	);
 }
 
@@ -329,8 +339,41 @@ export interface ProcessRunOptions {
 	onCommand?: (display: string) => void;
 }
 
+const CACHE_DAYS = 14;
+let pruned = false;
+
+/**
+ * Once per Obsidian session, in the background: removes build caches nobody ran for CACHE_DAYS,
+ * and run folders a crash left behind (older than a day). Without this the cache only grows.
+ */
+export async function pruneTemp(now = Date.now()): Promise<number> {
+	const { fs, path, os } = await loadNode();
+	let removed = 0;
+	const rmIfOld = async (dir: string, maxAgeMs: number) => {
+		const st = await fs.promises.stat(dir).catch(() => null);
+		if (!st || now - st.mtimeMs < maxAgeMs) return;
+		await fs.promises.rm(dir, { recursive: true, force: true }).catch(() => undefined);
+		removed++;
+	};
+	const tmp = os.tmpdir();
+	for (const name of await fs.promises.readdir(tmp).catch(() => [] as string[])) {
+		if (/^obsidian-coder-(?!cache$)/.test(name)) await rmIfOld(path.join(tmp, name), 24 * 3600_000);
+	}
+	const cache = path.join(tmp, "obsidian-coder-cache");
+	for (const lang of await fs.promises.readdir(cache).catch(() => [] as string[])) {
+		for (const block of await fs.promises.readdir(path.join(cache, lang)).catch(() => [] as string[])) {
+			await rmIfOld(path.join(cache, lang, block), CACHE_DAYS * 24 * 3600_000);
+		}
+	}
+	return removed;
+}
+
 export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> {
-	const { fs, path, os } = node();
+	const { fs, path, os } = await loadNode();
+	if (!pruned) {
+		pruned = true;
+		void pruneTemp();
+	}
 	const lang = o.lang;
 	const recipe = lang.process;
 	if (!recipe) throw new Error(`${lang.name} has no desktop runner.`);
@@ -345,7 +388,11 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 		const source = o.source ?? "";
 		// Cached languages keep one folder per code block so their build cache can be reused.
 		const dir = recipe.cache ? path.join(os.tmpdir(), "obsidian-coder-cache", lang.id, hashString(o.cacheKey ?? source)) : tmp;
-		if (recipe.cache) await fs.promises.mkdir(dir, { recursive: true });
+		if (recipe.cache) {
+			await fs.promises.mkdir(dir, { recursive: true });
+			const now = new Date();
+			await fs.promises.utimes(dir, now, now).catch(() => undefined); // marks the cache as used (see pruneTemp)
+		}
 		file = path.join(dir, recipe.fileName ?? `main.${recipe.ext}`);
 		const content = recipe.bom ? `\ufeff${source}` : source;
 		const same = recipe.cache && (await fs.promises.readFile(file, "utf8").catch(() => null)) === content;
@@ -391,12 +438,24 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 			child.on("error", (e) => {
 				if (settled) return;
 				settled = true;
-				resolve({ code: null, error: describeSpawnError(e as NodeJS.ErrnoException, exe) });
+				resolve({ code: null, error: describeSpawnError(e, exe) });
 			});
 			child.on("close", (code, signal) => {
 				if (settled) return;
 				settled = true;
 				resolve({ code, signal });
+			});
+			// After Stop, a background job the program started (`sleep 300 &` in Git Bash) can keep the
+			// output pipes open, so "close" never comes. Once the program itself has exited, stop waiting.
+			child.on("exit", (code, signal) => {
+				if (!stopped) return;
+				setTimeout(() => {
+					if (settled) return;
+					settled = true;
+					child.stdout?.destroy();
+					child.stderr?.destroy();
+					resolve({ code, signal });
+				}, 500);
 			});
 		});
 
@@ -416,7 +475,7 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 			if (!cmd) return { code: null, error: notFoundMessage(lang, tried) };
 			o.onCommand?.(cmd.display);
 			const args = [...cmd.pre, ...expandArgs(recipe.args, vars)];
-			const stdinText = recipe.sourceViaStdin ? await fs.promises.readFile(file as string, "utf8") : undefined;
+			const stdinText = recipe.sourceViaStdin ? await fs.promises.readFile(file, "utf8") : undefined;
 			const exit = await runOne(cmd.exe, args, stdinText);
 			if (!stopped && exit.code !== 0) {
 				const hint = recipe.hints?.find(([re]) => re.test(errTail));

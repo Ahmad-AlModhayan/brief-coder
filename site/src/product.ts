@@ -1,7 +1,7 @@
 import type { Product } from '@kahf/design/lib/product';
 
-/** Obsidian Coder's site settings. repo: point it at the plugin's own repository once it is public. */
-export const repo = 'https://github.com/Ahmad-AlModhayan';
+/** Brief Coder's site settings. */
+export const repo = 'https://github.com/Ahmad-AlModhayan/obsidian-coder';
 
 export const P: Product = {
   id: 'coder',
@@ -9,7 +9,7 @@ export const P: Product = {
   url: import.meta.env.PUBLIC_SITE_URL || 'https://coder.kahflabs.com',
   rootLang: 'en',
   scope: 'kf-scope-coder',
-  name: { en: 'Obsidian Coder', ar: 'Obsidian Coder' },
+  name: { en: 'Brief Coder', ar: 'Brief Coder' },
   line: {
     en: 'Run and Copy on every code block in your Obsidian notes, with the output right beneath.',
     ar: 'زرّا «تشغيل» و«نسخ» على كل كتلة كود في ملاحظات Obsidian، والنتيجة تحتها مباشرة.',

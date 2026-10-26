@@ -1,4 +1,5 @@
 import { Notice, setIcon } from "obsidian";
+import { t } from "../i18n";
 import type { RunSession } from "../run/session";
 import { OutputView } from "./outputView";
 
@@ -28,10 +29,10 @@ export function mountRunBar(host: HTMLElement, o: RunBarOptions): () => void {
 	if (o.title) meta.createSpan({ cls: "coder-title", text: o.title });
 	const actions = bar.createDiv({ cls: "coder-bar-actions" });
 
-	const copyBtn = actions.createEl("button", { cls: "coder-btn", attr: { type: "button", "aria-label": "Copy code" } });
+	const copyBtn = actions.createEl("button", { cls: "coder-btn", attr: { type: "button", "aria-label": t("Copy code") } });
 	const copyIcon = copyBtn.createSpan({ cls: "coder-btn-icon" });
 	setIcon(copyIcon, "copy");
-	copyBtn.createSpan({ cls: "coder-btn-label", text: "Copy" });
+	copyBtn.createSpan({ cls: "coder-btn-label", text: t("Copy") });
 	let copyTimer = 0;
 	copyBtn.addEventListener("click", (e) => {
 		e.preventDefault();
@@ -46,7 +47,7 @@ export function mountRunBar(host: HTMLElement, o: RunBarOptions): () => void {
 					copyBtn.removeClass("is-done");
 				}, 1200);
 			},
-			() => new Notice("Couldn't copy to the clipboard."),
+			() => new Notice(t("Couldn't copy to the clipboard.")),
 		);
 	});
 
@@ -75,9 +76,9 @@ export function mountRunBar(host: HTMLElement, o: RunBarOptions): () => void {
 		if (running === lastRunning) return;
 		lastRunning = running;
 		runBtn.toggleClass("is-running", running);
-		runBtn.setAttr("aria-label", running ? "Stop" : "Run code");
+		runBtn.setAttr("aria-label", running ? t("Stop") : t("Run code"));
 		setIcon(runIcon, running ? "square" : "play");
-		runLabel.setText(running ? "Stop" : "Run");
+		runLabel.setText(running ? t("Stop") : t("Run"));
 	};
 	const unsubscribe = o.session.subscribe(sync);
 	sync();
