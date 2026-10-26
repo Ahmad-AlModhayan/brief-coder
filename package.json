@@ -22,7 +22,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ahmad-AlModhayan/obsidian-coder.git"
+    "url": "https://github.com/Ahmad-AlModhayan/brief-coder.git"
   },
   "devDependencies": {
     "@codemirror/autocomplete": "6.18.6",

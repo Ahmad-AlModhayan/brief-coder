@@ -297,7 +297,7 @@ const JVM_NOTICE = /^Picked up (?:_JAVA_OPTIONS|JAVA_TOOL_OPTIONS|JDK_JAVA_OPTIO
 
 /**
  * Makes output read like the code block: strips colour codes, and shortens the temporary
- * folder in error messages (`/tmp/obsidian-coder-x1/main.py` → `main.py`).
+ * folder in error messages (`/tmp/brief-coder-x1/main.py` → `main.py`).
  */
 function outputCleaner(dirs: string[]): (text: string, isErr?: boolean) => string {
 	const { fs, path } = node();
@@ -340,6 +340,7 @@ export interface ProcessRunOptions {
 }
 
 const CACHE_DAYS = 14;
+const CACHE_DIR = "brief-coder-cache";
 let pruned = false;
 
 /**
@@ -356,13 +357,15 @@ export async function pruneTemp(now = Date.now()): Promise<number> {
 		removed++;
 	};
 	const tmp = os.tmpdir();
+	// "obsidian-coder-…" folders are from before the rename (1.0.x); they're cleaned up the same way.
 	for (const name of await fs.promises.readdir(tmp).catch(() => [] as string[])) {
-		if (/^obsidian-coder-(?!cache$)/.test(name)) await rmIfOld(path.join(tmp, name), 24 * 3600_000);
+		if (/^(?:brief|obsidian)-coder-(?!cache$)/.test(name)) await rmIfOld(path.join(tmp, name), 24 * 3600_000);
 	}
-	const cache = path.join(tmp, "obsidian-coder-cache");
-	for (const lang of await fs.promises.readdir(cache).catch(() => [] as string[])) {
-		for (const block of await fs.promises.readdir(path.join(cache, lang)).catch(() => [] as string[])) {
-			await rmIfOld(path.join(cache, lang, block), CACHE_DAYS * 24 * 3600_000);
+	for (const cache of [CACHE_DIR, "obsidian-coder-cache"].map((d) => path.join(tmp, d))) {
+		for (const lang of await fs.promises.readdir(cache).catch(() => [] as string[])) {
+			for (const block of await fs.promises.readdir(path.join(cache, lang)).catch(() => [] as string[])) {
+				await rmIfOld(path.join(cache, lang, block), CACHE_DAYS * 24 * 3600_000);
+			}
 		}
 	}
 	return removed;
@@ -382,12 +385,12 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 		throw new Error(`${lang.name} only runs on ${recipe.platforms.map((p) => names[p]).join(" / ")}.`);
 	}
 	const env = await runEnv();
-	const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), "obsidian-coder-"));
+	const tmp = await fs.promises.mkdtemp(path.join(os.tmpdir(), "brief-coder-"));
 	let file = o.filePath;
 	if (!file) {
 		const source = o.source ?? "";
 		// Cached languages keep one folder per code block so their build cache can be reused.
-		const dir = recipe.cache ? path.join(os.tmpdir(), "obsidian-coder-cache", lang.id, hashString(o.cacheKey ?? source)) : tmp;
+		const dir = recipe.cache ? path.join(os.tmpdir(), CACHE_DIR, lang.id, hashString(o.cacheKey ?? source)) : tmp;
 		if (recipe.cache) {
 			await fs.promises.mkdir(dir, { recursive: true });
 			const now = new Date();

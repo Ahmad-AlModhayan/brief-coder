@@ -25,7 +25,7 @@ const prod = process.argv[2] === "production";
 
 const context = await esbuild.context({
 	banner: {
-		js: "/* Brief Coder —https://github.com/Ahmad-AlModhayan/obsidian-coder */",
+		js: "/* Brief Coder — https://github.com/Ahmad-AlModhayan/brief-coder */",
 	},
 	entryPoints: ["src/main.ts"],
 	bundle: true,
