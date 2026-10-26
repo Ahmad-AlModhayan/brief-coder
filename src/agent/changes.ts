@@ -48,6 +48,15 @@ export async function sha256(text: string): Promise<string> {
 
 const hashOf = (text: string | null): Promise<string | null> => (text === null ? Promise.resolve(null) : sha256(text));
 
+/**
+ * A plain vault-relative path: forward slashes, no empty, "." / ".." or hidden segments, no drive
+ * letters, "~", or names Windows would silently change (trailing dot or space).
+ */
+export function isSafePath(path: string): boolean {
+	if (!path || path.length > 1024 || /[\\:*?"<>|\0]/.test(path)) return false;
+	return path.split("/").every((s) => s !== "" && !s.startsWith(".") && s !== "~" && !/[. ]$/.test(s));
+}
+
 /** Reads a changeset file, or returns null for anything that isn't one (never throws). */
 export function parseChangeset(json: string): Changeset | null {
 	try {
@@ -57,7 +66,7 @@ export function parseChangeset(json: string): Changeset | null {
 			typeof c.id === "string" &&
 			typeof c.actor === "string" &&
 			Array.isArray(c.entries) &&
-			c.entries.every((e) => typeof e?.path === "string" && ["added", "changed", "deleted"].includes(e.kind) && !e.path.split("/").some((p) => p === ".." || p.startsWith(".")));
+			c.entries.every((e) => typeof e?.path === "string" && ["added", "changed", "deleted"].includes(e.kind) && isSafePath(e.path));
 		return ok ? { ...c, label: String(c.label ?? ""), status: c.status ?? "held" } : null;
 	} catch {
 		return null;
@@ -69,11 +78,20 @@ export function agentName(actor: string): string {
 	return actor.replace(/^agent:/, "") || "agent";
 }
 
-/** Writes the agent's versions. Files changed since the proposal are left alone ("conflict"). */
-export async function acceptChangeset(c: Changeset, io: ChangeIO): Promise<{ ok: number; skipped: number }> {
+/**
+ * Writes the agent's versions. Files changed since the proposal are left alone ("conflict"), and
+ * so is any path outside what agents may touch now (`allowed`: the bridge's current folders), since
+ * a changeset file could have been written by anything on this computer, not only the bridge.
+ */
+export async function acceptChangeset(c: Changeset, io: ChangeIO, allowed: (path: string) => boolean = () => true): Promise<{ ok: number; skipped: number }> {
 	let ok = 0;
 	for (const e of c.entries) {
 		try {
+			if (!isSafePath(e.path) || !allowed(e.path)) {
+				e.outcome = "failed";
+				e.error = "outside the folders agents may change";
+				continue;
+			}
 			const current = await io.read(e.path);
 			if ((await hashOf(current)) !== e.beforeHash) {
 				e.outcome = "conflict";
@@ -138,7 +156,10 @@ export function lineDiff(before: string | null, after: string | null): DiffLine[
 	while (start < a.length && start < b.length && a[start] === b[start]) start++;
 	let endA = a.length;
 	let endB = b.length;
-	while (endA > start && endB > start && a[endA - 1] === b[endB - 1]) endA--, endB--;
+	while (endA > start && endB > start && a[endA - 1] === b[endB - 1]) {
+		endA--;
+		endB--;
+	}
 	const out: DiffLine[] = a.slice(0, start).map((l) => [" ", l]);
 	const midA = a.slice(start, endA);
 	const midB = b.slice(start, endB);

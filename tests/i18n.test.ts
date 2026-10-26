@@ -2,7 +2,7 @@ import { strict as assert } from "node:assert";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { hasArabic, setArabic, t } from "../src/i18n";
+import { hasArabic, setLanguage, t } from "../src/i18n";
 import { inFolders, parseFolders } from "../src/util/folders";
 
 function sources(dir: string): string[] {
@@ -29,7 +29,7 @@ describe("i18n", () => {
 	});
 
 	it("Arabic text keeps every placeholder", () => {
-		setArabic(true);
+		setLanguage("ar");
 		try {
 			for (const k of keys()) {
 				const vars = Object.fromEntries(Array.from(k.matchAll(/\{(\w+)\}/g), (m) => [m[1], `<${m[1]}>`]));
@@ -38,17 +38,17 @@ describe("i18n", () => {
 				assert.ok(!/\{\w+\}/.test(ar), `unfilled placeholder in ${ar}`);
 			}
 		} finally {
-			setArabic(undefined);
+			setLanguage("en");
 		}
 	});
 
 	it("falls back to English and fills placeholders", () => {
-		setArabic(false);
+		setLanguage("en");
 		assert.equal(t("Finished · {time}", { time: "1 s" }), "Finished · 1 s");
 		assert.equal(t("No such string"), "No such string");
-		setArabic(true);
+		setLanguage("ar");
 		assert.equal(t("Run"), "تشغيل");
-		setArabic(undefined);
+		setLanguage("en");
 	});
 });
 

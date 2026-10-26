@@ -5,9 +5,29 @@ import { t } from "../i18n";
 
 export const VIEW_TYPE_AGENT = "brief-coder-agent-changes";
 
+/** Words shown for statuses, kinds and outcomes (the stored values are codes). */
+function label(code: string, error?: string): string {
+	switch (code) {
+		case "held": return t("Held");
+		case "accepted": return t("Accepted");
+		case "partly_accepted": return t("Partly accepted");
+		case "rejected": return t("Rejected");
+		case "reverted": return t("Reverted");
+		case "partly_reverted": return t("Partly reverted");
+		case "added": return t("Added");
+		case "changed": return t("Changed");
+		case "deleted": return t("Deleted");
+		case "applied": return t("Applied");
+		case "conflict": return t("Skipped: the file changed after the proposal");
+		case "skipped_changed": return t("Skipped: you edited it after accepting");
+		default: return error?.startsWith("outside") ? t("Not allowed: outside the folders agents may change") : t("Failed");
+	}
+}
+
 /** Lists the changesets agents proposed through the bridge, with Accept / Reject / Revert and a diff. */
 export class AgentChangesView extends ItemView {
-	private open = new Set<string>();
+	/** Changesets whose diff is shown. (Not "open": that would replace View.open().) */
+	private expanded = new Set<string>();
 	private busy = false;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: CoderPlugin) {
@@ -49,21 +69,21 @@ export class AgentChangesView extends ItemView {
 		const card = parent.createDiv({ cls: `coder-agent-card is-${c.status}` });
 		const top = card.createDiv({ cls: "coder-agent-top" });
 		top.createSpan({ cls: "coder-agent-actor", text: agentName(c.actor) });
-		top.createSpan({ cls: "coder-agent-status", text: t(c.status) });
-		top.createSpan({ cls: "coder-agent-time", text: new Date(c.createdAt).toLocaleString() });
+		top.createSpan({ cls: "coder-agent-status", text: label(c.status) });
+		top.createSpan({ cls: "coder-agent-time", text: new Date(c.createdAt).toLocaleString(), attr: { dir: "auto" } });
 		if (c.label) card.createDiv({ cls: "coder-agent-label", text: c.label, attr: { dir: "auto" } });
 		const files = card.createEl("ul", { cls: "coder-agent-files" });
 		for (const e of c.entries) {
 			const li = files.createEl("li");
-			li.createSpan({ cls: `coder-agent-kind is-${e.kind}`, text: t(e.kind) });
+			li.createSpan({ cls: `coder-agent-kind is-${e.kind}`, text: label(e.kind) });
 			li.createSpan({ cls: "coder-agent-path", text: e.path, attr: { dir: "auto" } });
-			if (e.outcome) li.createSpan({ cls: "coder-agent-outcome", text: t(e.outcome) });
+			if (e.outcome) li.createSpan({ cls: "coder-agent-outcome", text: label(e.outcome, e.error) });
 		}
 		const actions = card.createDiv({ cls: "coder-agent-actions" });
-		const shown = this.open.has(c.id);
+		const shown = this.expanded.has(c.id);
 		this.button(actions, shown ? "chevron-up" : "chevron-down", shown ? t("Hide changes") : t("Show changes"), () => {
-			if (shown) this.open.delete(c.id);
-			else this.open.add(c.id);
+			if (shown) this.expanded.delete(c.id);
+			else this.expanded.add(c.id);
 			void this.refresh();
 		});
 		if (c.status === "held") {
@@ -86,7 +106,10 @@ export class AgentChangesView extends ItemView {
 					continue;
 				}
 				const [op, text] = line;
-				pre.createDiv({ cls: op === "+" ? "coder-diff-add" : op === "-" ? "coder-diff-del" : "coder-diff-ctx", text: `${op} ${text}`, attr: { dir: "auto" } });
+				// The +/- marker stays at the start; only the line's text takes its own direction.
+				const row = pre.createDiv({ cls: op === "+" ? "coder-diff-add" : op === "-" ? "coder-diff-del" : "coder-diff-ctx" });
+				row.createSpan({ cls: "coder-diff-op", text: op });
+				row.createSpan({ cls: "coder-diff-text", text, attr: { dir: "auto" } });
 			}
 		}
 	}
@@ -105,7 +128,7 @@ export class AgentChangesView extends ItemView {
 			const io = this.plugin.vaultIO();
 			if (what === "reject") rejectChangeset(c);
 			else {
-				const r = what === "accept" ? await acceptChangeset(c, io) : await revertChangeset(c, io);
+				const r = what === "accept" ? await acceptChangeset(c, io, (p) => this.plugin.agentMayChange(p)) : await revertChangeset(c, io);
 				const n = r.ok + r.skipped;
 				if (r.skipped)
 					new Notice(

@@ -28,7 +28,7 @@ interface CM5Mode {
 	startState?: (...a: unknown[]) => unknown;
 	token: (stream: unknown, state: unknown) => string | null;
 	blankLine?: (state: unknown) => void;
-	indent?: (state: unknown, textAfter: string, line?: string) => number | unknown;
+	indent?: (state: unknown, textAfter: string, line?: string) => unknown;
 	lineComment?: string;
 	blockCommentStart?: string;
 	blockCommentEnd?: string;
