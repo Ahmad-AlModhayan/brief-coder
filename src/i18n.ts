@@ -1,7 +1,6 @@
 /**
  * Interface text in English and Arabic. English strings are the keys, so code reads naturally and
- * a missing translation falls back to English. Obsidian keeps its interface language in
- * localStorage ("language"); Arabic is used when it starts with "ar".
+ * a missing translation falls back to English. Arabic is used when Obsidian's language is Arabic.
  */
 const AR: Record<string, string> = {
 	// bar and output
@@ -141,19 +140,20 @@ const AR: Record<string, string> = {
 	Revert: "تراجع",
 	"Show changes": "عرض التغييرات",
 	"Hide changes": "إخفاء التغييرات",
-	held: "معلّق",
-	accepted: "مقبول",
-	partly_accepted: "مقبول جزئيًا",
-	rejected: "مرفوض",
-	reverted: "متراجَع عنه",
-	partly_reverted: "متراجَع عنه جزئيًا",
-	added: "إضافة",
-	changed: "تعديل",
-	deleted: "حذف",
-	applied: "طُبّق",
-	conflict: "تعارض: تغيّر الملف بعد الاقتراح",
-	skipped_changed: "تُرك: عدّلته بعد القبول",
-	failed: "فشل",
+	Held: "معلّق",
+	Accepted: "مقبول",
+	"Partly accepted": "مقبول جزئيًا",
+	Rejected: "مرفوض",
+	Reverted: "متراجَع عنه",
+	"Partly reverted": "متراجَع عنه جزئيًا",
+	Added: "إضافة",
+	Changed: "تعديل",
+	Deleted: "حذف",
+	Applied: "طُبّق",
+	"Skipped: the file changed after the proposal": "تُرك: تغيّر الملف بعد الاقتراح",
+	"Skipped: you edited it after accepting": "تُرك: عدّلته بعد القبول",
+	"Not allowed: outside the folders agents may change": "غير مسموح: خارج المجلدات التي يغيّرها الوكلاء",
+	Failed: "فشل",
 	"{agent} proposed {n} changes. Review them in Agent changes.": "اقترح {agent} {n} تغييرات. راجعها في «تغييرات الوكلاء».",
 	"Accepted {ok} of {n}. {skipped} skipped: the file changed after the proposal.":
 		"قُبل {ok} من {n}. تُرك {skipped} لأن الملف تغيّر بعد الاقتراح.",
@@ -163,22 +163,15 @@ const AR: Record<string, string> = {
 		"استُوردت إعدادات Coder Studio. يمكنك إزالة الإضافة القديمة coder-studio.",
 };
 
-let arabic: boolean | undefined;
+let arabic = false;
 
-export function isArabic(): boolean {
-	if (arabic === undefined) {
-		try {
-			arabic = (globalThis.localStorage?.getItem("language") ?? "").toLowerCase().startsWith("ar");
-		} catch {
-			arabic = false;
-		}
-	}
-	return arabic;
+/** Set once at load from Obsidian's getLanguage() (main.ts), so this module needs no Obsidian import and stays testable. */
+export function setLanguage(code: string): void {
+	arabic = code.toLowerCase().startsWith("ar");
 }
 
-/** For tests. */
-export function setArabic(on: boolean | undefined): void {
-	arabic = on;
+export function isArabic(): boolean {
+	return arabic;
 }
 
 /** Translates `en` and fills `{name}` placeholders. */

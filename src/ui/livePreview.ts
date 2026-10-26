@@ -92,7 +92,7 @@ function update(plugin: CoderPlugin, value: FieldValue, state: EditorState, chan
 		// The edited block's bar gets the new code, and with it the block's new key.
 		const s = next.spans[edited.index];
 		deco = deco.update({
-			filter: (_from, _to, d) => !(d.spec.widget instanceof RunBarWidget),
+			filter: (_from, _to, d) => !((d.spec as { widget?: unknown }).widget instanceof RunBarWidget),
 			filterFrom: s.to,
 			filterTo: s.to,
 			add: [barWidget(plugin, `${s.meta.base}|0`, path, s, edited.code).range(s.to)],

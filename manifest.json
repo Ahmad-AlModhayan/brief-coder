@@ -2,7 +2,7 @@
 	"id": "brief-coder",
 	"name": "Brief Coder",
 	"version": "1.1.0",
-	"minAppVersion": "1.5.0",
+	"minAppVersion": "1.8.7",
 	"description": "Run, view and edit code in 40 languages: Run and Copy on code blocks with live output, an editor for code files, and a local, opt-in bridge for AI agents.",
 	"author": "Ahmad AlModhayan",
 	"authorUrl": "https://github.com/Ahmad-AlModhayan",

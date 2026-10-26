@@ -20,17 +20,26 @@ interface NodeMods {
 }
 
 let mods: NodeMods | null = null;
+
+/**
+ * Loads Node's modules on first use. Every entry point below awaits this; mobile never gets here.
+ * It has to be require(): esbuild leaves import() of a built-in as a real ES-module import, which
+ * Obsidian's renderer can't resolve ("Failed to resolve module specifier 'child_process'").
+ */
+async function loadNode(): Promise<NodeMods> {
+	/* eslint-disable @typescript-eslint/no-require-imports -- desktop-only modules, loaded on first run (see above) */
+	mods ??= {
+		cp: require("child_process") as NodeMods["cp"],
+		fs: require("fs") as NodeMods["fs"],
+		path: require("path") as NodeMods["path"],
+		os: require("os") as NodeMods["os"],
+	};
+	/* eslint-enable @typescript-eslint/no-require-imports -- end of the desktop-only modules */
+	return mods;
+}
+
 function node(): NodeMods {
-	if (!mods) {
-		const m = {
-			cp: require("child_process"),
-			fs: require("fs"),
-			path: require("path"),
-			os: require("os"),
-		};
-		if (!m.cp || !m.fs || !m.path || !m.os) throw new Error("Running programs needs Obsidian for desktop.");
-		mods = m;
-	}
+	if (!mods) throw new Error("Running programs needs Obsidian for desktop.");
 	return mods;
 }
 
@@ -58,7 +67,7 @@ function pathKey(env: NodeJS.ProcessEnv): string {
 }
 
 async function buildEnv(): Promise<NodeJS.ProcessEnv> {
-	const { path, os } = node();
+	const { path, os } = await loadNode();
 	const env: NodeJS.ProcessEnv = { ...process.env };
 	const key = pathKey(env);
 	const home = os.homedir();
@@ -338,7 +347,7 @@ let pruned = false;
  * and run folders a crash left behind (older than a day). Without this the cache only grows.
  */
 export async function pruneTemp(now = Date.now()): Promise<number> {
-	const { fs, path, os } = node();
+	const { fs, path, os } = await loadNode();
 	let removed = 0;
 	const rmIfOld = async (dir: string, maxAgeMs: number) => {
 		const st = await fs.promises.stat(dir).catch(() => null);
@@ -360,7 +369,7 @@ export async function pruneTemp(now = Date.now()): Promise<number> {
 }
 
 export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> {
-	const { fs, path, os } = node();
+	const { fs, path, os } = await loadNode();
 	if (!pruned) {
 		pruned = true;
 		void pruneTemp();
@@ -429,7 +438,7 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 			child.on("error", (e) => {
 				if (settled) return;
 				settled = true;
-				resolve({ code: null, error: describeSpawnError(e as NodeJS.ErrnoException, exe) });
+				resolve({ code: null, error: describeSpawnError(e, exe) });
 			});
 			child.on("close", (code, signal) => {
 				if (settled) return;
@@ -454,7 +463,7 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 			if (!cmd) return { code: null, error: notFoundMessage(lang, tried) };
 			o.onCommand?.(cmd.display);
 			const args = [...cmd.pre, ...expandArgs(recipe.args, vars)];
-			const stdinText = recipe.sourceViaStdin ? await fs.promises.readFile(file as string, "utf8") : undefined;
+			const stdinText = recipe.sourceViaStdin ? await fs.promises.readFile(file, "utf8") : undefined;
 			const exit = await runOne(cmd.exe, args, stdinText);
 			if (!stopped && exit.code !== 0) {
 				const hint = recipe.hints?.find(([re]) => re.test(errTail));

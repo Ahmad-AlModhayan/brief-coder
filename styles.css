@@ -208,9 +208,9 @@
 	font-size: var(--code-size, 0.875em);
 	line-height: 1.5;
 	white-space: pre-wrap;
-	/* Each output line takes its direction from its own text, so Arabic lines read right to left. */
-	unicode-bidi: plaintext;
-	text-align: start;
+	/* Output reads left to right like code, even in a right-to-left vault ... */
+	direction: ltr;
+	text-align: left;
 	word-break: break-word;
 	color: var(--text-normal);
 	user-select: text;
@@ -330,6 +330,19 @@ body:not(.is-mobile) .coder-view-output .coder-output {
 	height: 32px;
 }
 
+/* ... but each line takes its direction from its own text, so Arabic lines read right to left.
+   (unicode-bidi isn't inherited: it goes on the page blocks that hold the text.) */
+.coder-output-text .coder-page {
+	unicode-bidi: plaintext;
+	text-align: start;
+}
+
+/* Code reads left to right in right-to-left vaults too. */
+.coder-has-bar > pre {
+	direction: ltr;
+	text-align: left;
+}
+
 /* ---------- Run confirmation ---------- */
 .coder-confirm-code {
 	max-height: 40vh;
@@ -446,7 +459,18 @@ body:not(.is-mobile) .coder-view-output .coder-output {
 	border-radius: var(--radius-s);
 }
 .coder-agent-diff pre > div {
+	display: flex;
+	gap: 6px;
 	padding-inline: 8px;
+	direction: ltr;
+}
+.coder-diff-op {
+	flex: none;
+	width: 1ch;
+	color: var(--text-muted);
+}
+.coder-diff-text {
+	flex: 1;
 	white-space: pre-wrap;
 	unicode-bidi: plaintext;
 	text-align: start;

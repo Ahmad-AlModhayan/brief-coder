@@ -1,6 +1,6 @@
-import { App, Editor, FileSystemAdapter, MarkdownView, Modal, Notice, Platform, Plugin, Setting, TFile, TFolder, normalizePath } from "obsidian";
+import { App, Editor, FileSystemAdapter, MarkdownView, Modal, Notice, Platform, Plugin, Setting, TFile, TFolder, getLanguage, normalizePath } from "obsidian";
 import { CHANGES_DIR, ChangeIO, Changeset, agentName, parseChangeset } from "./agent/changes";
-import { t } from "./i18n";
+import { setLanguage, t } from "./i18n";
 import { LANGUAGES, languageForFence, normaliseFenceLanguage } from "./languages";
 import { canRun, startRun } from "./run/runner";
 import { RunSession, SessionStore } from "./run/session";
@@ -55,11 +55,12 @@ export default class CoderPlugin extends Plugin {
 	 * child_process exists. False on phones and tablets (and in Obsidian's mobile emulation).
 	 */
 	get desktop(): boolean {
-		if (this.canSpawn === undefined) this.canSpawn = Platform.isDesktopApp && !Platform.isMobile && hasChildProcess();
+		if (this.canSpawn === undefined) this.canSpawn = Platform.isDesktopApp && !Platform.isMobile;
 		return this.canSpawn;
 	}
 
 	async onload(): Promise<void> {
+		setLanguage(getLanguage());
 		await this.loadSettings();
 
 		this.registerView(VIEW_TYPE_CODE, (leaf) => new CodeView(leaf, this));
@@ -311,6 +312,19 @@ export default class CoderPlugin extends Plugin {
 		await this.app.vault.adapter.write(`${CHANGES_DIR}/${c.id}.json`, JSON.stringify(c, null, 2));
 	}
 
+	/**
+	 * Whether an accepted change may touch this path now: the bridge is on, the path is inside its
+	 * folders and outside the private ones and the config folder. Compared without case, as the
+	 * bridge does on Windows and macOS.
+	 */
+	agentMayChange(path: string): boolean {
+		const s = this.settings;
+		const p = path.toLowerCase();
+		const lower = (text: string) => parseFolders(text).map((f) => f.toLowerCase());
+		const configDir = this.app.vault.configDir.toLowerCase();
+		return s.bridgeEnabled && inFolders(p, lower(s.bridgeFolders)) && !inFolders(p, lower(s.bridgeExclude).filter(Boolean)) && !inFolders(p, [configDir]);
+	}
+
 	/** Notes as the changeset code sees them: written through the vault, deletions go to the trash. */
 	vaultIO(): ChangeIO {
 		const vault = this.app.vault;
@@ -333,11 +347,8 @@ export default class CoderPlugin extends Plugin {
 			},
 			remove: async (p) => {
 				const f = fileAt(p);
-				if (!f) return;
-				// trashFile (1.6.6+) follows the user's "deleted files" setting; older Obsidian gets the system trash.
-				const fm = this.app.fileManager as { trashFile?: (f: TFile) => Promise<void> };
-				if (fm.trashFile) await fm.trashFile(f);
-				else await vault.trash(f, true);
+				// Follows the user's "Deleted files" setting (system trash, .trash, or delete).
+				if (f) await this.app.fileManager.trashFile(f);
 			},
 		};
 	}
@@ -349,7 +360,8 @@ export default class CoderPlugin extends Plugin {
 		for (const c of fresh) {
 			this.announced.add(c.id);
 			const notice = new Notice(t("{agent} proposed {n} changes. Review them in Agent changes.", { agent: agentName(c.actor), n: c.entries.length }), 10000);
-			notice.noticeEl.addEventListener("click", () => void this.openAgentChanges());
+			// The whole notice, not just its text (noticeEl), opens the view.
+			notice.containerEl.addEventListener("click", () => void this.openAgentChanges());
 		}
 		this.app.workspace.getLeavesOfType(VIEW_TYPE_AGENT).forEach((l) => void (l.view as AgentChangesView).refresh());
 	}
@@ -367,7 +379,10 @@ export default class CoderPlugin extends Plugin {
 		const path = view.file?.path ?? "";
 		const blocks = findFencedBlocks(editor.getValue().split("\n"));
 		const keys = blockKeys(path, blocks);
-		return blocks.map((b, i) => ({ block: b, target: { key: keys[i], path, fence: b.lang, info: b.info, code: b.code } as BlockTarget }));
+		return blocks.map((b, i) => {
+			const target: BlockTarget = { key: keys[i], path, fence: b.lang, info: b.info, code: b.code };
+			return { block: b, target };
+		});
 	}
 
 	private registerCommands(): void {
@@ -485,16 +500,6 @@ export default class CoderPlugin extends Plugin {
 			if (this.store.stopGeneration !== generation) break;
 			await this.runBlock(x, true);
 		}
-	}
-}
-
-function hasChildProcess(): boolean {
-	try {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
-		const cp = require("child_process") as { spawn?: unknown } | null;
-		return !!cp && typeof cp.spawn === "function";
-	} catch {
-		return false;
 	}
 }
 
