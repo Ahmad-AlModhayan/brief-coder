@@ -1,8 +1,8 @@
 {
-  "name": "obsidian-coder-site",
+  "name": "brief-coder-site",
   "version": "1.0.0",
   "private": true,
-  "description": "coder.kahflabs.com — the Obsidian Coder website. Static, English and Arabic, built on @kahf/design.",
+  "description": "coder.kahflabs.com — the Brief Coder website. Static, English and Arabic, built on @kahf/design.",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"

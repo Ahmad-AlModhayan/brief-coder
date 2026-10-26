@@ -1,7 +1,7 @@
 import type { Product } from '@kahf/design/lib/product';
 
 /** Brief Coder's site settings. */
-export const repo = 'https://github.com/Ahmad-AlModhayan/obsidian-coder';
+export const repo = 'https://github.com/Ahmad-AlModhayan/brief-coder';
 
 export const P: Product = {
   id: 'coder',

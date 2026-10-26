@@ -8,4 +8,4 @@ Obsidian Coder is now **Brief Coder**, ready for the community directory. This r
 - **Tidier temp files.** Build caches unused for 14 days, and run folders left by a crash, are cleaned up.
 - Needs Obsidian 1.8.7 or newer.
 
-**Install:** with BRAT (`Ahmad-AlModhayan/obsidian-coder`), or download `main.js`, `manifest.json` and `styles.css` below into `<vault>/.obsidian/plugins/brief-coder/`. For the agent bridge, also put `coder-bridge.mjs` there.
+**Install:** with BRAT (`Ahmad-AlModhayan/brief-coder`), or download `main.js`, `manifest.json` and `styles.css` below into `<vault>/.obsidian/plugins/brief-coder/`. For the agent bridge, also put `coder-bridge.mjs` there.
