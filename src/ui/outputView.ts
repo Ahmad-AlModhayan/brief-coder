@@ -1,4 +1,5 @@
 import { setIcon } from "obsidian";
+import { t } from "../i18n";
 import { DrawState, drawIncrementally } from "../run/output";
 import { PagedText } from "./pagedText";
 import type { RunSession } from "../run/session";
@@ -58,10 +59,10 @@ export class OutputView {
 	private build(): Parts {
 		const el = this.parent.createDiv({ cls: "coder-output" });
 		const header = el.createDiv({ cls: "coder-output-header" });
-		const statusEl = header.createDiv({ cls: "coder-output-status" });
+		const statusEl = header.createDiv({ cls: "coder-output-status", attr: { role: "status", "aria-live": "polite" } });
 		const actionsEl = header.createDiv({ cls: "coder-output-actions" });
-		this.iconButton(actionsEl, "copy", "Copy output", () => void navigator.clipboard.writeText(this.session.buffer.toString()));
-		this.iconButton(actionsEl, "x", "Clear output", () => this.hooks.onClear());
+		this.iconButton(actionsEl, "copy", t("Copy output"), () => void navigator.clipboard.writeText(this.session.buffer.toString()));
+		this.iconButton(actionsEl, "x", t("Clear output"), () => this.hooks.onClear());
 		const bodyEl = el.createDiv({ cls: "coder-output-body" });
 		bodyEl.addEventListener(
 			"scroll",
@@ -73,7 +74,7 @@ export class OutputView {
 		const stdinRow = el.createDiv({ cls: "coder-stdin is-hidden" });
 		const stdinInput = stdinRow.createEl("input", {
 			cls: "coder-stdin-input",
-			attr: { type: "text", placeholder: "Type input for the program, then press Enter", spellcheck: "false" },
+			attr: { type: "text", placeholder: t("Type input for the program, then press Enter"), "aria-label": t("Input for the program"), spellcheck: "false", dir: "auto" },
 		});
 		stdinInput.addEventListener("keydown", (e) => {
 			if (e.key !== "Enter") return;
@@ -120,22 +121,22 @@ export class OutputView {
 		let cls: string;
 		switch (s.status) {
 			case "running":
-				text = `Running ${s.label}… ${formatDuration(Date.now() - s.startedAt)}`;
+				text = t("Running {name}… {time}", { name: s.label, time: formatDuration(Date.now() - s.startedAt) });
 				cls = "running";
 				break;
 			case "done":
-				text = s.html !== null ? `${s.label} preview` : `Finished · ${formatDuration(s.durationMs)}`;
+				text = s.html !== null ? t("{name} preview", { name: s.label }) : t("Finished · {time}", { time: formatDuration(s.durationMs) });
 				cls = "done";
 				break;
 			case "stopped":
-				text = `Stopped · ${formatDuration(s.durationMs)}`;
+				text = t("Stopped · {time}", { time: formatDuration(s.durationMs) });
 				cls = "stopped";
 				break;
 			case "failed":
 				text =
 					s.exit?.error && s.exit.code === null
-						? "Couldn't run"
-						: `Exit code ${s.exit?.code ?? s.exit?.signal ?? "?"} · ${formatDuration(s.durationMs)}`;
+						? t("Couldn't run")
+						: t("Exit code {code} · {time}", { code: String(s.exit?.code ?? s.exit?.signal ?? "?"), time: formatDuration(s.durationMs) });
 				cls = "failed";
 				break;
 			default:
@@ -167,7 +168,7 @@ export class OutputView {
 		this.text ??= new PagedText(p.preEl);
 		const changed = drawIncrementally(buf, this.drawState, this.text);
 		if (!changed) return;
-		p.noticeEl.setText(buf.trimmed ? `… ${buf.trimmed.toLocaleString()} earlier characters dropped (output limit in settings)` : "");
+		p.noticeEl.setText(buf.trimmed ? t("… {n} earlier characters dropped (output limit in settings)", { n: buf.trimmed.toLocaleString() }) : "");
 		p.noticeEl.toggleClass("is-hidden", !buf.trimmed);
 		p.preEl.toggleClass("is-hidden", buf.size === 0);
 		if (buf.size === 0) this.stickToBottom = true;
@@ -199,7 +200,7 @@ export class OutputView {
 		const token = Math.random().toString(36).slice(2);
 		const frame = wrap.createEl("iframe", {
 			cls: "coder-preview-frame",
-			attr: { sandbox: "allow-scripts allow-forms allow-modals", title: "HTML preview", loading: "lazy" },
+			attr: { sandbox: "allow-scripts allow-forms allow-modals", title: t("HTML preview"), loading: "lazy" },
 		});
 		frame.srcdoc = previewDocument(html, token);
 		// The preview grows to fit the page (60–600 px) until the user drags its edge.

@@ -1,9 +1,9 @@
 {
-	"id": "coder-studio",
-	"name": "Obsidian Coder",
-	"version": "1.0.1",
+	"id": "brief-coder",
+	"name": "Brief Coder",
+	"version": "1.1.0",
 	"minAppVersion": "1.5.0",
-	"description": "Run, view and edit code in 40 languages: Run and Copy on every code block with live output, plus an editor for code files.",
+	"description": "Run, view and edit code in 40 languages: Run and Copy on code blocks with live output, an editor for code files, and a local, opt-in bridge for AI agents.",
 	"author": "Ahmad AlModhayan",
 	"authorUrl": "https://github.com/Ahmad-AlModhayan",
 	"isDesktopOnly": false

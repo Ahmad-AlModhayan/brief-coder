@@ -5,6 +5,7 @@
  * plugin still loads on mobile where they don't exist.
  */
 import type { ChildProcess, SpawnOptions } from "child_process";
+import { t } from "../i18n";
 import type { LanguageDef } from "../languages";
 import type { CoderSettings } from "../settings";
 import type { RunExit, RunHandle, RunSink } from "./session";
@@ -271,8 +272,8 @@ function killTree(child: ChildProcess): void {
 function notFoundMessage(lang: LanguageDef, tried: readonly string[]): string {
 	const names = tried.map((t) => splitCommandLine(t)[0]).filter((n) => n && n !== "{out}");
 	return (
-		`${lang.name} isn't installed, or Obsidian can't find it (tried: ${Array.from(new Set(names)).join(", ")}).\n` +
-		`Install it, or set its command in Settings → Obsidian Coder → Languages.`
+		t("{lang} isn't installed, or Obsidian can't find it (tried: {tried}).", { lang: lang.name, tried: Array.from(new Set(names)).join(", ") }) +
+		`\n${t("Install it, or set its command in Settings → Brief Coder → Languages.")}`
 	);
 }
 
@@ -329,8 +330,41 @@ export interface ProcessRunOptions {
 	onCommand?: (display: string) => void;
 }
 
+const CACHE_DAYS = 14;
+let pruned = false;
+
+/**
+ * Once per Obsidian session, in the background: removes build caches nobody ran for CACHE_DAYS,
+ * and run folders a crash left behind (older than a day). Without this the cache only grows.
+ */
+export async function pruneTemp(now = Date.now()): Promise<number> {
+	const { fs, path, os } = node();
+	let removed = 0;
+	const rmIfOld = async (dir: string, maxAgeMs: number) => {
+		const st = await fs.promises.stat(dir).catch(() => null);
+		if (!st || now - st.mtimeMs < maxAgeMs) return;
+		await fs.promises.rm(dir, { recursive: true, force: true }).catch(() => undefined);
+		removed++;
+	};
+	const tmp = os.tmpdir();
+	for (const name of await fs.promises.readdir(tmp).catch(() => [] as string[])) {
+		if (/^obsidian-coder-(?!cache$)/.test(name)) await rmIfOld(path.join(tmp, name), 24 * 3600_000);
+	}
+	const cache = path.join(tmp, "obsidian-coder-cache");
+	for (const lang of await fs.promises.readdir(cache).catch(() => [] as string[])) {
+		for (const block of await fs.promises.readdir(path.join(cache, lang)).catch(() => [] as string[])) {
+			await rmIfOld(path.join(cache, lang, block), CACHE_DAYS * 24 * 3600_000);
+		}
+	}
+	return removed;
+}
+
 export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> {
 	const { fs, path, os } = node();
+	if (!pruned) {
+		pruned = true;
+		void pruneTemp();
+	}
 	const lang = o.lang;
 	const recipe = lang.process;
 	if (!recipe) throw new Error(`${lang.name} has no desktop runner.`);
@@ -345,7 +379,11 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 		const source = o.source ?? "";
 		// Cached languages keep one folder per code block so their build cache can be reused.
 		const dir = recipe.cache ? path.join(os.tmpdir(), "obsidian-coder-cache", lang.id, hashString(o.cacheKey ?? source)) : tmp;
-		if (recipe.cache) await fs.promises.mkdir(dir, { recursive: true });
+		if (recipe.cache) {
+			await fs.promises.mkdir(dir, { recursive: true });
+			const now = new Date();
+			await fs.promises.utimes(dir, now, now).catch(() => undefined); // marks the cache as used (see pruneTemp)
+		}
 		file = path.join(dir, recipe.fileName ?? `main.${recipe.ext}`);
 		const content = recipe.bom ? `\ufeff${source}` : source;
 		const same = recipe.cache && (await fs.promises.readFile(file, "utf8").catch(() => null)) === content;

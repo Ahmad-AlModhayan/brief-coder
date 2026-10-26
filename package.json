@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-coder",
-  "version": "1.0.1",
-  "description": "Run, view and edit code in 40 languages inside Obsidian: Run and Copy on every code block, live output, and an editor for code files.",
+  "name": "brief-coder",
+  "version": "1.1.0",
+  "description": "Brief Coder for Obsidian: run, view and edit code in 40 languages, with a local bridge for AI agents.",
   "main": "main.js",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "typecheck": "tsc -noEmit -skipLibCheck",
     "test": "tsx --test tests/*.test.ts",
-    "test:unit": "tsx --test tests/fence.test.ts tests/text.test.ts tests/output.test.ts tests/languages.test.ts tests/preview.test.ts tests/liveBlocks.test.ts tests/pagedText.test.ts",
+    "test:unit": "tsx --test tests/fence.test.ts tests/text.test.ts tests/output.test.ts tests/languages.test.ts tests/preview.test.ts tests/liveBlocks.test.ts tests/pagedText.test.ts tests/bridge.test.ts tests/agent.test.ts tests/i18n.test.ts tests/prune.test.ts",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "keywords": [

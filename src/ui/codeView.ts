@@ -1,4 +1,5 @@
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
+import { t } from "../i18n";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { bracketMatching, foldGutter, foldKeymap, indentOnInput, indentUnit } from "@codemirror/language";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
@@ -94,8 +95,8 @@ export class CodeView extends TextFileView {
 		this.contentEl.addClass("coder-view");
 		this.editorHost = this.contentEl.createDiv({ cls: "coder-view-editor" });
 		this.outputHost = this.contentEl.createDiv({ cls: "coder-view-output" });
-		this.runAction = this.addAction("play", "Run file (Ctrl/Cmd + Enter)", () => void this.toggleRun());
-		this.addAction("copy", "Copy file contents", () => void navigator.clipboard.writeText(this.getViewData()));
+		this.runAction = this.addAction("play", t("Run file (Ctrl/Cmd + Enter)"), () => void this.toggleRun());
+		this.addAction("copy", t("Copy file contents"), () => void navigator.clipboard.writeText(this.getViewData()));
 	}
 
 	async onClose(): Promise<void> {
@@ -239,7 +240,7 @@ export class CodeView extends TextFileView {
 		this.runAction.toggleClass("is-hidden", !runnable);
 		const running = !!this.session?.running;
 		setIcon(this.runAction, running ? "square" : "play");
-		this.runAction.setAttr("aria-label", running ? "Stop" : "Run file (Ctrl/Cmd + Enter)");
+		this.runAction.setAttr("aria-label", running ? t("Stop") : t("Run file (Ctrl/Cmd + Enter)"));
 		this.runAction.toggleClass("coder-is-running", running);
 	}
 
@@ -255,7 +256,7 @@ export class CodeView extends TextFileView {
 		if (!lang || !canRun(lang, this.plugin.desktop)) return;
 		this.starting = true;
 		try {
-			if (!(await this.plugin.confirmRun(lang.name))) return;
+			if (!(await this.plugin.confirmRun(lang.name, file.path))) return;
 			await this.save();
 		} finally {
 			this.starting = false;

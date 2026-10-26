@@ -2,7 +2,8 @@ name: Release
 
 # Publishes a release whenever main has a version (in manifest.json) that isn't released yet.
 # To ship a new version: `npm version patch` (or minor/major), update .github/RELEASE_NOTES.md,
-# and push to main. The release gets the three files Obsidian and BRAT need.
+# and push to main. The release gets the three files Obsidian and BRAT need, plus the agent bridge
+# (coder-bridge.mjs), which runs outside Obsidian and is downloaded on its own.
 on:
   push:
     branches: [main]
@@ -50,7 +51,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.version.outputs.value }}" main.js manifest.json styles.css \
+          gh release create "${{ steps.version.outputs.value }}" main.js manifest.json styles.css bridge/coder-bridge.mjs \
             --target "$GITHUB_SHA" \
             --title "${{ steps.version.outputs.value }}" \
             --notes-file .github/RELEASE_NOTES.md
