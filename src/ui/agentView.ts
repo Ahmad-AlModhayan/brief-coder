@@ -128,7 +128,8 @@ export class AgentChangesView extends ItemView {
 			const io = this.plugin.vaultIO();
 			if (what === "reject") rejectChangeset(c);
 			else {
-				const r = what === "accept" ? await acceptChangeset(c, io, (p) => this.plugin.agentMayChange(p)) : await revertChangeset(c, io);
+				const allowed = (p: string) => this.plugin.agentMayChange(p);
+				const r = what === "accept" ? await acceptChangeset(c, io, allowed) : await revertChangeset(c, io, allowed);
 				const n = r.ok + r.skipped;
 				if (r.skipped)
 					new Notice(

@@ -50,10 +50,11 @@ const hashOf = (text: string | null): Promise<string | null> => (text === null ?
 
 /**
  * A plain vault-relative path: forward slashes, no empty, "." / ".." or hidden segments, no drive
- * letters, "~", or names Windows would silently change (trailing dot or space).
+ * letters, "~", or names Windows would silently change (trailing dot or space). It must already be
+ * in the form Obsidian writes (NFC, no non-breaking spaces), so the path checked is the path written.
  */
 export function isSafePath(path: string): boolean {
-	if (!path || path.length > 1024 || /[\\:*?"<>|\0]/.test(path)) return false;
+	if (!path || path.length > 1024 || /[\\:*?"<>|\0\u00a0\u202f]/.test(path) || path.normalize("NFC") !== path) return false;
 	return path.split("/").every((s) => s !== "" && !s.startsWith(".") && s !== "~" && !/[. ]$/.test(s));
 }
 
@@ -111,14 +112,22 @@ export async function acceptChangeset(c: Changeset, io: ChangeIO, allowed: (path
 	return { ok, skipped: c.entries.length - ok };
 }
 
-/** Puts back the earlier versions of applied files, unless you changed them since. */
-export async function revertChangeset(c: Changeset, io: ChangeIO): Promise<{ ok: number; skipped: number }> {
+/**
+ * Puts back the earlier versions of applied files, unless you changed them since. Paths are checked
+ * like on accept: the file on disk, not this code, says what was applied.
+ */
+export async function revertChangeset(c: Changeset, io: ChangeIO, allowed: (path: string) => boolean = () => true): Promise<{ ok: number; skipped: number }> {
 	let ok = 0;
 	let tried = 0;
 	for (const e of c.entries) {
 		if (e.outcome !== "applied") continue;
 		tried++;
 		try {
+			if (!isSafePath(e.path) || !allowed(e.path)) {
+				e.outcome = "failed";
+				e.error = "outside the folders agents may change";
+				continue;
+			}
 			const current = await io.read(e.path);
 			if ((await hashOf(current)) !== (await hashOf(e.after))) {
 				e.outcome = "skipped_changed";
