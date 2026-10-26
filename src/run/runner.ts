@@ -1,5 +1,6 @@
 /** Chooses the right runner for a language and drives a RunSession through one run. */
 import type { LanguageDef } from "../languages";
+import { t } from "../i18n";
 import type { CoderSettings } from "../settings";
 import { startWorkerJs } from "./inapp";
 import type { RunHandle, RunSession } from "./session";
@@ -48,7 +49,7 @@ export async function startRun(o: StartRunOptions): Promise<void> {
 		// The time limit counts from the click, including finding and starting the tool.
 		if (settings.timeoutSeconds > 0) {
 			timer = setTimeout(() => {
-				session.write("info", `\nStopped after ${settings.timeoutSeconds} s (time limit in settings).\n`);
+				session.write("info", `\n${t("Stopped after {n} s (time limit in settings).", { n: settings.timeoutSeconds })}\n`);
 				session.stop();
 			}, settings.timeoutSeconds * 1000);
 		}
@@ -75,8 +76,8 @@ export async function startRun(o: StartRunOptions): Promise<void> {
 			session.finish({
 				code: null,
 				error: o.desktop
-					? `Coder can't run ${lang.name} yet.`
-					: `${lang.name} runs on Obsidian for desktop. On mobile, Coder runs JavaScript and HTML.`,
+					? t("Brief Coder can't run {lang} yet.", { lang: lang.name })
+					: t("{lang} runs on Obsidian for desktop. On mobile, Brief Coder runs JavaScript and HTML.", { lang: lang.name }),
 			});
 			return;
 		}

@@ -1,6 +1,6 @@
-/* Obsidian Coder's own touches, on top of @kahf/design (kahf.css + product.css). Loaded on every page by the kahf() integration. */
+/* Brief Coder's own touches, on top of @kahf/design (kahf.css + product.css). Loaded on every page by the kahf() integration. */
 
-/* ---------- Obsidian Coder: the example note and the theme cards ---------- */
+/* ---------- Brief Coder: the example note and the theme cards ---------- */
 .cd-hero { row-gap: 16px; }
 .cd-demo-note { grid-column: 2; margin-block-start: -8px; text-align: center; font: 400 13px/20px var(--kf-font); color: var(--md-sys-color-on-surface-variant); }
 @media (max-width: 899px) { .cd-demo-note { grid-column: 1; } }

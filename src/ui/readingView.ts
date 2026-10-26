@@ -1,4 +1,5 @@
 import { MarkdownPostProcessorContext, MarkdownRenderChild, Notice } from "obsidian";
+import { t } from "../i18n";
 import type CoderPlugin from "../main";
 import { isDecoratedFence } from "../languages";
 import { FencedBlock, blockKeys, findFencedBlocks, hashString } from "../util/fence";
@@ -76,11 +77,11 @@ function decorateInlineCode(el: HTMLElement): void {
 	el.querySelectorAll("code").forEach((c) => {
 		if (c.closest("pre") || c.hasClass("coder-inline-copy")) return;
 		c.addClass("coder-inline-copy");
-		c.setAttr("aria-label", "Click to copy");
+		c.setAttr("aria-label", t("Click to copy"));
 		c.addEventListener("click", (e) => {
 			if ((e as MouseEvent).detail > 1) return; // allow double-click to select
 			navigator.clipboard.writeText(c.textContent ?? "").then(
-				() => new Notice("Copied"),
+				() => new Notice(t("Copied")),
 				() => undefined,
 			);
 		});

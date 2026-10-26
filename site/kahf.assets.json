@@ -1,8 +1,8 @@
 {
   "id": "coder",
   "name": {
-    "en": "Obsidian Coder",
-    "ar": "Obsidian Coder"
+    "en": "Brief Coder",
+    "ar": "Brief Coder"
   },
   "bg": "#3a3835",
   "ink": "#f5f3f0",
@@ -16,5 +16,5 @@
     "ar": "زرّا «تشغيل» و«نسخ» على كل كتلة كود في Obsidian"
   },
   "short": "Coder",
-  "description": "Run and Copy on every code block in your Obsidian notes."
+  "description": "Run and Copy on every code block in your Obsidian notes, in English and Arabic."
 }

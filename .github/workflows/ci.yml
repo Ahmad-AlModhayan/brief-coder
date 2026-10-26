@@ -16,4 +16,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Size budget (main.js under 100 KiB)
+        run: node -e "const s=require('fs').statSync('main.js').size; console.log('main.js', s, 'bytes'); if (s > 102400) process.exit(1)"
       - run: npm run test:unit
