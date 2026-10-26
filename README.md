@@ -180,7 +180,7 @@ Brief Coder was built to keep Obsidian fast. Measured in Obsidian 1.13 and 1.14:
 - **C#** files run with **.NET 10 or newer** (`dotnet run app.cs`). On older .NET, install `dotnet-script` and set it as the C# command.
 - **Java** files run directly with **Java 11 or newer**.
 - **TypeScript** needs one of `tsx`, Bun, Deno or Node.js 22.6+.
-- **Windows:** Python runs through the `py` launcher, and `bash` blocks use Git Bash.
+- **Windows:** Python runs through the `py` launcher, and `bash` blocks use Git Bash. A background job started with `&` in a Git Bash block keeps running after Stop; end it from the Task Manager, or don't start background jobs in blocks.
 - **The agent bridge says it's off:** turn on **Let agents read this vault** in settings. The bridge reads the setting on every request, so no restart is needed.
 
 ## Development

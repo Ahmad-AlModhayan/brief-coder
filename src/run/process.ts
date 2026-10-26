@@ -445,6 +445,18 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 				settled = true;
 				resolve({ code, signal });
 			});
+			// After Stop, a background job the program started (`sleep 300 &` in Git Bash) can keep the
+			// output pipes open, so "close" never comes. Once the program itself has exited, stop waiting.
+			child.on("exit", (code, signal) => {
+				if (!stopped) return;
+				setTimeout(() => {
+					if (settled) return;
+					settled = true;
+					child.stdout?.destroy();
+					child.stderr?.destroy();
+					resolve({ code, signal });
+				}, 500);
+			});
 		});
 
 	const done = (async (): Promise<RunExit> => {
