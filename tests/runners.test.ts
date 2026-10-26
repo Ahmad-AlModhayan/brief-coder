@@ -133,7 +133,7 @@ describe("process runner behaviour", () => {
 		const { session, out } = await run("python", "def f():\n    raise ValueError('nope')\nf()");
 		assert.equal(session.status, "failed");
 		assert.match(out, /File "main\.py", line 3/);
-		assert.doesNotMatch(out, /obsidian-coder-/);
+		assert.doesNotMatch(out, /brief-coder-/);
 	});
 
 	it("re-runs an unchanged C# block from its build cache", { timeout: 180_000 }, async (t) => {
@@ -275,11 +275,11 @@ describe("process runner behaviour", () => {
 	});
 
 	it("cleans up its temporary folders", { timeout: 30_000 }, async () => {
-		const before = fs.readdirSync(os.tmpdir()).filter((n) => n.startsWith("obsidian-coder-")).length;
+		const before = fs.readdirSync(os.tmpdir()).filter((n) => n.startsWith("brief-coder-")).length;
 		await run("python", "print(1)");
 		await run("c", 'printf("x");');
 		await new Promise((r) => setTimeout(r, 200));
-		const after = fs.readdirSync(os.tmpdir()).filter((n) => n.startsWith("obsidian-coder-")).length;
+		const after = fs.readdirSync(os.tmpdir()).filter((n) => n.startsWith("brief-coder-")).length;
 		assert.ok(after <= before, `temp folders left behind: ${after - before}`);
 	});
 });

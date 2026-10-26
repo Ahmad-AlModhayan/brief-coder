@@ -48,12 +48,12 @@ Brief Coder needs Obsidian 1.8.7 or newer.
 **With BRAT (until it's in the community directory)**
 
 1. Install **BRAT** from Settings → Community plugins.
-2. Run **BRAT: Add a beta plugin** and enter `Ahmad-AlModhayan/obsidian-coder`.
+2. Run **BRAT: Add a beta plugin** and enter `Ahmad-AlModhayan/brief-coder`.
 3. Enable **Brief Coder** in Settings → Community plugins.
 
 **Manually**
 
-1. Download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/Ahmad-AlModhayan/obsidian-coder/releases/latest).
+1. Download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/Ahmad-AlModhayan/brief-coder/releases/latest).
 2. Put them in `<your vault>/.obsidian/plugins/brief-coder/`.
 3. Reload Obsidian and enable **Brief Coder**.
 
@@ -122,7 +122,7 @@ The agent bridge gives local AI agents your notes as context without giving them
 Set it up:
 
 1. **Settings → Brief Coder → Agent bridge → Let agents read this vault.** Choose the folders to share and the ones to keep private.
-2. Download `coder-bridge.mjs` from the [latest release](https://github.com/Ahmad-AlModhayan/obsidian-coder/releases/latest) into `<vault>/.obsidian/plugins/brief-coder/`. It needs Node.js 18 or newer.
+2. Download `coder-bridge.mjs` from the [latest release](https://github.com/Ahmad-AlModhayan/brief-coder/releases/latest) into `<vault>/.obsidian/plugins/brief-coder/`. It needs Node.js 18 or newer.
 3. Press **Copy config** in settings and add it to the agent's MCP settings. For Claude Code, put it in `.mcp.json`.
 
 Agents get six tools: `list_notes`, `search_notes` (Arabic-aware), `read_note`, `list_code_blocks`, `propose_change` and `list_changes`. The bridge never runs code.

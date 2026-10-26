@@ -1,5 +1,5 @@
 // @ts-check
-// coder.kahflabs.com. The family look comes from @kahf/design; Obsidian Coder's own touches are in src/styles/site.css.
+// coder.kahflabs.com. The family look comes from @kahf/design; Brief Coder's own touches are in src/styles/site.css.
 import { defineConfig } from 'astro/config';
 import kahf from '@kahf/design/integration';
 
