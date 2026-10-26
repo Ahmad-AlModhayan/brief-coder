@@ -139,7 +139,7 @@ export class RunSession implements RunSink {
 			try {
 				fn();
 			} catch (e) {
-				console.error("[Obsidian Coder]", e);
+				console.error("[Brief Coder]", e);
 			}
 		}
 	}
