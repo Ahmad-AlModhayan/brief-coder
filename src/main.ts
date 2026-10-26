@@ -319,8 +319,8 @@ export default class CoderPlugin extends Plugin {
 	 */
 	agentMayChange(path: string): boolean {
 		const s = this.settings;
-		const p = path.toLowerCase();
-		const lower = (text: string) => parseFolders(text).map((f) => f.toLowerCase());
+		const p = path.normalize("NFC").toLowerCase();
+		const lower = (text: string) => parseFolders(text).map((f) => f.normalize("NFC").toLowerCase());
 		const configDir = this.app.vault.configDir.toLowerCase();
 		return s.bridgeEnabled && inFolders(p, lower(s.bridgeFolders)) && !inFolders(p, lower(s.bridgeExclude).filter(Boolean)) && !inFolders(p, [configDir]);
 	}
@@ -328,8 +328,13 @@ export default class CoderPlugin extends Plugin {
 	/** Notes as the changeset code sees them: written through the vault, deletions go to the trash. */
 	vaultIO(): ChangeIO {
 		const vault = this.app.vault;
+		// Only paths already in Obsidian's form get here (isSafePath), so the path checked is the path written.
+		const exact = (p: string) => {
+			if (normalizePath(p) !== p) throw new Error(`Not a plain vault path: ${p}`);
+			return p;
+		};
 		const fileAt = (p: string) => {
-			const f = vault.getAbstractFileByPath(normalizePath(p));
+			const f = vault.getAbstractFileByPath(exact(p));
 			return f instanceof TFile ? f : null;
 		};
 		return {
@@ -340,7 +345,7 @@ export default class CoderPlugin extends Plugin {
 			write: async (p, text) => {
 				const f = fileAt(p);
 				if (f) return vault.modify(f, text);
-				const path = normalizePath(p);
+				const path = exact(p);
 				const parent = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
 				if (parent && !vault.getAbstractFileByPath(parent)) await vault.createFolder(parent);
 				await vault.create(path, text);

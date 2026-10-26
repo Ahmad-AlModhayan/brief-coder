@@ -94,6 +94,14 @@ describe("agent changes", () => {
 		assert.equal(io.files.get("Private/a.md"), "old");
 	});
 
+	it("revert refuses paths outside what agents may change", async () => {
+		const io = memoryIO({ "Private/a.md": "agent" });
+		const c = await changeset([{ path: "Private/a.md", before: "old", after: "agent" }]);
+		c.entries[0].outcome = "applied"; // as a forged changeset file could claim
+		assert.deepEqual(await revertChangeset(c, io, (p) => !p.startsWith("Private/")), { ok: 0, skipped: 1 });
+		assert.equal(io.files.get("Private/a.md"), "agent");
+	});
+
 	it("reject writes nothing", async () => {
 		const io = memoryIO({ "a.md": "old" });
 		const c = await changeset([{ path: "a.md", before: "old", after: "agent" }]);
@@ -107,7 +115,7 @@ describe("agent changes", () => {
 		assert.ok(parseChangeset(JSON.stringify(good)));
 		assert.equal(parseChangeset("not json"), null);
 		assert.equal(parseChangeset(JSON.stringify({ ...good, version: 2 })), null);
-		for (const path of ["../outside.md", ".obsidian/app.json", "notes/../../x.md", "a/.git/config", "..\\x.md", "C:/x.md", "/etc/x.md", "a//b.md", "~/x.md", "dir./x.md", "x.md ", ""]) {
+		for (const path of ["../outside.md", ".obsidian/app.json", "notes/../../x.md", "a/.git/config", "..\\x.md", "C:/x.md", "/etc/x.md", "a//b.md", "~/x.md", "dir./x.md", "x.md ", "", "a b.md", "café.md"]) {
 			assert.equal(parseChangeset(JSON.stringify({ ...good, entries: [{ ...good.entries[0], path }] })), null, path);
 		}
 	});
