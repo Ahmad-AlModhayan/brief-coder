@@ -1,7 +1,7 @@
 # Agent bridge: vault context for local agents, changes held until you say yes
 
-Status: built in 1.1.0 (2026-10-26). Answers the whitepaper's role for this product (§2.1, row 5: *Knowledge Bridge,
-feeds local codebase/note context into Raqeeb safely*), and follows the agent-change model Wasl uses
+Status: built in 1.1.0 (2026-10-26). Answers the role planned for this product (a knowledge bridge that
+feeds local codebase and note context into Raqeeb safely), and follows the agent-change model Wasl uses
 (`wasl/docs/AGENT_CHANGES.md`): an agent's changes are held, labelled with its name, and accepted or reverted by you.
 
 ## 1. Why
