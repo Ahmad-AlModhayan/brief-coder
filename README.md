@@ -2,6 +2,10 @@
 
 Run, view and edit code inside Obsidian. Every code block gets **Run** and **Copy**, output appears live under the block, and code files open in a real editor. It supports 40 languages, speaks English and Arabic, and stays light: under 100 KB, with nothing running until you press Run.
 
+- **Incumbent**: Execute Code (twibiral/obsidian-execute-code), the most-downloaded Obsidian plugin for running code blocks.
+- **Leap**: Brief Coder runs code blocks and whole code files in 40 languages without slowing Obsidian, and asks before it runs code from any note outside your trusted folders.
+- **Benchmark**: a Miqyas run in one test vault with each plugin alone: plugin size, startup time, typing latency in a 3,000-line note, frame rate during endless printing, the same snippets in every installed language, and whether code from a shared folder can run without a prompt.
+
 New in 1.1: **trusted folders** for notes from other people, an **Arabic interface**, and an opt-in **agent bridge** that lets local AI agents (Claude Code, Raqeeb) read the folders you choose and *propose* note changes that wait for your Accept.
 
 > Brief Coder was called Obsidian Coder (plugin ID `coder-studio`) until 1.0.1. The community directory doesn't allow "Obsidian" in plugin names, so it was renamed, ID included. See [Moving from Obsidian Coder](#moving-from-obsidian-coder).

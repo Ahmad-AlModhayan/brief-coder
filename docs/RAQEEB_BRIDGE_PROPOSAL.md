@@ -8,7 +8,7 @@ described in [AGENT_BRIDGE.md](AGENT_BRIDGE.md).
 - `rqb-memory` indexes an Obsidian vault read-only as a memory source (`SourceKind::Obsidian`, `**/*.md`, excluding
   `.obsidian/**` and `.trash/**`), with Arabic-normalised FTS5 search.
 - The SRS plans an MCP client in the hub (FR-T3: "connect to extra MCP servers listed in config"), not yet built.
-- The whitepaper describes Raqeeb on PydanticAI with `MCPServerStdio`. The repository today is a Rust core with a
+- Raqeeb was once planned on PydanticAI with `MCPServerStdio`. The repository today is a Rust core with a
   Python LangGraph planner, so the bridge must work with either. It does: it is plain MCP over stdio.
 
 ## What to add
