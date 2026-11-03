@@ -150,6 +150,7 @@ Agents get six tools: `list_notes`, `search_notes` (Arabic-aware), `read_note`, 
 - **Code runs on your computer with your permissions**, the same as running it in a terminal. Only run code you trust, and use trusted folders if your vault contains notes from other people.
 - **Nothing runs on its own.** Opening, syncing or rendering a note never runs its code.
 - **Files outside the vault:** to run code, Brief Coder writes the block to a temporary folder in your system's temp directory and starts the installed interpreter or compiler there. Temporary folders are removed after each run. Build caches for C#, Scala, Nim and Crystal are kept per block and removed after 14 days unused.
+- **Clipboard:** Brief Coder writes to the clipboard only when you press a copy button or run a copy command, and never reads from it.
 - **Network:** Brief Coder itself makes no network requests and collects nothing. Code you run can use the network, like any program you run yourself. HTML previews run in a sandboxed frame with no access to Obsidian or your files.
 - The **in-app JavaScript sandbox** runs like JavaScript in a browser tab: it has no access to your files, your vault or Obsidian.
 - The **agent bridge** is off by default, runs only when an agent you configured starts it, and writes nothing to your notes until you accept a change. Any program running as you can still edit your files directly; the bridge narrows what a well-behaved agent does, it isn't a sandbox.

@@ -11,6 +11,9 @@ on:
 
 permissions:
   contents: write
+  # Signed build provenance for the release files (GitHub artifact attestations).
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -45,6 +48,16 @@ jobs:
           npm ci
           npm run build
           npm run test:unit
+
+      - name: Attest the release files
+        if: steps.released.outputs.yes == 'false'
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
+            bridge/coder-bridge.mjs
 
       - name: Create the release
         if: steps.released.outputs.yes == 'false'

@@ -27,7 +27,7 @@ Checked against the pages above on 2026-11-03.
 | `version` is `x.y.z`; the release tag equals it, no `v` | Tags `1.0.0`, `1.0.1`, `1.1.0`. `release.yml` tags and titles each release with the manifest version. |
 | Release has `main.js`, `manifest.json`, `styles.css` as attachments | Yes, plus `coder-bridge.mjs`. |
 | `minAppVersion` is the real minimum; `versions.json` maps older versions | 1.8.7. `eslint-plugin-obsidianmd`'s `no-unsupported-api` finds no API newer than that. `versions.json`: 1.0.x → 1.5.0, 1.1.0 → 1.8.7. |
-| `isDesktopOnly`: Node.js and Electron APIs need desktop | `false`, on purpose: mobile runs JavaScript and HTML and keeps Copy for the rest. `child_process`, `fs`, `path` and `os` are loaded with `require()` on first Run only, and only when `Platform.isDesktopApp && !Platform.isMobile` (`main.ts`, `canSpawn`). See *Known questions* below. |
+| `isDesktopOnly`: Node.js and Electron APIs need desktop | `false`, on purpose: mobile runs JavaScript and HTML and keeps Copy for the rest. `child_process`, `fs`, `path` and `os` are loaded with `require()` on first Run only, and only when `Platform.isDesktopApp && !Platform.isMobile` (`main.ts`, `canSpawn`); `loadNode()` also checks `Platform.isDesktop` itself. See *Known questions* below. |
 | `fundingUrl` only for donations | None set. |
 | No obfuscation, ads, client-side telemetry, self-updating | None. The build is minified with sourcemaps off, from the public TypeScript source. |
 | Disclosures in the README: network use, files outside the vault | *Safety and disclosures*: no network requests, nothing collected; temporary folders in the OS temp directory, removed after each run. |
@@ -41,14 +41,15 @@ Checked against the pages above on 2026-11-03.
 
 ### Automated check
 
-`eslint-plugin-obsidianmd` 0.4.2, `recommended` config, on 2026-11-03: **0 errors, 6 warnings**. The review bot
-doesn't allow `eslint-disable` comments for `obsidianmd` rules, so these stay as warnings, with the reasons ready:
+`eslint-plugin-obsidianmd` 0.4.2, `recommended` config: **0 errors, 0 warnings** since the 1.1.1 directory review
+([#10](https://github.com/Ahmad-AlModhayan/brief-coder/issues/10)). The review bot doesn't allow `eslint-disable`
+comments for `obsidianmd` rules, so the earlier warnings were fixed in the code:
 
-- `no-nodejs-modules` (4, `run/process.ts`): the `require()` calls in `loadNode()` run only after the `Platform` check
-  in `main.ts` (`canSpawn`). The rule only sees guards in the same function, and `process.ts` can't import
-  `obsidian` because it's unit-tested under Node.
-- `prefer-setting-definitions` and `no-deprecated` on `display()`: `getSettingDefinitions()` needs Obsidian 1.13,
-  and `minAppVersion` is 1.8.7.
+- `no-nodejs-modules` (`run/process.ts`): `loadNode()` exits early unless `Platform.isDesktop`, a guard the rule sees.
+  Tests resolve `obsidian` to a stub (`tests/obsidianStub.ts`), since the package ships types only.
+- `prefer-setting-definitions` and `no-deprecated` on `display()`: the settings are described once and rendered by
+  `getSettingDefinitions()` on Obsidian 1.13+ (searchable), and by `display()` on older versions (`minAppVersion`
+  is 1.8.7).
 
 Window timers, Obsidian's DOM helpers in the output pages, and the configuration folder name (`vault.configDir`
 everywhere, never `.obsidian`) were fixed for this submission.
