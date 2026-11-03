@@ -80,8 +80,11 @@ export class CoderSettingTab extends PluginSettingTab {
 
 	/** Shows or hides the rows that depend on a setting that just changed. */
 	private refresh(): void {
-		if (requireApiVersion("1.13.0")) this.refreshDomState();
-		else this.renderLegacy();
+		// update() re-reads the definitions, so rows hidden at the first render are built too.
+		if (requireApiVersion("1.13.0")) {
+			this.update();
+			this.refreshDomState();
+		} else this.renderLegacy();
 	}
 
 	private sections(): Section[] {

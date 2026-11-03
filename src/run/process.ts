@@ -30,7 +30,7 @@ let mods: NodeMods | null = null;
  * Obsidian's renderer can't resolve ("Failed to resolve module specifier 'child_process'").
  */
 async function loadNode(): Promise<NodeMods> {
-	if (!Platform.isDesktop) throw new Error("Running programs needs Obsidian for desktop.");
+	if (!Platform.isDesktop) throw new Error(t("Running programs needs Obsidian for desktop."));
 	/* eslint-disable @typescript-eslint/no-require-imports -- desktop-only modules, loaded on first run (see above) */
 	mods ??= {
 		cp: require("child_process") as NodeMods["cp"],
@@ -43,7 +43,7 @@ async function loadNode(): Promise<NodeMods> {
 }
 
 function node(): NodeMods {
-	if (!mods) throw new Error("Running programs needs Obsidian for desktop.");
+	if (!mods) throw new Error(t("Running programs needs Obsidian for desktop."));
 	return mods;
 }
 

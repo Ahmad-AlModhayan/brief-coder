@@ -307,6 +307,14 @@ body:not(.is-mobile) .coder-view-output .coder-output {
 .coder-lang-intro {
 	padding: 0 0 8px;
 }
+/* On Obsidian 1.13+, a text-only row is a setting item with no name or control. */
+.setting-item.coder-lang-intro {
+	border-top: none;
+}
+.setting-item.coder-lang-intro .setting-item-name:empty,
+.setting-item.coder-lang-intro .setting-item-control:empty {
+	display: none;
+}
 .coder-lang-status {
 	margin-top: 2px;
 	font-family: var(--font-monospace);

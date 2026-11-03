@@ -26,6 +26,7 @@ const AR: Record<string, string> = {
 	Copied: "نُسخ",
 	"Code copied": "نُسخت الشيفرة",
 	"Couldn't copy to the clipboard.": "تعذّر النسخ إلى الحافظة.",
+	"Running programs needs Obsidian for desktop.": "تشغيل البرامج يحتاج Obsidian لسطح المكتب.",
 	"Run file (Ctrl/Cmd + Enter)": "تشغيل الملف (Ctrl/Cmd + Enter)",
 	"Copy file contents": "نسخ محتوى الملف",
 	// running
