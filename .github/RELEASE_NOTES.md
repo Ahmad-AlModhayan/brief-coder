@@ -1,11 +1,11 @@
-Obsidian Coder is now **Brief Coder**, ready for the community directory. This release adds trusted folders, an Arabic interface, and an opt-in bridge that lets local AI agents read your notes and propose changes you approve.
+Fixes ahead of the Obsidian Community directory submission. No new features.
 
-- **New name and ID.** The directory doesn't allow "Obsidian" in plugin names, so the plugin is now Brief Coder (`brief-coder`). Your settings from `coder-studio` are imported on first start; then remove the old plugin.
-- **Trusted folders.** Notes outside the folders you trust show their code and ask before running. **Run all code blocks in this note** asks once and names what will run. By default the whole vault is trusted, so nothing changes until you set it.
-- **Arabic interface.** Brief Coder follows Obsidian's language. Code stays left to right in right-to-left vaults, and Arabic output lines read right to left.
-- **Agent bridge (off by default).** `coder-bridge.mjs`, attached below, is a local MCP server for Claude Code, Raqeeb and other agents. They can search and read the folders you share, and propose note changes that wait in **Agent changes** for your Accept, Reject or Revert. No network, no port.
-- **Screen readers** hear run status changes, and the input box is labelled.
-- **Tidier temp files.** Build caches unused for 14 days, and run folders left by a crash, are cleaned up.
+- **HTML preview height** is set through a CSS variable instead of an inline style. Dragging the preview's edge works as before.
+- **Accepted agent changes** to an existing note are written with Obsidian's `Vault.process`, as Obsidian's guidelines recommend.
+- **Copy config** for the agent bridge always passes `--config-dir`, so it's right for vaults with a custom configuration folder too.
+- Settings name "Obsidian's configuration folder" instead of `.obsidian`, whatever the folder is called.
+- Code cleanups from Obsidian's plugin guidelines: window timers, and Obsidian's DOM helpers for output.
+- A [changelog](https://github.com/Ahmad-AlModhayan/brief-coder/blob/main/CHANGELOG.md) and a FAQ in the README.
 - Needs Obsidian 1.8.7 or newer.
 
-**Install:** with BRAT (`Ahmad-AlModhayan/brief-coder`), or download `main.js`, `manifest.json` and `styles.css` below into `<vault>/.obsidian/plugins/brief-coder/`. For the agent bridge, also put `coder-bridge.mjs` there.
+**Install:** with BRAT (`Ahmad-AlModhayan/brief-coder`), or download `main.js`, `manifest.json` and `styles.css` below into your vault's `plugins/brief-coder/` folder inside Obsidian's configuration folder (`.obsidian` by default). For the agent bridge, also put `coder-bridge.mjs` there.
