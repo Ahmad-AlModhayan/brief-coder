@@ -29,13 +29,14 @@
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 }
-.coder-has-bar.coder-hide-copy > pre > .copy-code-button {
-	display: none !important; /* Obsidian forces it visible on mobile */
+/* Specific enough to beat Obsidian's own rule, which forces it visible on mobile. */
+body .markdown-rendered .coder-has-bar.coder-hide-copy > pre > .copy-code-button {
+	display: none;
 }
 
 /* Live Preview: the widget sits right under the closing fence. */
-.coder-hide-copy .code-block-flair {
-	display: none !important;
+.markdown-source-view.mod-cm6 .cm-line.coder-hide-copy .code-block-flair {
+	display: none;
 }
 .coder-lp.coder-block {
 	margin: 0 0 0.6em;
@@ -123,12 +124,6 @@
 	background-color: var(--background-primary);
 	overflow: hidden;
 }
-.coder-output.is-hidden,
-.coder-output .is-hidden,
-.coder-stdin.is-hidden {
-	display: none !important;
-}
-
 .coder-output-header {
 	display: flex;
 	align-items: center;
@@ -231,12 +226,16 @@
 .coder-stdin {
 	border-top: 1px solid var(--background-modifier-border);
 }
-.coder-stdin-input {
+.coder-stdin input.coder-stdin-input,
+.coder-stdin input.coder-stdin-input:hover,
+.coder-stdin input.coder-stdin-input:focus,
+.coder-stdin input.coder-stdin-input:focus-visible,
+.coder-stdin input.coder-stdin-input:active {
 	width: 100%;
-	border: none !important;
-	border-radius: 0 !important;
-	background: transparent !important;
-	box-shadow: none !important;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
 	font-family: var(--font-monospace);
 	font-size: var(--code-size, 0.875em);
 	padding: 6px 10px;
@@ -486,11 +485,19 @@ body:not(.is-mobile) .coder-view-output .coder-output {
 	color: var(--text-faint);
 }
 
+/* Hidden parts of the output panel. Last in the file, and doubled, so no display rule above wins. */
+.coder-output.is-hidden.is-hidden,
+.coder-output .is-hidden.is-hidden,
+.coder-stdin.is-hidden.is-hidden {
+	display: none;
+}
+
 /* ---------- Printing / PDF export: plain code blocks, no buttons ---------- */
 @media print {
-	.coder-reading,
-	.coder-lp {
-		display: none !important;
+	body .coder-reading,
+	body .coder-lp,
+	body .coder-lp.coder-block {
+		display: none;
 	}
 	.coder-has-bar > pre {
 		margin-bottom: var(--p-spacing, 1em);

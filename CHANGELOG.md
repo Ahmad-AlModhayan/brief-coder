@@ -4,6 +4,17 @@ Each release is on the [releases page](https://github.com/Ahmad-AlModhayan/brief
 `manifest.json`, `styles.css` and `coder-bridge.mjs` attached. Versions follow [Semantic Versioning](https://semver.org/);
 tags have no `v` prefix, as Obsidian requires.
 
+## Unreleased
+
+Fixes for the Obsidian Community directory review. No new features.
+
+- Releases come with signed build provenance (GitHub artifact attestations) for each attached file.
+- Running code checks for Obsidian for desktop before it loads any Node.js module.
+- On Obsidian 1.13 and later, the settings are searchable from Obsidian's settings search. Older versions show
+  them as before.
+- The stylesheet no longer uses `!important`.
+- The README says when Brief Coder uses the clipboard.
+
 ## 1.1.1 (2026-11-03)
 
 Fixes ahead of the Obsidian Community directory submission. No new features.

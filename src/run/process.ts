@@ -4,6 +4,7 @@
  * Node modules are required lazily (only when the user runs something on desktop), so the
  * plugin still loads on mobile where they don't exist.
  */
+import { Platform } from "obsidian";
 import { t } from "../i18n";
 import type { LanguageDef } from "../languages";
 import type { CoderSettings } from "../settings";
@@ -29,6 +30,7 @@ let mods: NodeMods | null = null;
  * Obsidian's renderer can't resolve ("Failed to resolve module specifier 'child_process'").
  */
 async function loadNode(): Promise<NodeMods> {
+	if (!Platform.isDesktop) throw new Error("Running programs needs Obsidian for desktop.");
 	/* eslint-disable @typescript-eslint/no-require-imports -- desktop-only modules, loaded on first run (see above) */
 	mods ??= {
 		cp: require("child_process") as NodeMods["cp"],
