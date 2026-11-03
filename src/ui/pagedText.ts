@@ -101,12 +101,9 @@ export class PagedText implements ChunkSink {
 			if (last && last.chunk === chunk && last.page === page) {
 				last.node.appendData(piece);
 			} else {
-				const doc = this.root.ownerDocument;
-				const span = doc.createElement("span");
-				span.className = `coder-stream-${this.kinds[chunk]}`;
-				const node = doc.createTextNode(piece);
+				const span = page.el.createSpan({ cls: `coder-stream-${this.kinds[chunk]}` });
+				const node = this.root.ownerDocument.createTextNode(piece);
 				span.appendChild(node);
-				page.el.appendChild(span);
 				this.segments.push({ chunk, node, span, page });
 			}
 			page.len += piece.length;
@@ -121,9 +118,7 @@ export class PagedText implements ChunkSink {
 	}
 
 	private newPage(): Page {
-		const el = this.root.ownerDocument.createElement("div");
-		el.className = "coder-page";
-		this.root.appendChild(el);
+		const el = this.root.createDiv({ cls: "coder-page" });
 		const page = { el, len: 0 };
 		this.pages.push(page);
 		return page;

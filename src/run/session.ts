@@ -123,11 +123,11 @@ export class RunSession implements RunSink {
 	/** Coalesces output bursts into one UI update per animation frame. */
 	private schedule(): void {
 		if (this.frame) return;
-		const raf = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (cb: () => void) => setTimeout(cb, 16);
+		const raf = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (cb: () => void) => window.setTimeout(cb, 16);
 		this.frame = raf(() => {
 			this.frame = 0;
 			this.emit();
-		}) as unknown as number;
+		});
 	}
 
 	notifyNow(): void {

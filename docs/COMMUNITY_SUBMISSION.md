@@ -36,23 +36,22 @@ Checked against the pages above on 2026-11-03.
 | Sentence case in the UI; settings headings with `setHeading()`, no "settings" in them | Yes. |
 | No global `app`; resources cleaned up on unload | `this.app` only. `registerDomEvent`, `registerView` and `onunload` dispose of sessions and mounted blocks. |
 | No hardcoded styles | All styling in `styles.css`. The HTML preview's auto-height goes through a CSS variable (`setCssProps`). |
-| Vault API over the adapter | Notes go through the Vault API (`vault.process`, `vault.create`, `fileManager.trashFile`). The adapter is used only for files the Vault API doesn't index: `bridge.json` in the plugin folder and held changes in `.coder/agent-changes/`. |
+| Vault API over the adapter | Notes go through the Vault API (`vault.process`, `vault.create`, `fileManager.trashFile`). The adapter is used only for files the Vault API doesn't index: `bridge.json` in the plugin folder, held changes in `.coder/agent-changes/`, and the one-time import of `coder-studio` settings. |
 | Sample code removed, class names renamed | Yes. |
 
 ### Automated check
 
-`eslint-plugin-obsidianmd` 0.4.2, `recommended` config, on 2026-11-03: **0 errors**, and these warnings, all intended:
+`eslint-plugin-obsidianmd` 0.4.2, `recommended` config, on 2026-11-03: **0 errors, 6 warnings**. The review bot
+doesn't allow `eslint-disable` comments for `obsidianmd` rules, so these stay as warnings, with the reasons ready:
 
-- `no-nodejs-modules` (5, `run/process.ts`): the `require()` calls are reached only after the `Platform` check in
-  `main.ts`; the rule only sees guards in the same function.
-- `prefer-window-timers` (8, `run/process.ts`, `run/runner.ts`, `run/session.ts`): these timers belong to child
-  processes, not to a window, and the modules are unit-tested under Node, where `window` doesn't exist.
-- `prefer-create-el` (2, `ui/pagedText.ts`): output pages are built on the owner document on purpose, so the unit
-  tests can drive them with a minimal fake DOM.
-- `hardcoded-config-path` (4): two are UI text that names `.obsidian` as an example; one compares
-  `vault.configDir` with `.obsidian` to decide whether to pass `--config-dir` to the bridge.
-- `prefer-setting-definitions`, `no-deprecated` on `display()`: `getSettingDefinitions()` needs Obsidian 1.13,
+- `no-nodejs-modules` (4, `run/process.ts`): the `require()` calls in `loadNode()` run only after the `Platform` check
+  in `main.ts` (`canSpawn`). The rule only sees guards in the same function, and `process.ts` can't import
+  `obsidian` because it's unit-tested under Node.
+- `prefer-setting-definitions` and `no-deprecated` on `display()`: `getSettingDefinitions()` needs Obsidian 1.13,
   and `minAppVersion` is 1.8.7.
+
+Window timers, Obsidian's DOM helpers in the output pages, and the configuration folder name (`vault.configDir`
+everywhere, never `.obsidian`) were fixed for this submission.
 
 ## 2. Release
 
@@ -60,7 +59,7 @@ The code reviewed by the directory is the default branch at HEAD, and users inst
 the manifest version. Changes made since 1.1.0 (the community-directory fixes) need a new release so the two match:
 
 1. `npm version patch` → 1.1.1 (updates `manifest.json`, `package.json`, `versions.json`: 1.1.1 → 1.8.7).
-2. Update `.github/RELEASE_NOTES.md`.
+2. Update `.github/RELEASE_NOTES.md` and move `CHANGELOG.md`'s *Unreleased* section under `1.1.1`.
 3. Merge to `main`. `release.yml` publishes release `1.1.1` with `main.js`, `manifest.json`, `styles.css` and
    `coder-bridge.mjs`.
 4. Check the release page: tag exactly `1.1.1`, the three plugin files attached.
