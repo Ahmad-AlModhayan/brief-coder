@@ -21,7 +21,7 @@ Checked against the pages above on 2026-11-03.
 | Requirement | Brief Coder |
 |---|---|
 | `README.md`, `LICENSE`, `manifest.json` in the repo root | Yes. MIT, `Copyright (c) 2026 Ahmad AlModhayan`. |
-| `id`: lowercase letters and hyphens, no `obsidian`, doesn't end in `plugin`, unique | `brief-coder`. Not used by any of the 9,855 plugins in the directory. |
+| `id`: lowercase letters and hyphens, no `obsidian`, doesn't end in `plugin`, unique | `brief-coder`. Not used by any of the 9,855 plugins in the directory (checked 2026-11-03). |
 | `name`: Basic Latin, no "Obsidian", no "Plugin", unique | `Brief Coder`. |
 | `description`: action first, 250 characters at most, ends with a period, no emoji | 154 characters, starts with "Run, view and edit code". |
 | `version` is `x.y.z`; the release tag equals it, no `v` | Tags `1.0.0`, `1.0.1`, `1.1.0`. `release.yml` tags and titles each release with the manifest version. |

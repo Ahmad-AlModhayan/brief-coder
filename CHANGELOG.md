@@ -14,7 +14,7 @@ Fixes ahead of the Obsidian Community directory submission. No new features.
   configuration folder too.
 - Settings no longer name `.obsidian` as the hidden folder agents can't read; it's "Obsidian's configuration folder",
   whatever it's called.
-- Window timers and Obsidian's DOM helpers throughout, as the plugin guidelines ask.
+- Window timers, and Obsidian's DOM helpers in the output view, as the plugin guidelines ask.
 
 ## 1.1.0 (2026-10-26)
 

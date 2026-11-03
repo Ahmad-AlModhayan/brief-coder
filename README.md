@@ -114,7 +114,7 @@ The agent bridge gives local AI agents your notes as context without giving them
 
 ![Agent changes: a held proposal with its diff](docs/agent-changes.png)
 
-- **Read only what you share.** Agents see the folders you list, never hidden folders such as `.obsidian`, and never the folders you mark private.
+- **Read only what you share.** Agents see the folders you list, never hidden folders such as Obsidian's configuration folder, and never the folders you mark private.
 - **Proposals are held.** An agent can propose new notes, edits and deletions. Nothing is written until you press **Accept** in **Agent changes**, which shows each change as a diff. **Reject** discards it. **Revert** undoes an accepted change.
 - **You win.** Accept skips a note that changed since the proposal, and Revert skips a note you edited after accepting.
 - **Local.** The bridge is `coder-bridge.mjs`, a small MCP server the agent starts on your computer. It talks over stdin/stdout: no port, no network, no account.
