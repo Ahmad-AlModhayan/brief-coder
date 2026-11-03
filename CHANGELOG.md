@@ -4,7 +4,7 @@ Each release is on the [releases page](https://github.com/Ahmad-AlModhayan/brief
 `manifest.json`, `styles.css` and `coder-bridge.mjs` attached. Versions follow [Semantic Versioning](https://semver.org/);
 tags have no `v` prefix, as Obsidian requires.
 
-## Unreleased
+## 1.1.1 (2026-11-03)
 
 Fixes ahead of the Obsidian Community directory submission. No new features.
 
@@ -15,6 +15,7 @@ Fixes ahead of the Obsidian Community directory submission. No new features.
 - Settings no longer name `.obsidian` as the hidden folder agents can't read; it's "Obsidian's configuration folder",
   whatever it's called.
 - Window timers, and Obsidian's DOM helpers in the output view, as the plugin guidelines ask.
+- A changelog, and a FAQ in the README.
 
 ## 1.1.0 (2026-10-26)
 
