@@ -344,7 +344,10 @@ export default class CoderPlugin extends Plugin {
 			},
 			write: async (p, text) => {
 				const f = fileAt(p);
-				if (f) return vault.modify(f, text);
+				if (f) {
+					await vault.process(f, () => text);
+					return;
+				}
 				const path = exact(p);
 				const parent = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
 				if (parent && !vault.getAbstractFileByPath(parent)) await vault.createFolder(parent);

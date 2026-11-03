@@ -46,6 +46,18 @@ class FakeEl extends FakeNode {
 	removeChild(n: FakeEl | FakeText) {
 		n.remove();
 	}
+	/** Obsidian's createDiv/createSpan: create, set the class, append. */
+	createDiv(o: { cls?: string } = {}) {
+		return this.createChild("div", o);
+	}
+	createSpan(o: { cls?: string } = {}) {
+		return this.createChild("span", o);
+	}
+	private createChild(tag: string, o: { cls?: string }) {
+		const el = this.ownerDocument.createElement(tag);
+		el.className = o.cls ?? "";
+		return this.appendChild(el) as FakeEl;
+	}
 	get text(): string {
 		return this.children.map((c) => (c instanceof FakeText ? c.data : c.text)).join("");
 	}

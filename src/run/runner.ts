@@ -39,7 +39,7 @@ export async function startRun(o: StartRunOptions): Promise<void> {
 		session.finish({ code: null, signal: "SIGTERM" }, true);
 		return true;
 	};
-	let timer: ReturnType<typeof setTimeout> | undefined;
+	let timer: number | undefined;
 	try {
 		if (lang.inApp === "html") {
 			session.html = source;
@@ -48,7 +48,7 @@ export async function startRun(o: StartRunOptions): Promise<void> {
 		}
 		// The time limit counts from the click, including finding and starting the tool.
 		if (settings.timeoutSeconds > 0) {
-			timer = setTimeout(() => {
+			timer = window.setTimeout(() => {
 				session.write("info", `\n${t("Stopped after {n} s (time limit in settings).", { n: settings.timeoutSeconds })}\n`);
 				session.stop();
 			}, settings.timeoutSeconds * 1000);
@@ -88,7 +88,7 @@ export async function startRun(o: StartRunOptions): Promise<void> {
 	} catch (e) {
 		session.finish({ code: null, error: e instanceof Error ? e.message : String(e) });
 	} finally {
-		if (timer) clearTimeout(timer);
+		if (timer) window.clearTimeout(timer);
 	}
 }
 

@@ -1,93 +1,108 @@
 # Community directory submission: Brief Coder
 
-Ready to send. Nothing has been submitted. Check Obsidian's current steps first, since they change from time to time:
-<https://docs.obsidian.md/Plugins/Releasing/Submit+your+plugin>.
+Status on 2026-11-03: **not submitted.** Brief Coder is released on GitHub (1.0.0, 1.0.1, 1.1.0) and installable
+with BRAT, but it isn't in the Obsidian Community directory: there's no `brief-coder` entry in
+`obsidianmd/obsidian-releases` `community-plugins.json`.
 
-## 1. Before submitting
+Obsidian changed the submission process. New plugins are no longer added by a pull request to `obsidian-releases`;
+they're submitted at **[community.obsidian.md](https://community.obsidian.md)**, reviewed automatically, and the
+directory shows what needs fixing. Check the current steps before submitting, since they change from time to time:
 
-1. Merge the 1.1.0 PR into `main`. `release.yml` then publishes release **`1.1.0`**: the tag and title match
-   `manifest.json`, with no `v`. It attaches `main.js`, `manifest.json`, `styles.css` and `coder-bridge.mjs`.
-2. Check the release page: the three plugin files are attached, and the tag is exactly `1.1.0`.
-3. Optional but worth it: try the release on a Mac and on a phone, since only Windows and mobile emulation were run
-   (see [TESTING.md](TESTING.md)). Then tick those boxes in the PR below.
+- [Submit your plugin](https://docs.obsidian.md/Plugins/Releasing/Submit+your+plugin)
+- [Set up and claim](https://docs.obsidian.md/Community+directory/Set+up+and+claim)
+- [Submission requirements for plugins](https://docs.obsidian.md/Community+directory/Submission+requirements+for+plugins)
+- [Developer policies](https://docs.obsidian.md/Community+directory/Developer+policies)
+- [Plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines)
 
-## 2. The entry
+## 1. Requirements checklist
 
-Fork <https://github.com/obsidianmd/obsidian-releases>, and add this at the **end** of `community-plugins.json`:
+Checked against the pages above on 2026-11-03.
 
-```json
-{
-	"id": "brief-coder",
-	"name": "Brief Coder",
-	"author": "Ahmad AlModhayan",
-	"description": "Run, view and edit code in 40 languages: Run and Copy on code blocks with live output, an editor for code files, and a local, opt-in bridge for AI agents.",
-	"repo": "Ahmad-AlModhayan/brief-coder"
-}
-```
+| Requirement | Brief Coder |
+|---|---|
+| `README.md`, `LICENSE`, `manifest.json` in the repo root | Yes. MIT, `Copyright (c) 2026 Ahmad AlModhayan`. |
+| `id`: lowercase letters and hyphens, no `obsidian`, doesn't end in `plugin`, unique | `brief-coder`. Not used by any of the 9,855 plugins in the directory (checked 2026-11-03). |
+| `name`: Basic Latin, no "Obsidian", no "Plugin", unique | `Brief Coder`. |
+| `description`: action first, 250 characters at most, ends with a period, no emoji | 154 characters, starts with "Run, view and edit code". |
+| `version` is `x.y.z`; the release tag equals it, no `v` | Tags `1.0.0`, `1.0.1`, `1.1.0`. `release.yml` tags and titles each release with the manifest version. |
+| Release has `main.js`, `manifest.json`, `styles.css` as attachments | Yes, plus `coder-bridge.mjs`. |
+| `minAppVersion` is the real minimum; `versions.json` maps older versions | 1.8.7. `eslint-plugin-obsidianmd`'s `no-unsupported-api` finds no API newer than that. `versions.json`: 1.0.x → 1.5.0, 1.1.0 → 1.8.7. |
+| `isDesktopOnly`: Node.js and Electron APIs need desktop | `false`, on purpose: mobile runs JavaScript and HTML and keeps Copy for the rest. `child_process`, `fs`, `path` and `os` are loaded with `require()` on first Run only, and only when `Platform.isDesktopApp && !Platform.isMobile` (`main.ts`, `canSpawn`). See *Known questions* below. |
+| `fundingUrl` only for donations | None set. |
+| No obfuscation, ads, client-side telemetry, self-updating | None. The build is minified with sourcemaps off, from the public TypeScript source. |
+| Disclosures in the README: network use, files outside the vault | *Safety and disclosures*: no network requests, nothing collected; temporary folders in the OS temp directory, removed after each run. |
+| Plugin ID not repeated in command IDs; no default hotkeys | Command IDs are `run-*`, `stop-*` and so on; no `hotkeys`. Ctrl/Cmd+Enter is bound inside the code view only. |
+| No `innerHTML`, `outerHTML`, `insertAdjacentHTML` | None. DOM is built with `createEl`, `createDiv`, `setText`. User HTML runs in a sandboxed iframe. |
+| Sentence case in the UI; settings headings with `setHeading()`, no "settings" in them | Yes. |
+| No global `app`; resources cleaned up on unload | `this.app` only. `registerDomEvent`, `registerView` and `onunload` dispose of sessions and mounted blocks. |
+| No hardcoded styles | All styling in `styles.css`. The HTML preview's auto-height goes through a CSS variable (`setCssProps`). |
+| Vault API over the adapter | Notes go through the Vault API (`vault.process`, `vault.create`, `fileManager.trashFile`). The adapter is used only for files the Vault API doesn't index: `bridge.json` in the plugin folder, held changes in `.coder/agent-changes/`, and the one-time import of `coder-studio` settings. |
+| Sample code removed, class names renamed | Yes. |
 
-The `id`, `name`, `author` and `description` match `manifest.json` exactly. The validation bot compares them.
+### Automated check
 
-Checks against the directory rules:
+`eslint-plugin-obsidianmd` 0.4.2, `recommended` config, on 2026-11-03: **0 errors, 6 warnings**. The review bot
+doesn't allow `eslint-disable` comments for `obsidianmd` rules, so these stay as warnings, with the reasons ready:
 
-- The ID has no "obsidian" and doesn't end in "plugin". It isn't used by any plugin in the directory: searched on
-  2026-10-26, no `brief-coder` ID or "Brief Coder" name among 9,509 plugins.
-- The name has no "Obsidian" and no "plugin".
-- The description has no "Obsidian" and doesn't start with "This plugin". It ends with a period and is under 250
-  characters (154).
-- `minAppVersion` is 1.8.7, and `versions.json` maps 1.1.0 → 1.8.7. Older Obsidian keeps getting 1.0.1.
-- `isDesktopOnly` is false: on mobile, JavaScript and HTML run and other languages keep Copy. Node.js modules load
-  only on desktop, on first Run.
-- The license is MIT, in `LICENSE`.
+- `no-nodejs-modules` (4, `run/process.ts`): the `require()` calls in `loadNode()` run only after the `Platform` check
+  in `main.ts` (`canSpawn`). The rule only sees guards in the same function, and `process.ts` can't import
+  `obsidian` because it's unit-tested under Node.
+- `prefer-setting-definitions` and `no-deprecated` on `display()`: `getSettingDefinitions()` needs Obsidian 1.13,
+  and `minAppVersion` is 1.8.7.
 
-## 3. Pull request
+Window timers, Obsidian's DOM helpers in the output pages, and the configuration folder name (`vault.configDir`
+everywhere, never `.obsidian`) were fixed for this submission.
 
-**Title:** `Add plugin: Brief Coder`
+## 2. Release
 
-**Body:**
+The code reviewed by the directory is the default branch at HEAD, and users install the release whose tag equals
+the manifest version. Changes made since 1.1.0 (the community-directory fixes) need a new release so the two match:
 
-```markdown
-# I am submitting a new Community Plugin
+1. `npm version patch` → 1.1.1 (updates `manifest.json`, `package.json`, `versions.json`: 1.1.1 → 1.8.7).
+2. Update `.github/RELEASE_NOTES.md` and move `CHANGELOG.md`'s *Unreleased* section under `1.1.1`.
+3. Merge to `main`. `release.yml` publishes release `1.1.1` with `main.js`, `manifest.json`, `styles.css` and
+   `coder-bridge.mjs`.
+4. Check the release page: tag exactly `1.1.1`, the three plugin files attached.
 
-## Repo URL
+Optional but worth it: try the release on a Mac and on a phone before submitting.
 
-Link to my plugin: https://github.com/Ahmad-AlModhayan/brief-coder
+## 3. Submit
 
-## Release Checklist
-- [x] I have tested the plugin on
-  - [x]  Windows
-  - [ ]  macOS
-  - [ ]  Linux
-  - [ ]  Android _(if applicable)_
-  - [ ]  iOS _(if applicable)_
-- [x] My GitHub release contains all required files (as individual files, not just in the source.zip / source.tar.gz)
-  - [x] `main.js`
-  - [x] `manifest.json`
-  - [x] `styles.css` _(optional)_
-- [x] GitHub release name matches the exact version number specified in my manifest.json (_**Note:** Use the exact version number, don't include a prefix `v`_)
-- [x] The `id` in my `manifest.json` matches the `id` in the `community-plugins.json` file.
-- [x] My README.md describes the plugin's purpose and provides clear usage instructions.
-- [x] I have read the developer policies at https://docs.obsidian.md/Developer+policies, and have assessed my plugin's adherence to these policies.
-- [x] I have read the tips in https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines and have self-reviewed my plugin to avoid these common pitfalls.
-- [x] I have added a license in the LICENSE file.
-- [x] My project respects and is compatible with the original license of any code from other plugins that I'm using.
-      I have given proper attribution to these other projects in my `README.md`.
+1. Go to [community.obsidian.md](https://community.obsidian.md) and sign in with the Obsidian account.
+2. In the profile, under **GitHub**, select **Connect** (read-only access to the public profile, to verify repo
+   ownership). Turn on **Action required notifications**.
+3. **Plugins** → **New plugin**:
+   - **GitHub repository URL**: `https://github.com/Ahmad-AlModhayan/brief-coder`
+   - **Owner**: Ahmad AlModhayan (or a KahfLabs organization, if one is set up in the directory first).
+4. Agree to the Developer policies and to keep supporting the plugin, then **Submit**.
+5. Read the automated review. Fix anything it flags in the repo, bump the patch version, release again; don't
+   submit a second entry.
 
-## Notes for reviewers
+The directory reads the description from `manifest.json` and lets you edit it there; keep the two the same.
 
-- **Running code is the plugin's purpose.** It happens only when the user presses Run (or runs a command); opening, syncing or rendering a note never runs anything. Notes outside the user's *trusted folders* show their code and ask first. On desktop it starts the user's installed interpreters with `child_process`, loaded with `require()` only on desktop and only on first Run.
-- **Files outside the vault:** code blocks are written to a temporary folder in the OS temp directory to run; it's removed after each run, and old build caches after 14 days. Disclosed in the README.
-- **No network requests, no telemetry.** User HTML runs in a sandboxed iframe (`allow-scripts`, no `allow-same-origin`); in-app JavaScript runs in a Web Worker with Node.js removed.
-- **No innerHTML / outerHTML / insertAdjacentHTML** anywhere; all DOM is built with `createEl`/`createDiv`/`setText`.
-- **Agent bridge:** `coder-bridge.mjs` (attached to the release) is a separate, optional MCP server the user's own AI agent starts; the plugin never runs it. The plugin only writes its settings (`bridge.json` in the plugin folder) and reviews proposed changes, which are written to notes only when the user presses Accept.
-- Self-reviewed with `eslint-plugin-obsidianmd` 0.4.2 (recommended): 0 errors.
+## 4. Known questions from reviewers
+
+Answers to keep ready, in case a human reviewer asks:
+
+- **Running code is the plugin's purpose.** It happens only when the user presses Run (or runs a command); opening,
+  syncing or rendering a note never runs anything. Notes outside the user's *trusted folders* show their code and
+  ask first. On desktop it starts the user's installed interpreters with `child_process`, loaded with `require()`
+  only on desktop and only on first Run.
+- **Why not `isDesktopOnly: true`?** On mobile, JavaScript (in a Web Worker) and HTML (in a sandboxed iframe) run,
+  and other languages keep Copy and the code-file editor. Node.js is never loaded there. If the directory requires
+  `isDesktopOnly: true` anyway, that drops mobile support and is a product decision.
+- **Files outside the vault:** code blocks are written to a temporary folder in the OS temp directory to run; it's
+  removed after each run, and old build caches after 14 days. Disclosed in the README.
+- **No network requests, no telemetry.** User HTML runs in a sandboxed iframe (`allow-scripts`, no
+  `allow-same-origin`); in-app JavaScript runs in a Web Worker with Node.js removed.
+- **Agent bridge:** `coder-bridge.mjs` (attached to the release) is a separate, optional MCP server the user's own
+  AI agent starts; the plugin never runs it. The plugin only writes its settings (`bridge.json` in the plugin
+  folder) and reviews proposed changes, which are written to notes only when the user presses Accept.
 - Previously released via BRAT as "Obsidian Coder" (`coder-studio`); renamed for the directory's naming rule.
-```
 
-## 4. After submitting
+## 5. After it's listed
 
-- The validation bot comments within minutes. Fix anything it flags in the repo, publish a new release (bump the
-  patch version), and the PR re-runs. Don't open a new PR.
-- Human review can take weeks. Reviewers often ask about `child_process` and about files outside the vault. The
-  notes above answer both; point them to the README's *Safety and disclosures*.
-- Once it's merged, change the README's install section to lead with **Settings → Community plugins → Browse →
-  Brief Coder**, and keep BRAT as the way to get beta releases.
+- Change the README's install section to lead with **Settings → Community plugins → Browse → Brief Coder**, and keep
+  BRAT as the way to get beta releases.
+- Announce in the forum's *Share & showcase* and Discord `#updates` (needs the `developer` role). Public posts need
+  Ahmad's yes.

@@ -4,13 +4,15 @@
  * Node modules are required lazily (only when the user runs something on desktop), so the
  * plugin still loads on mobile where they don't exist.
  */
-import type { ChildProcess, SpawnOptions } from "child_process";
 import { t } from "../i18n";
 import type { LanguageDef } from "../languages";
 import type { CoderSettings } from "../settings";
 import type { RunExit, RunHandle, RunSink } from "./session";
 import { hashString } from "../util/fence";
 import { expandArgs, quoteForCmd, splitCommandLine, stripAnsi } from "../util/text";
+
+type ChildProcess = import("child_process").ChildProcess;
+type SpawnOptions = import("child_process").SpawnOptions;
 
 interface NodeMods {
 	cp: typeof import("child_process");
@@ -125,7 +127,7 @@ function loginShellPath(): Promise<string> {
 			resolve("");
 			return;
 		}
-		const timer = setTimeout(() => {
+		const timer = window.setTimeout(() => {
 			try {
 				child.kill("SIGKILL");
 			} catch {
@@ -136,11 +138,11 @@ function loginShellPath(): Promise<string> {
 		child.stdout?.setEncoding("utf8");
 		child.stdout?.on("data", (d: string) => (out += d));
 		child.on("error", () => {
-			clearTimeout(timer);
+			window.clearTimeout(timer);
 			resolve("");
 		});
 		child.on("close", () => {
-			clearTimeout(timer);
+			window.clearTimeout(timer);
 			const m = /__CODER_PATH__([\s\S]*?)__CODER_END__/.exec(out);
 			resolve(m ? m[1].trim() : "");
 		});
@@ -273,7 +275,7 @@ function killTree(child: ChildProcess): void {
 		}
 	};
 	signal("SIGTERM");
-	setTimeout(() => {
+	window.setTimeout(() => {
 		if (child.exitCode === null && child.signalCode === null) signal("SIGKILL");
 	}, 1500);
 }
@@ -452,7 +454,7 @@ export async function startProcessRun(o: ProcessRunOptions): Promise<RunHandle> 
 			// output pipes open, so "close" never comes. Once the program itself has exited, stop waiting.
 			child.on("exit", (code, signal) => {
 				if (!stopped) return;
-				setTimeout(() => {
+				window.setTimeout(() => {
 					if (settled) return;
 					settled = true;
 					child.stdout?.destroy();
