@@ -214,7 +214,7 @@ export class OutputView {
 			if (d.k === "h") {
 				if (autoHeight && typeof d.h === "number") {
 					const border = wrap.offsetHeight - wrap.clientHeight;
-					wrap.style.height = `${Math.min(600, Math.max(60, Math.round(d.h))) + border}px`;
+					wrap.setCssProps({ "--coder-preview-height": `${Math.min(600, Math.max(60, Math.round(d.h))) + border}px` });
 				}
 			} else if (d.k === "b" && Array.isArray(d.b)) {
 				// Console output arrives in batches (see htmlBridgeScript).

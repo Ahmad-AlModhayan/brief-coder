@@ -120,8 +120,8 @@ const AR: Record<string, string> = {
 	"Off by default. When on, local agents such as Claude Code and Raqeeb can search and read notes in the folders below through coder-bridge.mjs, over stdio on this computer. Nothing is sent anywhere.":
 		"معطّل افتراضيًا. عند تفعيله، يستطيع الوكلاء المحليون مثل Claude Code ورقيب البحث في ملاحظات المجلدات أدناه وقراءتها عبر coder-bridge.mjs على هذا الحاسوب فقط. لا يُرسل شيء إلى أي مكان.",
 	"Folders agents can read": "المجلدات التي يقرؤها الوكلاء",
-	"One per line; / means the whole vault. Hidden folders such as .obsidian are never shared.":
-		"مجلد في كل سطر؛ و/ تعني الخزنة كلها. المجلدات المخفية مثل ‎.obsidian لا تُشارك أبدًا.",
+	"One per line; / means the whole vault. Hidden folders, such as Obsidian's configuration folder, are never shared.":
+		"مجلد في كل سطر؛ و/ تعني الخزنة كلها. المجلدات المخفية، مثل مجلد إعدادات Obsidian، لا تُشارك أبدًا.",
 	"Folders to keep private": "مجلدات تبقى خاصة",
 	"Never shared, even inside a folder above.": "لا تُشارك أبدًا، حتى لو كانت داخل مجلد أعلاه.",
 	"Let agents propose changes": "السماح للوكلاء باقتراح تغييرات",

@@ -2,10 +2,6 @@
 
 Run, view and edit code inside Obsidian. Every code block gets **Run** and **Copy**, output appears live under the block, and code files open in a real editor. It supports 40 languages, speaks English and Arabic, and stays light: under 100 KB, with nothing running until you press Run.
 
-- **Incumbent**: Execute Code (twibiral/obsidian-execute-code), the most-downloaded Obsidian plugin for running code blocks.
-- **Leap**: Brief Coder runs code blocks and whole code files in 40 languages without slowing Obsidian, and asks before it runs code from any note outside your trusted folders.
-- **Benchmark**: a Miqyas run in one test vault with each plugin alone: plugin size, startup time, typing latency in a 3,000-line note, frame rate during endless printing, the same snippets in every installed language, and whether code from a shared folder can run without a prompt.
-
 New in 1.1: **trusted folders** for notes from other people, an **Arabic interface**, and an opt-in **agent bridge** that lets local AI agents (Claude Code, Raqeeb) read the folders you choose and *propose* note changes that wait for your Accept.
 
 > Brief Coder was called Obsidian Coder (plugin ID `coder-studio`) until 1.0.1. The community directory doesn't allow "Obsidian" in plugin names, so it was renamed, ID included. See [Moving from Obsidian Coder](#moving-from-obsidian-coder).
@@ -118,7 +114,7 @@ The agent bridge gives local AI agents your notes as context without giving them
 
 ![Agent changes: a held proposal with its diff](docs/agent-changes.png)
 
-- **Read only what you share.** Agents see the folders you list, never hidden folders such as `.obsidian`, and never the folders you mark private.
+- **Read only what you share.** Agents see the folders you list, never hidden folders such as Obsidian's configuration folder, and never the folders you mark private.
 - **Proposals are held.** An agent can propose new notes, edits and deletions. Nothing is written until you press **Accept** in **Agent changes**, which shows each change as a diff. **Reject** discards it. **Revert** undoes an accepted change.
 - **You win.** Accept skips a note that changed since the proposal, and Revert skips a note you edited after accepting.
 - **Local.** The bridge is `coder-bridge.mjs`, a small MCP server the agent starts on your computer. It talks over stdin/stdout: no port, no network, no account.
@@ -187,6 +183,39 @@ Brief Coder was built to keep Obsidian fast. Measured in Obsidian 1.13 and 1.14:
 - **Windows:** Python runs through the `py` launcher, and `bash` blocks use Git Bash. A background job started with `&` in a Git Bash block keeps running after Stop; end it from the Task Manager, or don't start background jobs in blocks.
 - **The agent bridge says it's off:** turn on **Let agents read this vault** in settings. The bridge reads the setting on every request, so no restart is needed.
 
+## Compared with Execute Code
+
+[Execute Code](https://github.com/twibiral/obsidian-execute-code) is the most-used plugin for running code blocks. Brief Coder covers the same ground with a different focus:
+
+- **Code files, not only blocks.** `.py`, `.go`, `.rs` and other files open in an editor and run with Ctrl/Cmd + Enter.
+- **Light.** Under 100 KB with nothing running until you press Run, and Obsidian stays smooth while a program prints without end.
+- **Safe with shared vaults.** Code from notes outside your trusted folders asks before it runs.
+
+Execute Code has features Brief Coder doesn't, such as notebook-style shared state between blocks and plots drawn into the note. Pick the one that fits how you work.
+
+## FAQ
+
+**Does it work on phones and tablets?**
+Yes. JavaScript and HTML run inside Obsidian, and code files open in the editor. Other languages need a desktop computer to run; on mobile their blocks keep the Copy button.
+
+**Does it send my notes or code anywhere?**
+No. Brief Coder makes no network requests and collects nothing. Code you run can use the network, as any program you run yourself can.
+
+**Is it safe to open a vault someone shared with me?**
+Nothing runs when a note opens, syncs or renders. Code runs only when you press Run, and code in notes outside your trusted folders asks first and shows what will run.
+
+**Will it slow Obsidian down?**
+It shouldn't. Startup takes a few milliseconds, desktop-only parts load the first time you press Run, and nothing runs in the background while you aren't running code. See [Performance](#performance).
+
+**Where is output kept?**
+In memory only. Output isn't written into your notes, and it's dropped when you clear it, when Obsidian closes, or after ten minutes with nothing showing it.
+
+**Why does it say a language isn't installed?**
+Brief Coder runs code with the tools already on your computer. Install the language, or set its full path in Settings → Brief Coder → Languages. See [Troubleshooting](#troubleshooting).
+
+**Do I need the agent bridge?**
+No. It's off by default and only matters if you use a local AI agent such as Claude Code. See [Agent bridge](#agent-bridge).
+
 ## Development
 
 ```bash
@@ -205,7 +234,7 @@ npm test        # unit tests + runs real snippets in every language installed on
 
 The test suite runs snippets in 32 languages end to end, and also covers Stop, the time limit, typed input, output limits, temporary-file cleanup, error messages, the bridge's scope rules, and accepting and reverting changesets. [docs/TESTING.md](docs/TESTING.md) records the last run inside Obsidian.
 
-**Releasing:** run `npm version patch` (or `minor` / `major`), update `.github/RELEASE_NOTES.md`, and push to `main`. GitHub Actions builds, tests and publishes the release with `main.js`, `manifest.json`, `styles.css` and `coder-bridge.mjs`.
+**Releasing:** run `npm version patch` (or `minor` / `major`), update `.github/RELEASE_NOTES.md` and [CHANGELOG.md](CHANGELOG.md), and push to `main`. GitHub Actions builds, tests and publishes the release with `main.js`, `manifest.json`, `styles.css` and `coder-bridge.mjs`.
 
 ## License
 

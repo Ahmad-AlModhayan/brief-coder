@@ -147,7 +147,7 @@ export class CoderSettingTab extends PluginSettingTab {
 		if (!s.bridgeEnabled) return;
 		new Setting(containerEl)
 			.setName(t("Folders agents can read"))
-			.setDesc(t("One per line; / means the whole vault. Hidden folders such as .obsidian are never shared."))
+			.setDesc(t("One per line; / means the whole vault. Hidden folders, such as Obsidian's configuration folder, are never shared."))
 			.addTextArea((ta) => {
 				ta.setPlaceholder("/").setValue(s.bridgeFolders).onChange(async (v) => this.save({ bridgeFolders: v }));
 				ta.inputEl.rows = 3;
@@ -179,8 +179,7 @@ export class CoderSettingTab extends PluginSettingTab {
 		const base = adapter instanceof FileSystemAdapter ? adapter.getBasePath() : "<vault folder>";
 		const sep = base.includes("\\") ? "\\" : "/";
 		const dir = (this.plugin.manifest.dir ?? `${this.app.vault.configDir}/plugins/${this.plugin.manifest.id}`).split("/").join(sep);
-		const args = [`${base}${sep}${dir}${sep}coder-bridge.mjs`, "--vault", base];
-		if (this.app.vault.configDir !== ".obsidian") args.push("--config-dir", this.app.vault.configDir);
+		const args = [`${base}${sep}${dir}${sep}coder-bridge.mjs`, "--vault", base, "--config-dir", this.app.vault.configDir];
 		return JSON.stringify({ mcpServers: { "brief-coder": { command: "node", args } } }, null, 2);
 	}
 

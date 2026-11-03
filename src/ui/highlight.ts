@@ -80,14 +80,14 @@ function ensureLoaded(c: CM5, mode: string): Promise<boolean> {
 	if (has()) return Promise.resolve(true);
 	if (c.requireMode) {
 		return new Promise((resolve) => {
-			const timer = setTimeout(() => resolve(has()), 1500);
+			const timer = window.setTimeout(() => resolve(has()), 1500);
 			try {
 				c.requireMode?.(mode, () => {
-					clearTimeout(timer);
+					window.clearTimeout(timer);
 					resolve(has());
 				});
 			} catch {
-				clearTimeout(timer);
+				window.clearTimeout(timer);
 				resolve(false);
 			}
 		});
@@ -104,7 +104,7 @@ function ensureLoaded(c: CM5, mode: string): Promise<boolean> {
 		const tick = () => {
 			const loaded = Object.keys(c.modes ?? {}).length > BUNDLE_LOADED;
 			if (has() || loaded || Date.now() - started > 4000) resolve(has());
-			else setTimeout(tick, 50);
+			else window.setTimeout(tick, 50);
 		};
 		tick();
 	});
