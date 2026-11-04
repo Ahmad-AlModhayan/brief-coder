@@ -4,7 +4,7 @@ Each release is on the [releases page](https://github.com/Ahmad-AlModhayan/brief
 `manifest.json`, `styles.css` and `coder-bridge.mjs` attached. Versions follow [Semantic Versioning](https://semver.org/);
 tags have no `v` prefix, as Obsidian requires.
 
-## Unreleased
+## 1.1.2 (2026-11-04)
 
 Fixes for the Obsidian Community directory review. No new features.
 
