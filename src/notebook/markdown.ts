@@ -22,13 +22,7 @@ const CLOSER = /^[ \t>]*(`{3,}|~{3,})[ \t]*$/;
 const SAFE_TAG = /^<\/?(?:b|i|u|em|strong|sub|sup|kbd|br|hr)\s*\/?>/i;
 const ATTACHMENT = /^!\[([^\]\n]{0,500})\]\(attachment:([^)\s]{1,500})\)/;
 /** MathJax commands that load something, link somewhere or add markup. */
-const ACTIVE_COMMAND = /^\\(?:href|require|unicode|style|class|cssId|mmlToken|data|html)(?![a-zA-Z])/;
-/**
- * Indented code reaches inline query processors too; these are the prefixes they look for. In a paragraph
- * the backslash doesn't show, so this applies to every line, after any container, not just indented ones.
- * A line of only "=" is a heading underline.
- */
-const LINE_QUERY = /^((?:[ \t>]|[*+-][ \t]|\d{1,9}[.)][ \t]|\[\^[^\]\n]{0,100}\]:)*)(?=\$?=)(?!=+[ \t]*$)/;
+const ACTIVE_COMMAND = /^\\(?:href|require|unicode|style|class|cssId|bbox|mmlToken|data|html)(?![a-zA-Z])/;
 const MAX_LINE = 100_000;
 const MAX_CELL = 1_000_000;
 
@@ -65,11 +59,38 @@ export function neutraliseMarkdown(source: string, nonce: string): { text: strin
 			out.push(opener[1] + t);
 			continue;
 		}
-		const scanned = scanLine(lines[i].replace(LINE_QUERY, "$1\\"), displayMath, slots, token);
+		const scanned = scanLine(defuseIndentedQueries(lines[i]), displayMath, slots, token);
 		displayMath = scanned.displayMath;
 		out.push(scanned.text);
 	}
 	return { text: out.join("\n"), slots };
+}
+
+/**
+ * Indented code reaches inline query processors too, which look for "=" and "$=". Whatever container it's
+ * in, code is indented by at least four columns, so any such prefix after that much white space gets a
+ * backslash. In a paragraph the backslash doesn't show; in real indented code it does, which is harmless.
+ */
+function defuseIndentedQueries(line: string): string {
+	let out = "";
+	let from = 0;
+	for (let i = line.indexOf("="); i >= 0; i = line.indexOf("=", i + 1)) {
+		const at = line[i - 1] === "$" ? i - 1 : i;
+		if (!afterIndent(line, at)) continue;
+		out += `${line.slice(from, at)}\\`;
+		from = at;
+	}
+	return out + line.slice(from);
+}
+
+/** Four white space characters, or a tab (which can stand for up to four columns), right before `at`. */
+function afterIndent(line: string, at: number): boolean {
+	for (let n = 1; n <= 4; n++) {
+		const c = line[at - n];
+		if (c === undefined || !/\s/.test(c)) return false;
+		if (c === "\t") return true;
+	}
+	return true;
 }
 
 function scanLine(line: string, startInMath: boolean, slots: MarkdownSlot[], token: () => string): { text: string; displayMath: boolean } {

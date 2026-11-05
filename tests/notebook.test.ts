@@ -293,9 +293,9 @@ describe("markdown from a notebook reaches Obsidian's renderer with nothing acti
 	});
 
 	it("takes the network and link commands out, inside math or not", () => {
-		for (const cmd of ["\\href{javascript:evil()}{x}", "\\require{evil}", "\\unicode{x}", "\\style{x}{y}", "\\class{x}{y}", "\\cssId{x}{y}"]) {
-			assert.ok(!/\\(href|require|unicode|style|class|cssId)/.test(clean(`$${cmd}$`)), cmd);
-			assert.ok(!/\\(href|require|unicode|style|class|cssId)/.test(clean(`$ ${cmd}\n$`)), cmd);
+		for (const cmd of ["\\href{javascript:evil()}{x}", "\\require{evil}", "\\unicode{x}", "\\style{x}{y}", "\\class{x}{y}", "\\cssId{x}{y}", "\\bbox[background-image:url(https://evil.example/x.png)]{x}"]) {
+			assert.ok(!/\\(href|require|unicode|style|class|cssId|bbox)/.test(clean(`$${cmd}$`)), cmd);
+			assert.ok(!/\\(href|require|unicode|style|class|cssId|bbox)/.test(clean(`$ ${cmd}\n$`)), cmd);
 		}
 		assert.equal(clean("$\\alpha + \\frac{1}{2}$"), "$\\alpha + \\frac{1}{2}$");
 	});
@@ -410,11 +410,19 @@ describe("findings from the review of #21", () => {
 		assert.equal(clean("1.      = x"), "1.      \\= x");
 		assert.equal(clean("> -     $= x"), "> -     \\$= x");
 		assert.equal(clean("[^1]:     $= x"), "[^1]:     \\$= x");
-		assert.equal(clean("$= top"), "\\$= top");
+		assert.equal(clean("    =\n    this.file.name"), "    \\=\n    this.file.name");
+		assert.equal(clean("-     =\n      this.file.name"), "-     \\=\n      this.file.name");
+		assert.equal(clean("    ==\n    x"), "    \\==\n    x");
+		assert.equal(clean("\u00a0\u00a0\u00a0\u00a0\u00a0$= x"), "\u00a0\u00a0\u00a0\u00a0\u00a0\\$= x");
+		assert.equal(clean("    \u3000= x"), "    \u3000\\= x");
+		assert.equal(clean("-\t  = x"), "-\t  \\= x");
+		assert.equal(clean(`[^${"a".repeat(101)}]:      $= x`), `[^${"a".repeat(101)}]:      \\$= x`);
+		assert.equal(clean("[^a\\]b]:      $= x"), "[^a\\]b]:      \\$= x");
 	});
 
 	it("leaves a heading underline alone", () => {
 		assert.equal(clean("Title\n==="), "Title\n===");
+		assert.equal(clean("a = b, $= c"), "a = b, $= c");
 	});
 
 	it("hostile lines stay cheap", () => {
