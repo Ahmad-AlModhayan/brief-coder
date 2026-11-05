@@ -42,8 +42,8 @@ function bundle(v: unknown): MimeBundle {
 	const out: MimeBundle = Object.create(null) as MimeBundle;
 	if (!isObject(v)) return out;
 	for (const [mime, value] of Object.entries(v)) {
-		// JSON outputs (application/json and friends) are stored as objects, everything else as text.
-		out[mime] = isObject(value) ? JSON.stringify(value, null, 2) : multiline(value);
+		// JSON outputs (application/json and friends) are stored as any JSON value, everything else as text.
+		out[mime] = /json$/i.test(mime) && typeof value !== "string" ? JSON.stringify(value, null, 2) : multiline(value);
 	}
 	return out;
 }
@@ -93,7 +93,7 @@ function readCell(v: unknown): NotebookCell {
 }
 
 /** Language names that don't match their file extension. */
-const EXTENSION_FOR_NAME: Record<string, string> = { python: "py", julia: "jl", javascript: "js", typescript: "ts", ruby: "rb", rust: "rs", bash: "sh", csharp: "cs", "c#": "cs", "c++": "cpp", haskell: "hs", kotlin: "kt" };
+const EXTENSION_FOR_NAME = new Map(Object.entries({ python: "py", julia: "jl", javascript: "js", typescript: "ts", ruby: "rb", rust: "rs", bash: "sh", csharp: "cs", "c#": "cs", "c++": "cpp", haskell: "hs", kotlin: "kt" }));
 
 function readLanguage(metadata: unknown): string {
 	const meta = isObject(metadata) ? metadata : {};
@@ -103,13 +103,13 @@ function readLanguage(metadata: unknown): string {
 	const extension = plain(typeof info.file_extension === "string" ? info.file_extension.replace(/^\./, "") : "");
 	if (extension) return extension;
 	const name = plain(info.name) || plain(kernel.language);
-	return EXTENSION_FOR_NAME[name] ?? (name || "py");
+	return EXTENSION_FOR_NAME.get(name) ?? (name || "py");
 }
 
 export function parseNotebook(text: string): ParseResult {
 	let root: unknown;
 	try {
-		root = JSON.parse(text.replace(/^﻿/, ""));
+		root = JSON.parse(text.replace(/^\uFEFF/, ""));
 	} catch (e) {
 		return { ok: false, code: "json", reason: e instanceof Error ? e.message : String(e) };
 	}

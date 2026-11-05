@@ -71,6 +71,7 @@ const AR: Record<string, string> = {
 	"This output can't be shown ({type}).": "تعذّر عرض هذه المخرجات ({type}).",
 	"This output's type isn't supported.": "نوع هذه المخرجات غير مدعوم.",
 	"Notebook output": "مخرجات الدفتر",
+	"This markdown is too large to format, so it shows as plain text.": "هذا النص أكبر من أن يُنسَّق، فيظهر نصًا عاديًا.",
 	// commands
 	"Run code block at cursor": "تشغيل كتلة الشيفرة عند المؤشر",
 	"Copy code block at cursor": "نسخ كتلة الشيفرة عند المؤشر",

@@ -2,7 +2,7 @@ import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { neutraliseMarkdown } from "../src/notebook/markdown";
+import { markdownTooLarge, neutraliseMarkdown } from "../src/notebook/markdown";
 import { cleanText, imageSource, planOutput } from "../src/notebook/outputs";
 import { parseNotebook } from "../src/notebook/parse";
 import { isNotebookTrusted, moveNotebook, readTrustStore, revokeNotebook, trustNotebook } from "../src/notebook/trust";
@@ -366,7 +366,7 @@ describe("the view path has no desktop-only code", () => {
 			if (seen.has(file)) return;
 			seen.add(file);
 			const text = readFileSync(file, "utf8");
-			assert.ok(!/\brequire\(/.test(text.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "")), `${file} uses require`);
+			assert.ok(!/\brequire\(|\bimport\(/.test(text.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "")), `${file} loads code at run time`);
 			for (const m of text.matchAll(/^(?:import|export) (?!type\b)[^;]*? from "([^"]+)"/gm)) {
 				if (m[1].startsWith(".")) walk(join(dirname(file), `${m[1]}.ts`));
 				else bare.add(m[1]);
@@ -380,5 +380,70 @@ describe("the view path has no desktop-only code", () => {
 
 	it("the manifest stays open to phones", () => {
 		assert.equal(JSON.parse(readFileSync("manifest.json", "utf8")).isDesktopOnly, false);
+	});
+});
+
+describe("findings from the review of #21", () => {
+	const run = (src: string) => neutraliseMarkdown(src, "N");
+	const clean = (src: string) => run(src).text;
+
+	it("no tilde fence survives odd line ends or containers the scan doesn't know", () => {
+		for (const src of ["text\r~~~dataviewjs\rdv.paragraph(1)\r~~~\r", "~~~dataviewjs\r\r\nevil()\r\n~~~", "~~~dataviewjs \nevil()\n~~~", "x[^1]\n\n[^1]: ~~~dataviewjs\n    evil()\n", "a ~~~dataviewjs evil()", "a\f~~~dataviewjs\fevil()"]) {
+			assert.ok(!/(^|[^\\])~~/.test(clean(src)), JSON.stringify(src) + " -> " + JSON.stringify(clean(src)));
+		}
+		assert.equal(clean("~~strike~~"), "~~strike~~");
+	});
+
+	it("a safe tag starting an HTML block can't bring live HTML with it", () => {
+		for (const src of ['<hr>\\<img src="http://x.example/hr.png">', '<b>\n\\<img src="http://x.example/b.png">\\<code>$= dv.evil()\\</code>\n</b>', "\\\\\\<img src=x>"]) {
+			assert.ok(!/<(img|code|\/code)/.test(clean(src)), `${src} -> ${clean(src)}`);
+		}
+	});
+
+	it("a token can't become a tag name", () => {
+		assert.ok(!/<BCNB/.test(clean("<`x` a=b>")), clean("<`x` a=b>"));
+		assert.ok(!/<[^\s]/.test(clean("<\\`x <1a <$x <_y").replace(/&lt;/g, "")));
+	});
+
+	it("takes the query prefix off code indented inside any container", () => {
+		assert.equal(clean("-      $= evil()"), "-      \\$= evil()");
+		assert.equal(clean("1.      = x"), "1.      \\= x");
+		assert.equal(clean("> -     $= x"), "> -     \\$= x");
+		assert.equal(clean("[^1]:     $= x"), "[^1]:     \\$= x");
+		assert.equal(clean("$= top"), "\\$= top");
+	});
+
+	it("leaves a heading underline alone", () => {
+		assert.equal(clean("Title\n==="), "Title\n===");
+	});
+
+	it("hostile lines stay cheap", () => {
+		for (const src of [`${" ".repeat(90_000)}x`, `\`${"a ".repeat(45_000)}\``, "![".repeat(45_000), "<b".repeat(45_000), `- ${" ".repeat(90_000)}x`, `\`\`\`${" ".repeat(90_000)}x`]) {
+			const t0 = performance.now();
+			clean(src);
+			assert.ok(performance.now() - t0 < 250, `${src.slice(0, 12)} took ${performance.now() - t0} ms`);
+		}
+	});
+
+	it("markdown too big to scan is flagged, by line or by cell", () => {
+		assert.equal(markdownTooLarge("short"), false);
+		assert.equal(markdownTooLarge("x".repeat(100_001)), true);
+		assert.equal(markdownTooLarge("line\n".repeat(250_000)), true);
+	});
+
+	it("a language name can't reach Object.prototype", () => {
+		for (const name of ["constructor", "__proto__", "toString"]) {
+			assert.equal(typeof opened(nb([], { metadata: { language_info: { name } } })).language, "string", name);
+		}
+	});
+
+	it("a JSON output that's a list keeps its value", () => {
+		const { cells } = opened(nb([{ cell_type: "code", source: "", outputs: [{ output_type: "display_data", data: { "application/json": [1, 2], "application/vnd.x+json": 3 } }] }]));
+		assert.ok(cells[0].kind === "code");
+		assert.deepEqual(plain(cells[0].outputs[0]), { kind: "data", data: { "application/json": "[\n  1,\n  2\n]", "application/vnd.x+json": "3" } });
+	});
+
+	it("reads a file with a byte order mark", () => {
+		assert.deepEqual(opened(`﻿${nb([])}`).cells, []);
 	});
 });

@@ -182,7 +182,7 @@ export default class CoderPlugin extends Plugin {
 			this.settings.trustedNotebooks = next;
 			void this.saveSettings();
 		};
-		this.registerEvent(this.app.vault.on("rename", (_file, from) => update(moveNotebook(this.settings.trustedNotebooks, from, _file.path))));
+		this.registerEvent(this.app.vault.on("rename", (file, from) => update(moveNotebook(this.settings.trustedNotebooks, from, file.path))));
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
 				if (file.path in this.settings.trustedNotebooks) update(revokeNotebook(this.settings.trustedNotebooks, file.path));
@@ -192,7 +192,10 @@ export default class CoderPlugin extends Plugin {
 
 	/** Every open notebook draws again, after trust changed. */
 	refreshNotebooks(): void {
-		this.app.workspace.getLeavesOfType(VIEW_TYPE_NOTEBOOK).forEach((leaf) => (leaf.view as NotebookView).refresh());
+		this.app.workspace.getLeavesOfType(VIEW_TYPE_NOTEBOOK).forEach((leaf) => {
+			// A tab not yet shown since startup holds a placeholder, and draws fresh when it's opened.
+			if (leaf.view instanceof NotebookView) leaf.view.refresh();
+		});
 	}
 
 	resetDetection(): void {

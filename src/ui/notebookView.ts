@@ -5,7 +5,7 @@ import { sha256 } from "../agent/changes";
 import { isArabic, t } from "../i18n";
 import { languageForFence } from "../languages";
 import type CoderPlugin from "../main";
-import { MarkdownSlot, neutraliseMarkdown } from "../notebook/markdown";
+import { MarkdownSlot, markdownTooLarge, neutraliseMarkdown } from "../notebook/markdown";
 import { imageSource, isHeldBack, planOutput } from "../notebook/outputs";
 import { MimeBundle, Notebook, NotebookCell, ParseResult, parseNotebook } from "../notebook/parse";
 import { isNotebookTrusted, revokeNotebook, trustNotebook } from "../notebook/trust";
@@ -41,6 +41,7 @@ export class NotebookView extends FileView {
 	/** Hash of the text on screen; pressing Trust trusts exactly this. */
 	private hash = "";
 	private loadId = 0;
+	private bySlot = new WeakMap<Element, CellSlot>();
 
 	constructor(leaf: WorkspaceLeaf, private plugin: CoderPlugin) {
 		super(leaf);
@@ -151,7 +152,7 @@ export class NotebookView extends FileView {
 		this.slots = [];
 		this.contentEl.empty();
 		this.drawBanner(notebook);
-		if (!notebook.cells.length) this.contentEl.createDiv({ cls: "coder-nb-note", text: t("This notebook has no cells.") });
+		if (!notebook.cells.length) note(this.contentEl, t("This notebook has no cells."));
 		const win = this.contentEl.ownerDocument.defaultView ?? window;
 		this.observer = new win.IntersectionObserver((entries) => this.onScrollNear(entries), { root: this.contentEl, rootMargin: DRAW_MARGIN });
 		for (const cell of notebook.cells) {
@@ -163,8 +164,6 @@ export class NotebookView extends FileView {
 			this.observer.observe(el);
 		}
 	}
-
-	private bySlot = new WeakMap<Element, CellSlot>();
 
 	private onScrollNear(entries: IntersectionObserverEntry[]): void {
 		for (const entry of entries) {
@@ -229,7 +228,7 @@ export class NotebookView extends FileView {
 				el.createEl("pre", { cls: "coder-nb-raw", text: cell.source, attr: { dir: "auto" } });
 				break;
 			default:
-				el.createDiv({ cls: "coder-nb-note", text: t("This cell's type isn't supported.") });
+				note(el, t("This cell's type isn't supported."));
 				if (cell.source) el.createEl("pre", { cls: "coder-nb-raw", text: cell.source, attr: { dir: "auto" } });
 		}
 	}
@@ -249,7 +248,7 @@ export class NotebookView extends FileView {
 				switch (part.kind) {
 					case "text":
 						outputs.createEl("pre", { cls: `coder-nb-text is-${part.tone}`, text: part.text });
-						if (part.dropped) outputs.createDiv({ cls: "coder-nb-note", text: t("… {n} more characters not shown.", { n: part.dropped.toLocaleString() }) });
+						if (part.dropped) note(outputs, t("… {n} more characters not shown.", { n: part.dropped.toLocaleString() }));
 						break;
 					case "image":
 						outputs.createEl("img", { cls: "coder-nb-image", attr: { src: part.src, alt: t("Output image"), decoding: "async" } });
@@ -261,10 +260,10 @@ export class NotebookView extends FileView {
 						this.mountFrame(outputs, part.html, drawn);
 						break;
 					case "blocked":
-						outputs.createDiv({ cls: "coder-nb-note is-blocked", text: t("HTML or a script is blocked in this output.") });
+						note(outputs, t("HTML or a script is blocked in this output.")).addClass("is-blocked");
 						break;
 					case "unshown":
-						outputs.createDiv({ cls: "coder-nb-note", text: part.mime ? t("This output can't be shown ({type}).", { type: part.mime }) : t("This output's type isn't supported.") });
+						note(outputs, part.mime ? t("This output can't be shown ({type}).", { type: part.mime }) : t("This output's type isn't supported."));
 				}
 			}
 		}
@@ -301,6 +300,11 @@ export class NotebookView extends FileView {
 
 	/** Obsidian's renderer, fed only neutralised text (see neutraliseMarkdown), and swept once more after. */
 	private async drawMarkdown(source: string, host: HTMLElement, attachments: Record<string, MimeBundle>, drawn: Component): Promise<void> {
+		if (markdownTooLarge(source)) {
+			note(host, t("This markdown is too large to format, so it shows as plain text."));
+			host.createEl("pre", { cls: "coder-nb-raw", text: source.slice(0, 200_000) });
+			return;
+		}
 		const nonce = Math.random().toString(36).slice(2, 10).toUpperCase();
 		const { text, slots } = neutraliseMarkdown(source, nonce);
 		await MarkdownRenderer.render(this.app, text, host, this.file?.path ?? "", drawn);
@@ -377,6 +381,10 @@ export class NotebookView extends FileView {
 	}
 }
 
+function note(parent: HTMLElement, text: string): HTMLElement {
+	return parent.createDiv({ cls: "coder-nb-note", text, attr: { dir: isArabic() ? "rtl" : "ltr" } });
+}
+
 function refusalText(parsed: Extract<ParseResult, { ok: false }>): string {
 	switch (parsed.code) {
 		case "json":
@@ -392,7 +400,10 @@ function refusalText(parsed: Extract<ParseResult, { ok: false }>): string {
 function sweep(host: HTMLElement): void {
 	host.querySelectorAll(STRIPPED).forEach((el) => el.remove());
 	host.querySelectorAll("*").forEach((el) => {
-		for (const name of el.getAttributeNames()) if (/^on|^srcset$|^srcdoc$|^formaction$/i.test(name)) el.removeAttribute(name);
+		for (const name of el.getAttributeNames()) {
+			// MathJax lays out its own output with style attributes.
+			if (/^on|^srcset$|^srcdoc$|^formaction$/i.test(name) || (name === "style" && !el.closest("mjx-container"))) el.removeAttribute(name);
+		}
 		if (el.tagName === "A" && !SAFE_LINK.test(el.getAttribute("href") ?? "")) el.removeAttribute("href");
 		if (el.tagName === "IMG" && !/^data:image\//i.test(el.getAttribute("src") ?? "")) el.remove();
 	});
