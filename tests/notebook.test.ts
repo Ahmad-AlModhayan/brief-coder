@@ -405,10 +405,7 @@ describe("reading markdown", () => {
 		const [tasks] = parseMarkdown("- [x] done\n- [ ] todo\n- [link](https://x.example)") as Extract<Block, { k: "list" }>[];
 		assert.deepEqual(tasks.items.map((i) => i.task), [true, false, null]);
 		assert.equal((parseMarkdown("- a\n\n- b") as Extract<Block, { k: "list" }>[])[0].tight, false);
-		assert.equal((parseMarkdown("- a
-- b
-
-1. c") as Extract<Block, { k: "list" }>[])[0].tight, true, "a different list after a blank line");
+		assert.equal((parseMarkdown("- a\n- b\n\n1. c") as Extract<Block, { k: "list" }>[])[0].tight, true, "a different list after a blank line");
 		assert.equal(parseMarkdown("- - -")[0].k, "rule");
 		assert.deepEqual(parseMarkdown("text\n2. not a list").map((b) => b.k), ["paragraph"]);
 	});
