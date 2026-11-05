@@ -4,10 +4,12 @@ import { setLanguage, t } from "./i18n";
 import { LANGUAGES, languageForFence, normaliseFenceLanguage } from "./languages";
 import { canRun, startRun } from "./run/runner";
 import { RunSession, SessionStore } from "./run/session";
-import { CoderSettings, DEFAULT_SETTINGS, mergeOpenExtensions, parseExtensionList } from "./settings";
+import { moveNotebook, readTrustStore, revokeNotebook } from "./notebook/trust";
+import { CoderSettings, DEFAULT_SETTINGS, claimsNotebooks, mergeOpenExtensions, parseExtensionList } from "./settings";
 import { AgentChangesView, VIEW_TYPE_AGENT } from "./ui/agentView";
 import { CodeView, VIEW_TYPE_CODE } from "./ui/codeView";
 import { livePreviewExtension, refreshEffect } from "./ui/livePreview";
+import { NotebookView, VIEW_TYPE_NOTEBOOK } from "./ui/notebookView";
 import { readingViewProcessor } from "./ui/readingView";
 import { mountRunBar } from "./ui/runBar";
 import { CoderSettingTab } from "./ui/settingsTab";
@@ -65,12 +67,15 @@ export default class CoderPlugin extends Plugin {
 
 		this.registerView(VIEW_TYPE_CODE, (leaf) => new CodeView(leaf, this));
 		this.registerView(VIEW_TYPE_AGENT, (leaf) => new AgentChangesView(leaf, this));
+		this.registerView(VIEW_TYPE_NOTEBOOK, (leaf) => new NotebookView(leaf, this));
 		this.registerCodeExtensions();
 		this.registerMarkdownPostProcessor(readingViewProcessor(this));
 		this.registerEditorExtension(livePreviewExtension(this));
 		this.addSettingTab(new CoderSettingTab(this.app, this));
 		this.registerCommands();
+		this.registerNotebookTrustEvents();
 		this.app.workspace.onLayoutReady(() => {
+			this.registerNotebookExtension();
 			void this.writeBridgeConfig();
 			void this.checkAgentChanges();
 		});
@@ -89,7 +94,7 @@ export default class CoderPlugin extends Plugin {
 		let data = (await this.loadData()) as Partial<CoderSettings> | null;
 		if (!data) data = await this.importOldSettings();
 		const merged = mergeOpenExtensions(data);
-		this.settings = { ...DEFAULT_SETTINGS, ...(data ?? {}), ...merged, commands: { ...(data?.commands ?? {}) } };
+		this.settings = { ...DEFAULT_SETTINGS, ...(data ?? {}), ...merged, commands: { ...(data?.commands ?? {}) }, trustedNotebooks: readTrustStore(data?.trustedNotebooks) };
 		if (merged.openExtensions !== undefined) await this.saveData(this.settings);
 	}
 
@@ -135,9 +140,7 @@ export default class CoderPlugin extends Plugin {
 	 */
 	private registerCodeExtensions(): void {
 		const wanted = parseExtensionList(this.settings.openExtensions);
-		const registry = (this.app as unknown as { viewRegistry?: { isExtensionRegistered?: (ext: string) => boolean } }).viewRegistry;
-		const isTaken = (ext: string) => registry?.isExtensionRegistered?.(ext) ?? false;
-		const free = wanted.filter((ext) => !isTaken(ext));
+		const free = wanted.filter((ext) => !this.extensionTaken(ext));
 		try {
 			if (free.length) this.registerExtensions(free, VIEW_TYPE_CODE);
 			for (const ext of free) this.codeExtensions.add(ext);
@@ -152,6 +155,44 @@ export default class CoderPlugin extends Plugin {
 				}
 			}
 		}
+	}
+
+	private extensionTaken(ext: string): boolean {
+		const registry = (this.app as unknown as { viewRegistry?: { isExtensionRegistered?: (ext: string) => boolean } }).viewRegistry;
+		return registry?.isExtensionRegistered?.(ext) ?? false;
+	}
+
+	/**
+	 * Waits for the layout, by when other plugins have loaded: a notebook plugin that registers .ipynb
+	 * keeps it, and doesn't hit an "already registered" error because Brief Coder got there first.
+	 */
+	private registerNotebookExtension(): void {
+		if (!claimsNotebooks(this.codeExtensions, (ext) => this.extensionTaken(ext))) return;
+		try {
+			this.registerExtensions(["ipynb"], VIEW_TYPE_NOTEBOOK);
+		} catch {
+			/* left to the other viewer */
+		}
+	}
+
+	/** Trust follows a notebook that moves, and ends with one that's deleted. */
+	private registerNotebookTrustEvents(): void {
+		const update = (next: Record<string, string>) => {
+			if (next === this.settings.trustedNotebooks) return;
+			this.settings.trustedNotebooks = next;
+			void this.saveSettings();
+		};
+		this.registerEvent(this.app.vault.on("rename", (_file, from) => update(moveNotebook(this.settings.trustedNotebooks, from, _file.path))));
+		this.registerEvent(
+			this.app.vault.on("delete", (file) => {
+				if (file.path in this.settings.trustedNotebooks) update(revokeNotebook(this.settings.trustedNotebooks, file.path));
+			}),
+		);
+	}
+
+	/** Every open notebook draws again, after trust changed. */
+	refreshNotebooks(): void {
+		this.app.workspace.getLeavesOfType(VIEW_TYPE_NOTEBOOK).forEach((leaf) => (leaf.view as NotebookView).refresh());
 	}
 
 	resetDetection(): void {

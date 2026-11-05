@@ -46,6 +46,31 @@ const AR: Record<string, string> = {
 		"تعمل واحدة بعد الأخرى: {list}. أمر «إيقاف كل الشيفرات» ينهي التسلسل.",
 	Cancel: "إلغاء",
 	"Run all": "تشغيل الكل",
+	// notebooks
+	Notebook: "دفتر",
+	"This notebook can't be shown.": "تعذّر عرض هذا الدفتر.",
+	"The file hasn't been changed.": "لم يتغيّر الملف.",
+	"This file is too large to open as a notebook.": "هذا الملف أكبر من أن يُفتح دفترًا.",
+	"It isn't valid JSON: {reason}": "ليس JSON صالحًا: {reason}",
+	"It uses notebook format {version}. Brief Coder reads format 4.": "يستخدم صيغة الدفاتر {version}. يقرأ Brief Coder الصيغة 4.",
+	"It's JSON, but not a Jupyter notebook.": "هذا JSON لكنه ليس دفتر Jupyter.",
+	"This notebook has no cells.": "لا خلايا في هذا الدفتر.",
+	"You trust this notebook. Its HTML and scripts show in a sandbox, cut off from your vault and from Obsidian.":
+		"أنت تثق بهذا الدفتر. يظهر ما فيه من HTML ونصوص برمجية في بيئة معزولة عن خزنتك وعن Obsidian.",
+	"Revoke trust": "سحب الثقة",
+	"This notebook changed after you trusted it, so its HTML and scripts are blocked again.":
+		"تغيّر هذا الدفتر بعد أن وثقت به، فحُظر ما فيه من HTML ونصوص برمجية من جديد.",
+	"Outputs blocked for having HTML or scripts: {n}. Text and images show.": "المخرجات المحظورة لاحتوائها على HTML أو نصوص برمجية: {n}. يظهر النص والصور.",
+	"Trusting shows them in a sandbox, cut off from your vault and from Obsidian. They can still reach the internet. Your code doesn't run.":
+		"الثقة تعرضها في بيئة معزولة عن خزنتك وعن Obsidian، لكنها تستطيع الوصول إلى الإنترنت. لا تعمل شيفرتك.",
+	"Trust this notebook": "الوثوق بهذا الدفتر",
+	"This cell's type isn't supported.": "نوع هذه الخلية غير مدعوم.",
+	"… {n} more characters not shown.": "… {n} حرفًا إضافيًا لم يظهر.",
+	"Output image": "صورة المخرجات",
+	"HTML or a script is blocked in this output.": "حُظر HTML أو نص برمجي في هذه المخرجات.",
+	"This output can't be shown ({type}).": "تعذّر عرض هذه المخرجات ({type}).",
+	"This output's type isn't supported.": "نوع هذه المخرجات غير مدعوم.",
+	"Notebook output": "مخرجات الدفتر",
 	// commands
 	"Run code block at cursor": "تشغيل كتلة الشيفرة عند المؤشر",
 	"Copy code block at cursor": "نسخ كتلة الشيفرة عند المؤشر",

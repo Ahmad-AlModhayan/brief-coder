@@ -13,7 +13,7 @@ folder with full write access. The bridge sits in between:
 - **Read:** an agent sees only the folders you share, never hidden folders (`.obsidian`, `.git`, `.trash`) or the
   ones you mark private.
   Agents read only a fixed list of note and code types, set in the bridge. The types Brief Coder opens have no effect
-  on it, so `.env`, `.conf` and `.properties` files stay out of reach.
+  on it, so `.env`, `.conf`, `.properties` and `.ipynb` files stay out of reach.
 - **Write:** an agent can only *propose*. Nothing reaches a note until you press Accept in Obsidian, and an accepted
   change can be reverted.
 - **Local:** no network, no port, no account. The agent starts the bridge as a child process and talks to it over
@@ -30,7 +30,7 @@ folder with full write access. The bridge sits in between:
 
 The bridge is a separate file because it runs outside Obsidian (in the agent's process), and because the
 community directory installs only `main.js`, `manifest.json` and `styles.css`. Keeping it out of `main.js` also keeps
-the plugin under its 100 KB budget.
+the plugin smaller.
 
 ## 3. Setup
 

@@ -512,3 +512,125 @@ body:not(.is-mobile) .coder-view-output .coder-output {
 		border-radius: var(--code-radius, 6px);
 	}
 }
+
+/* ---------- Notebook view ---------- */
+.coder-nb.view-content {
+	padding: 0 0 48px;
+	overflow: auto;
+}
+.coder-nb-banner {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	padding: 8px 12px;
+	background: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	font-size: var(--font-ui-small);
+}
+.coder-nb-banner-text {
+	flex: 1 1 240px;
+}
+.coder-nb-banner-more {
+	color: var(--text-muted);
+}
+.coder-nb-refusal {
+	margin: 24px auto;
+	max-width: 640px;
+	padding: 12px 16px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m, 8px);
+}
+.coder-nb-cell {
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 6px 16px;
+	/* An estimate until the cell is drawn, then its measured height while it's away from the screen. */
+	min-height: 0;
+}
+.coder-nb-cell:empty,
+.coder-nb-cell.is-waiting {
+	min-height: var(--coder-nb-height, 40px);
+}
+.coder-nb-cell-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	color: var(--text-faint);
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+}
+.coder-nb-code {
+	direction: ltr;
+	text-align: left;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s, 4px);
+	overflow: hidden;
+}
+.coder-nb-code .cm-content {
+	padding: 6px 0;
+}
+.coder-nb-code .cm-def {
+	color: var(--code-function);
+}
+.coder-nb-code .cm-atom {
+	color: var(--code-value);
+}
+.coder-nb-outputs {
+	padding: 6px 0 0;
+}
+.coder-nb-text,
+.coder-nb-raw {
+	margin: 0 0 6px;
+	padding: 4px 8px;
+	max-height: 480px;
+	overflow: auto;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	font-family: var(--font-monospace);
+	font-size: var(--code-size, 0.875em);
+	/* Each line takes its own direction, as run output does. */
+	unicode-bidi: plaintext;
+	user-select: text;
+}
+.coder-nb-text.is-err {
+	color: var(--text-error);
+}
+.coder-nb-image {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 0 0 6px;
+	background: #fff;
+}
+.coder-nb-note {
+	margin: 0 0 6px;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+.coder-nb-note.is-blocked {
+	padding: 4px 8px;
+	border-inline-start: 2px solid var(--text-warning);
+}
+.coder-nb-md {
+	user-select: text;
+	overflow-wrap: anywhere;
+}
+.coder-nb-md :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th) {
+	unicode-bidi: plaintext;
+	text-align: start;
+}
+.coder-nb-md code {
+	unicode-bidi: isolate;
+}
+.coder-nb-md .coder-nb-code {
+	margin: 8px 0;
+}
+.coder-nb-md .mjx-container,
+.coder-nb-md :is(table) {
+	max-width: 100%;
+	overflow-x: auto;
+}

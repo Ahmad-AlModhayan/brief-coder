@@ -1,6 +1,6 @@
 # Brief Coder
 
-Run, view and edit code inside Obsidian. Every code block gets **Run** and **Copy**, output appears live under the block, and code files open in a real editor. It supports 40 languages, speaks English and Arabic, and stays light: under 100 KB, with nothing running until you press Run.
+Run, view and edit code inside Obsidian. Every code block gets **Run** and **Copy**, output appears live under the block, and code files open in a real editor. It supports 40 languages, speaks English and Arabic, and stays light, with nothing running until you press Run.
 
 New in 1.1: **trusted folders** for notes from other people, an **Arabic interface**, and an opt-in **agent bridge** that lets local AI agents (Claude Code, Raqeeb) read the folders you choose and *propose* note changes that wait for your Accept.
 
@@ -21,6 +21,7 @@ New in 1.1: **trusted folders** for notes from other people, an **Arabic interfa
 - **Code files open in an editor.** `.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`, `.c`, `.cs`, `.sh` and more get:
   - Syntax colours from your theme, line numbers, bracket matching, search and undo.
   - **Ctrl/Cmd + Enter** to run, with output below.
+- **Jupyter notebooks open read-only.** `.ipynb` files show their cells and saved outputs, on desktop and on phones. See [Notebooks](#notebooks).
 - **Safe with shared vaults.** Notes outside your trusted folders show their code and ask before running. Nothing ever runs on its own.
 - **English and Arabic.** The interface follows Obsidian's language. Code always reads left to right, and each output line takes its own direction, so Arabic output reads right to left even in mixed text.
 - **Works on phones and tablets.** JavaScript and HTML run inside Obsidian; other languages keep their Copy button.
@@ -93,6 +94,20 @@ By default the whole vault is trusted (`/`), and code runs when you press Run, a
 - **Limits, set by Obsidian:** hidden files (`.env`, `.gitignore`) aren't part of the vault, so Obsidian can't open them; `prod.env` opens, `.env` doesn't. Files with no extension (`Dockerfile`, `Makefile`) don't open either: Obsidian picks a viewer by extension only, so opening them would mean claiming every extensionless file in the vault, binaries included.
 - Types you remove from the list stay removed, and new versions only add types you haven't been offered. A type another plugin already holds stays with that plugin.
 
+### Notebooks
+
+`.ipynb` files (Jupyter's format 4) open in a read-only view, on desktop and mobile. Brief Coder doesn't write to the file, and opening a notebook never runs its code.
+
+- **Shown:** markdown cells through Obsidian's renderer, code cells with syntax colours, and saved text, images and errors.
+- **Blocked until you press Trust this notebook:** saved HTML and scripts. Trusted outputs show in a sandboxed frame, cut off from your vault and from Obsidian. They can still reach the internet.
+- **Trust is per notebook.** It's remembered, **Revoke trust** ends it, and it ends by itself if the file changes.
+- **Markdown cells are limited,** because a notebook is treated as untrusted even after you trust its outputs:
+  - Raw HTML shows as text, apart from simple tags such as `<br>` and `<b>`.
+  - Images in markdown show as links, so opening a notebook loads nothing from the internet. Images attached to the cell show.
+  - `![[embeds]]` and `[[links]]` show as text. Code blocks show as code, so plugins such as Dataview don't run them.
+- **Not supported:** format 3 and older get a clear message. Interactive widgets show as a note saying they can't be shown.
+- **Who opens `.ipynb`:** if another plugin handles it, that plugin keeps it. If you added `ipynb` to **Code files**, it keeps opening as text in the editor.
+
 ### HTML
 
 ![HTML preview](docs/html-preview.png)
@@ -152,10 +167,11 @@ Agents get six tools: `list_notes`, `search_notes` (Arabic-aware), `read_note`, 
 ## Safety and disclosures
 
 - **Code runs on your computer with your permissions**, the same as running it in a terminal. Only run code you trust, and use trusted folders if your vault contains notes from other people.
-- **Nothing runs on its own.** Opening, syncing or rendering a note never runs its code.
+- **Nothing runs on its own.** Opening, syncing or rendering a note or a notebook never runs its code.
 - **Files outside the vault:** to run code, Brief Coder writes the block to a temporary folder in your system's temp directory and starts the installed interpreter or compiler there. Temporary folders are removed after each run. Build caches for C#, Scala, Nim and Crystal are kept per block and removed after 14 days unused.
 - **Clipboard:** Brief Coder writes to the clipboard only when you press a copy button or run a copy command, and never reads from it.
 - **Network:** Brief Coder itself makes no network requests and collects nothing. Code you run can use the network, like any program you run yourself. HTML previews run in a sandboxed frame with no access to Obsidian or your files.
+- **Notebooks** are treated as untrusted. Saved HTML and scripts stay blocked until you trust that notebook, and then run in a sandboxed frame with no access to your vault or to Obsidian, though they can reach the internet. The agent bridge can't read notebooks.
 - The **in-app JavaScript sandbox** runs like JavaScript in a browser tab: it has no access to your files, your vault or Obsidian.
 - The **agent bridge** is off by default, runs only when an agent you configured starts it, and writes nothing to your notes until you accept a change. Any program running as you can still edit your files directly; the bridge narrows what a well-behaved agent does, it isn't a sandbox.
 
@@ -163,7 +179,7 @@ Agents get six tools: `list_notes`, `search_notes` (Arabic-aware), `read_note`, 
 
 Brief Coder was built to keep Obsidian fast. Measured in Obsidian 1.13 and 1.14:
 
-- **Small:** about 98 KB, with no bundled libraries; CI fails a build over 100 KiB. The code editor and syntax colours reuse what Obsidian already ships. The Arabic interface is about 13 KB of that.
+- **Small:** about 122 KB, with no bundled libraries; CI fails a build over 150 KiB. The code editor and syntax colours reuse what Obsidian already ships. The Arabic interface is about 13 KB of that.
 - **Quick to load:** its own startup work is a few milliseconds.
   - Desktop-only modules load the first time you press Run.
   - File types are registered in one step, so the file list refreshes once instead of 70 times.
@@ -172,6 +188,7 @@ Brief Coder was built to keep Obsidian fast. Measured in Obsidian 1.13 and 1.14:
   - In Live Preview, bars are drawn only for blocks on screen.
   - Output panels are created only after a block runs, and HTML previews load only when they come on screen.
   - Typing costs about 0.06 ms per keystroke in ordinary text, and about 0.6 ms inside a code block of a 3,000-line note.
+- **Large notebooks:** only cells near the screen are drawn. A notebook of 5,000 cells and 104 MB opened in under 0.5 s on a Windows PC and scrolled at over 60 frames per second.
 - **Idle means idle:** no timers or file watchers run while nothing is running, and memory doesn't grow as you open notes and code files. New agent proposals are checked when you come back to Obsidian.
 - **Never blocks Obsidian:**
   - Programs run in their own process; JavaScript in a background worker; HTML previews in a separate sandboxed frame.
@@ -193,7 +210,7 @@ Brief Coder was built to keep Obsidian fast. Measured in Obsidian 1.13 and 1.14:
 [Execute Code](https://github.com/twibiral/obsidian-execute-code) is the most-used plugin for running code blocks. Brief Coder covers the same ground with a different focus:
 
 - **Code files, not only blocks.** `.py`, `.go`, `.rs` and other files open in an editor and run with Ctrl/Cmd + Enter.
-- **Light.** Under 100 KB with nothing running until you press Run, and Obsidian stays smooth while a program prints without end.
+- **Light.** Nothing runs until you press Run, and Obsidian stays smooth while a program prints without end.
 - **Safe with shared vaults.** Code from notes outside your trusted folders asks before it runs.
 
 Execute Code has features Brief Coder doesn't, such as notebook-style shared state between blocks and plots drawn into the note. Pick the one that fits how you work.
