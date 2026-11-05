@@ -16,6 +16,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Size budget (main.js under 100 KiB)
-        run: node -e "const s=require('fs').statSync('main.js').size; console.log('main.js', s, 'bytes'); if (s > 102400) process.exit(1)"
+      # Raised for notebooks (#3, #14). The read-only view took main.js to 123 KB (20.7 KB of it new);
+      # 150 KiB leaves about 30 KB for notebook editing (#15). Running them (#16) needs its own decision.
+      - name: Size budget (main.js under 150 KiB)
+        run: node -e "const s=require('fs').statSync('main.js').size; console.log('main.js', s, 'bytes'); if (s > 153600) process.exit(1)"
       - run: npm run test:unit

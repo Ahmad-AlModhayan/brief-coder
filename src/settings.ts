@@ -35,6 +35,8 @@ export interface CoderSettings {
 	bridgeFolders: string;
 	bridgeExclude: string;
 	bridgeProposals: boolean;
+	/** Notebooks whose saved HTML and scripts may show: vault path → hash of the contents the user trusted. */
+	trustedNotebooks: Record<string, string>;
 }
 
 export const DEFAULT_SETTINGS: CoderSettings = {
@@ -58,6 +60,7 @@ export const DEFAULT_SETTINGS: CoderSettings = {
 	bridgeFolders: "/",
 	bridgeExclude: "",
 	bridgeProposals: true,
+	trustedNotebooks: {},
 };
 
 export function parseExtensionList(value: string): string[] {
@@ -96,4 +99,9 @@ const LARGE_FILE_BYTES = 5 * 1024 * 1024;
 
 export function isLargeFile(bytes: number): boolean {
 	return bytes > LARGE_FILE_BYTES;
+}
+
+/** .ipynb opens in the notebook view unless the user listed it under Code files, or another plugin has it. */
+export function claimsNotebooks(codeExtensions: Set<string>, isTaken: (ext: string) => boolean): boolean {
+	return !codeExtensions.has("ipynb") && !isTaken("ipynb");
 }

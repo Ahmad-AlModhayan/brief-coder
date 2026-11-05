@@ -182,6 +182,18 @@ describe("bridge reading", () => {
 		assert.deepEqual((await client.call("list_notes", { folder: "Code", limit: 5 })).data.map((f: any) => f.path), ["Code/tool.py"]);
 	});
 
+	it("doesn't widen to notebooks: a .ipynb can't be listed, searched, read or changed", async () => {
+		const secret = "NOTEBOOK-SECRET-OUTPUT";
+		write("Code/data.ipynb", JSON.stringify({ nbformat: 4, cells: [{ cell_type: "code", source: "", outputs: [{ output_type: "stream", text: secret }] }] }));
+		const p = "Code/data.ipynb";
+		assert.ok(!(await client.call("list_notes")).data.map((f: any) => f.path).includes(p));
+		assert.ok(!JSON.stringify((await client.call("search_notes", { query: secret })).data).includes(secret));
+		assert.ok((await client.call("read_note", { path: p })).error);
+		assert.ok((await client.call("list_code_blocks", { path: p })).error);
+		assert.ok((await client.call("propose_change", { label: "x", changes: [{ path: p, content: "{}" }] })).error);
+		fs.rmSync(path.join(vault, p));
+	});
+
 	it("never exposes secret-style files, whatever Brief Coder opens", async () => {
 		write(".env", "TOKEN=1");
 		write("Code/prod.env", "TOKEN=2");
