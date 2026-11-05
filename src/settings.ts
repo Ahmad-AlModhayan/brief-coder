@@ -1,4 +1,4 @@
-import { DEFAULT_CODE_EXTENSIONS } from "./languages";
+import { DEFAULT_CODE_EXTENSIONS, FIRST_CODE_EXTENSIONS } from "./languages";
 
 export interface CoderSettings {
 	/** Show the Coder bar (language, Copy, Run, output) under code blocks. */
@@ -21,8 +21,12 @@ export interface CoderSettings {
 	jsRuntime: "auto" | "node" | "in-app";
 	/** File extensions opened in the Coder editor (comma-separated, no dots). */
 	openExtensions: string;
+	/** Every default type this list has been given, so a type the user removed isn't added back. */
+	offeredExtensions: string[];
 	editorLineNumbers: boolean;
 	editorWrap: boolean;
+	/** Wrap long lines in prose files (txt, log...), separately from code. */
+	textWrap: boolean;
 	editorTabSize: number;
 	/** Per-language command overrides, e.g. { python: "/opt/homebrew/bin/python3.12" }. */
 	commands: Record<string, string>;
@@ -44,8 +48,10 @@ export const DEFAULT_SETTINGS: CoderSettings = {
 	blockWorkingDir: "note",
 	jsRuntime: "auto",
 	openExtensions: DEFAULT_CODE_EXTENSIONS.join(", "),
+	offeredExtensions: DEFAULT_CODE_EXTENSIONS,
 	editorLineNumbers: true,
 	editorWrap: false,
+	textWrap: true,
 	editorTabSize: 4,
 	commands: {},
 	bridgeEnabled: false,
@@ -61,4 +67,33 @@ export function parseExtensionList(value: string): string[] {
 		if (ext && /^[a-z0-9+_-]+$/.test(ext)) seen.add(ext);
 	}
 	return Array.from(seen);
+}
+
+/**
+ * What to change in saved settings so the list gains default types it hasn't been offered yet.
+ * Empty when there is nothing new, so an edited list is left exactly as the user wrote it.
+ */
+export function mergeOpenExtensions(saved: Partial<CoderSettings> | null): Partial<CoderSettings> {
+	if (saved?.openExtensions === undefined) return {}; // nothing saved: the defaults apply as they are
+	const offered = saved.offeredExtensions ?? FIRST_CODE_EXTENSIONS;
+	const fresh = DEFAULT_CODE_EXTENSIONS.filter((ext) => !offered.includes(ext));
+	if (!fresh.length) return {};
+	const listed = parseExtensionList(saved.openExtensions);
+	return {
+		openExtensions: [saved.openExtensions.trim(), ...fresh.filter((ext) => !listed.includes(ext))].filter(Boolean).join(", "),
+		offeredExtensions: [...offered, ...fresh],
+	};
+}
+
+const PROSE_EXTENSIONS = ["txt", "log", "rst", "adoc", "text"];
+
+export function wrapsLines(ext: string, s: Pick<CoderSettings, "editorWrap" | "textWrap">): boolean {
+	return s.editorWrap || (s.textWrap && PROSE_EXTENSIONS.includes(ext.toLowerCase()));
+}
+
+/** Above this the code editor opens a file read-only. */
+const LARGE_FILE_BYTES = 5 * 1024 * 1024;
+
+export function isLargeFile(bytes: number): boolean {
+	return bytes > LARGE_FILE_BYTES;
 }

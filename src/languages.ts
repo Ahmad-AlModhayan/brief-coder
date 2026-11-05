@@ -387,11 +387,19 @@ export function isDecoratedFence(raw: string): boolean {
 	return byAlias.has(name) || COPY_ONLY_LANGUAGES.has(name);
 }
 
-/** Every file extension Coder can open, in a stable order (used as the default setting). */
-export const DEFAULT_CODE_EXTENSIONS = [
+/** The types 1.1.2 opened. A saved list with no record of what it was offered has seen exactly these. */
+export const FIRST_CODE_EXTENSIONS = [
 	"py", "pyw", "js", "mjs", "cjs", "ts", "mts", "cts", "jsx", "tsx", "java", "kt", "kts", "scala", "groovy",
 	"c", "h", "cpp", "cc", "cxx", "hpp", "cs", "fs", "fsx", "go", "rs", "swift", "dart", "rb", "php", "pl", "lua",
 	"r", "jl", "hs", "ex", "exs", "clj", "ml", "nim", "zig", "cr", "rkt", "lisp", "f90", "sh", "bash", "zsh", "fish",
 	"ps1", "bat", "cmd", "sql", "json", "jsonc", "yaml", "yml", "toml", "ini", "xml", "html", "htm", "css", "scss",
 	"less", "vue", "svelte", "graphql", "proto",
+];
+
+/** Every file extension Coder can open, in a stable order (used as the default setting). Add new types at the end. */
+export const DEFAULT_CODE_EXTENSIONS = [
+	...FIRST_CODE_EXTENSIONS,
+	"txt", "log", "rst", "adoc", "text", "csv", "tsv", "json5", "ndjson", "conf", "cfg", "env", "properties", "gradle",
+	"tf", "hcl", "sass", "tex", "diff", "patch", "sol", "vb", "erl", "pas", "asm", "pm", "hh", "hxx", "csx", "psm1",
+	"gvy", "sc", "cljs", "cljc", "mli", "lsp", "f95", "f03", "applescript",
 ];
