@@ -88,6 +88,10 @@ By default the whole vault is trusted (`/`), and code runs when you press Run, a
 - Code files open straight from the file list.
 - To make one, run **Create new code file** and type a name such as `scratch.py` or `tools/convert.js`.
 - Edits save automatically, like notes. **Ctrl/Cmd + Enter**, or ▷ in the tab header, runs the file in place.
+- Text, data and config files open too: `.txt`, `.log`, `.rst`, `.adoc`, `.csv`, `.tsv`, `.ndjson`, `.conf`, `.cfg`, `.env`, `.properties`, `.tf`, `.tex`, `.diff` and more. They have no Run button. `.txt`, `.log`, `.rst`, `.adoc` and `.text` wrap long lines; **Settings → Brief Coder → Wrap text files** turns that off. `.csv` and `.tsv` show as plain text.
+- Files over 5 MB open read-only, with a notice. Nothing is written back to them.
+- **Limits, set by Obsidian:** hidden files (`.env`, `.gitignore`) aren't part of the vault, so Obsidian can't open them; `prod.env` opens, `.env` doesn't. Files with no extension (`Dockerfile`, `Makefile`) don't open either: Obsidian picks a viewer by extension only, so opening them would mean claiming every extensionless file in the vault, binaries included.
+- Types you remove from the list stay removed, and new versions only add types you haven't been offered. A type another plugin already holds stays with that plugin.
 
 ### HTML
 
@@ -141,7 +145,7 @@ Agents get six tools: `list_notes`, `search_notes` (Arabic-aware), `read_note`, 
 | Time limit | Stops programs after this many seconds. 0 means no limit. |
 | Output kept per run | Keeps the newest output (200 KB by default), so endless printing can't slow Obsidian. |
 | JavaScript runs with | Auto (Node.js if installed), Node.js, or the in-app sandbox. |
-| Code files | Which extensions open in Brief Coder's editor, plus line numbers, wrapping and tab size. |
+| Code files | Which extensions open in Brief Coder's editor, plus line numbers, wrapping (code and text files separately) and tab size. |
 | Agent bridge | Off by default. Shared folders, private folders, whether agents may propose changes, and the config to copy. |
 | Languages | Per-language command, e.g. `/opt/homebrew/bin/python3.12` or `py -3.12`. |
 

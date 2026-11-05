@@ -12,6 +12,8 @@ folder with full write access. The bridge sits in between:
 
 - **Read:** an agent sees only the folders you share, never hidden folders (`.obsidian`, `.git`, `.trash`) or the
   ones you mark private.
+  Agents read only a fixed list of note and code types, set in the bridge. The types Brief Coder opens have no effect
+  on it, so `.env`, `.conf` and `.properties` files stay out of reach.
 - **Write:** an agent can only *propose*. Nothing reaches a note until you press Accept in Obsidian, and an accepted
   change can be reverted.
 - **Local:** no network, no port, no account. The agent starts the bridge as a child process and talks to it over
