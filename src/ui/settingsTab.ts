@@ -202,6 +202,10 @@ export class CoderSettingTab extends PluginSettingTab {
 						build: (row) => row.addToggle((tg) => tg.setValue(s.editorWrap).onChange(async (v) => this.save({ editorWrap: v }, false, true))),
 					},
 					{
+						name: t("Wrap text files"),
+						build: (row) => row.addToggle((tg) => tg.setValue(s.textWrap).onChange(async (v) => this.save({ textWrap: v }, false, true))),
+					},
+					{
 						name: t("Tab size"),
 						build: (row) =>
 							row.addDropdown((d) =>

@@ -4,6 +4,16 @@ Each release is on the [releases page](https://github.com/Ahmad-AlModhayan/brief
 `manifest.json`, `styles.css` and `coder-bridge.mjs` attached. Versions follow [Semantic Versioning](https://semver.org/);
 tags have no `v` prefix, as Obsidian requires.
 
+## Unreleased
+
+- More file types open by default: text (`txt`, `log`, `rst`, `adoc`, `text`), data (`csv`, `tsv`, `json5`, `ndjson`), config
+  (`conf`, `cfg`, `env`, `properties`, `gradle`, `tf`, `hcl`, `sass`), `tex`, `diff`, `patch`, `sol`, `vb`, `erl`, `pas`, `asm`, and
+  the types the language table already knew (`pm`, `hh`, `hxx`, `csx`, `psm1`, `gvy`, `sc`, `cljs`, `cljc`, `mli`, `lsp`, `f95`, `f03`, `applescript`).
+- A saved list gains the new types once. A type you removed stays removed, and types you added stay.
+- Text files wrap long lines by default, with their own setting, and have no Run button.
+- Files over 5 MB open read-only, with a notice.
+- The README states what Obsidian doesn't allow: hidden files and files with no extension don't open.
+
 ## 1.1.2 (2026-11-04)
 
 Fixes for the Obsidian Community directory review. No new features.

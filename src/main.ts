@@ -4,7 +4,7 @@ import { setLanguage, t } from "./i18n";
 import { LANGUAGES, languageForFence, normaliseFenceLanguage } from "./languages";
 import { canRun, startRun } from "./run/runner";
 import { RunSession, SessionStore } from "./run/session";
-import { CoderSettings, DEFAULT_SETTINGS, parseExtensionList } from "./settings";
+import { CoderSettings, DEFAULT_SETTINGS, mergeOpenExtensions, parseExtensionList } from "./settings";
 import { AgentChangesView, VIEW_TYPE_AGENT } from "./ui/agentView";
 import { CodeView, VIEW_TYPE_CODE } from "./ui/codeView";
 import { livePreviewExtension, refreshEffect } from "./ui/livePreview";
@@ -88,7 +88,9 @@ export default class CoderPlugin extends Plugin {
 	async loadSettings(): Promise<void> {
 		let data = (await this.loadData()) as Partial<CoderSettings> | null;
 		if (!data) data = await this.importOldSettings();
-		this.settings = { ...DEFAULT_SETTINGS, ...(data ?? {}), commands: { ...(data?.commands ?? {}) } };
+		const merged = mergeOpenExtensions(data);
+		this.settings = { ...DEFAULT_SETTINGS, ...(data ?? {}), ...merged, commands: { ...(data?.commands ?? {}) } };
+		if (merged.openExtensions !== undefined) await this.saveData(this.settings);
 	}
 
 	/** Brings over settings from the plugin's earlier ID (coder-studio), once. */

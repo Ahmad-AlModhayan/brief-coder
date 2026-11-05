@@ -15,10 +15,11 @@ import {
 	lineNumbers,
 	rectangularSelection,
 } from "@codemirror/view";
-import { FileSystemAdapter, Scope, TextFileView, TFile, WorkspaceLeaf, setIcon } from "obsidian";
+import { FileSystemAdapter, Notice, Scope, TextFileView, TFile, WorkspaceLeaf, setIcon } from "obsidian";
 import type CoderPlugin from "../main";
 import { LanguageDef, languageForExtension } from "../languages";
 import { canRun } from "../run/runner";
+import { isLargeFile, wrapsLines } from "../settings";
 import { RunSession } from "../run/session";
 import { languageFor, themeHighlighting } from "./highlight";
 import { OutputView } from "./outputView";
@@ -62,6 +63,8 @@ export class CodeView extends TextFileView {
 	private langLoadId = 0;
 	/** Run was pressed and is waiting for confirmation or the save. */
 	private starting = false;
+	/** The open file is too large to edit smoothly: no typing, and nothing is ever written back. */
+	readOnly = false;
 
 	constructor(leaf: WorkspaceLeaf, private plugin: CoderPlugin) {
 		super(leaf);
@@ -107,6 +110,8 @@ export class CodeView extends TextFileView {
 
 	async onLoadFile(file: TFile): Promise<void> {
 		this.lang = languageForExtension(file.extension);
+		this.readOnly = isLargeFile(file.stat.size);
+		if (this.readOnly) new Notice(t("{file} is over 5 MB: read-only.", { file: file.name }));
 		this.attachSession(file);
 		this.updateRunAction();
 		if (this.lang?.process) this.plugin.warmUp();
@@ -116,6 +121,15 @@ export class CodeView extends TextFileView {
 	async onUnloadFile(file: TFile): Promise<void> {
 		await super.onUnloadFile(file);
 		this.detachSession();
+	}
+
+	/**
+	 * Everything that writes the file comes through here, Run and Obsidian's own saves included,
+	 * and the editor's text can differ from the file without an edit (it turns CRLF into LF).
+	 */
+	async save(clear?: boolean): Promise<void> {
+		if (!this.readOnly) return super.save(clear);
+		if (clear) this.clear();
 	}
 
 	getViewData(): string {
@@ -166,7 +180,8 @@ export class CodeView extends TextFileView {
 			indentUnit.of(" ".repeat(Math.max(1, s.editorTabSize))),
 		];
 		if (s.editorLineNumbers) ext.push(lineNumbers(), foldGutter(), highlightActiveLineGutter());
-		if (s.editorWrap) ext.push(EditorView.lineWrapping);
+		if (wrapsLines(this.file?.extension ?? "", s)) ext.push(EditorView.lineWrapping);
+		if (this.readOnly) ext.push(EditorState.readOnly.of(true));
 		return ext;
 	}
 

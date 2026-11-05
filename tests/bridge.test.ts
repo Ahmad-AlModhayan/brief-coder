@@ -182,6 +182,19 @@ describe("bridge reading", () => {
 		assert.deepEqual((await client.call("list_notes", { folder: "Code", limit: 5 })).data.map((f: any) => f.path), ["Code/tool.py"]);
 	});
 
+	it("never exposes secret-style files, whatever Brief Coder opens", async () => {
+		write(".env", "TOKEN=1");
+		write("Code/prod.env", "TOKEN=2");
+		write("Code/app.properties", "token=3");
+		write("Code/app.conf", "token=4");
+		const listed = (await client.call("list_notes")).data.map((f: any) => f.path);
+		for (const p of [".env", "Code/prod.env", "Code/app.properties", "Code/app.conf"]) {
+			assert.ok(!listed.includes(p), p);
+			assert.ok((await client.call("read_note", { path: p })).error, p);
+		}
+		for (const p of [".env", "Code/prod.env", "Code/app.properties", "Code/app.conf"]) fs.rmSync(path.join(vault, p));
+	});
+
 	it("whole vault when folders is empty, still hiding excluded and dot folders", async () => {
 		config({ ...ON, folders: [] });
 		const paths = (await client.call("list_notes")).data.map((f: any) => f.path).sort();
