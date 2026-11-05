@@ -2,7 +2,7 @@ import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { markdownTooLarge, neutraliseMarkdown } from "../src/notebook/markdown";
+import { Block, Inline, markdownTooLarge, parseMarkdown, safeTex } from "../src/notebook/markdown";
 import { cleanText, imageSource, planOutput } from "../src/notebook/outputs";
 import { parseNotebook } from "../src/notebook/parse";
 import { isNotebookTrusted, moveNotebook, readTrustStore, revokeNotebook, trustNotebook } from "../src/notebook/trust";
@@ -21,6 +21,42 @@ const refused = (text: string) => {
 	if (r.ok) throw new Error("expected a refusal");
 	return r;
 };
+
+/** One of every shape from the real Obsidian table (tests/obsidian/hostile.mjs). */
+const HOSTILE = [
+	"---\n$= EVIL()\n---\nx", "\uFEFF---\n= EVIL\n---", "\n\n---\r\n$= EVIL\r\n---", "    $= EVIL()", "\t= EVIL", "- a\n\n      $= EVIL", ">     = EVIL", "```dataviewjs\nEVIL\n```", "~~~evilblock\nEVIL", "x\r~~~query\rEVIL\r~~~", "x\u2028~~~query\u2028EVIL\u2028~~~",
+	"> [!note]\n> ```dataviewjs\n> EVIL\n> ```", "- ```dataviewjs\n  EVIL\n  ```", "- > ```evilblock\n  > EVIL\n  > ```", "[^1]: ~~~dataviewjs\n    EVIL", "`$= EVIL`", "``= EVIL``", "# `$= EVIL`", "| a |\n|---|\n| `= EVIL` |", "[`= EVIL`](https://x.example)", "![`$= EVIL`](attachment:a)",
+	"<pre><code>$= EVIL</code></pre>", '<pre><code class="language-dataviewjs">EVIL</code></pre>', "<CODE>= EVIL</CODE>", "<code\n>EVIL</code\n>", "&lt;code&gt;= EVIL&lt;/code&gt;", "&#96;$= EVIL&#96;", "<b>\n\\<code>$= EVIL\\</code>\n</b>", '<div markdown="1">\n`$= EVIL`\n</div>', "<!-- `$= EVIL` -->", "$= EVIL", "= EVIL", "\\= EVIL", "%% `= EVIL` %%",
+	"<img src=x onerror=EVIL>", "<script>EVIL</script>", "[EVIL](javascript:EVIL)", "![EVIL](https://x.example/a.png)", "![[EVIL]]", "$\\href{javascript:x}{EVIL}$ EVIL",
+];
+
+/** Calls `visit` for every block and inline in a tree. */
+function walkTree(blocks: Block[], visit: (n: Block | Inline) => void): void {
+	const inlines = (nodes: Inline[]) => {
+		for (const n of nodes) {
+			visit(n);
+			if (n.k === "wrap" || n.k === "link") inlines(n.children);
+		}
+	};
+	for (const b of blocks) {
+		visit(b);
+		if (b.k === "heading" || b.k === "paragraph") inlines(b.content);
+		else if (b.k === "quote") walkTree(b.blocks, visit);
+		else if (b.k === "list") for (const i of b.items) walkTree(i.blocks, visit);
+		else if (b.k === "table") for (const c of [...b.head, ...b.rows.flat()]) inlines(c);
+	}
+}
+
+/** A readable form of inline nodes: "text", ["em", ...], ["a:href", ...], "BR". */
+function plainTree(nodes: Inline[]): unknown[] {
+	const out: unknown[] = [];
+	for (const n of nodes) {
+		const piece = n.k === "wrap" ? [n.tag, ...plainTree(n.children)] : n.k === "link" ? [`a:${n.href}`, ...plainTree(n.children)] : n.k === "break" ? "BR" : n.k === "text" ? n.text : n;
+		if (typeof piece === "string" && typeof out[out.length - 1] === "string" && piece !== "BR" && out[out.length - 1] !== "BR") out[out.length - 1] += piece;
+		else out.push(piece);
+	}
+	return out;
+}
 
 describe("reading nbformat 4", () => {
 	it("reads code, markdown and raw cells with sources as a string or a list of lines", () => {
@@ -109,6 +145,13 @@ describe("files that aren't nbformat 4 get a clear refusal", () => {
 
 	it("JSON that isn't a notebook", () => {
 		for (const text of ["[]", "null", "12", '"x"', "{}", '{"nbformat":4}', '{"nbformat":4,"cells":{}}', '{"nbformat":"4","cells":[]}']) assert.equal(refused(text).code, "not-notebook", text);
+	});
+
+	it("JSON nested too deeply to read back gets the same refusal, not an exception", () => {
+		const deep = `{"nbformat":4,"cells":[{"cell_type":"code","source":"","outputs":[{"output_type":"display_data","data":{"application/json":${"[".repeat(200_000)}${"]".repeat(200_000)}}}]}]}`;
+		const result = parseNotebook(deep);
+		assert.equal(result.ok, false);
+		assert.ok(!result.ok && result.code === "json" && /nested too deeply/.test(result.reason));
 	});
 
 	it("older and newer formats, naming the version", () => {
@@ -216,99 +259,203 @@ describe("image data is checked, not believed", () => {
 	});
 });
 
-describe("markdown from a notebook reaches Obsidian's renderer with nothing active in it", () => {
-	const run = (src: string) => neutraliseMarkdown(src, "N");
-	const clean = (src: string) => run(src).text;
-
-	it("leaves ordinary markdown alone", () => {
-		const src = "# Title\n\n**bold** a < b and [link](https://x.y) \\* $5\n\n- item\n    - nested\n\n> quote";
-		assert.equal(clean(src), src);
+describe("markdown never reaches another plugin's processors", () => {
+	it("nothing the notebook view loads can reach Obsidian's markdown renderer or parse markup", () => {
+		const seen = new Set<string>();
+		const walk = (file: string) => {
+			if (seen.has(file)) return;
+			seen.add(file);
+			const text = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "");
+			assert.ok(!/\bMarkdownRenderer\b|\bMarkdownPreviewRenderer\b|\bMarkdownPreviewView\b|\bsanitizeHTMLToDom\b|\binnerHTML\b|\bouterHTML\b|\binsertAdjacentHTML\b|\bDOMParser\b|\bcreateContextualFragment\b|\bdocument\.write\b/.test(text), `${file} can reach a markdown renderer or an HTML parser`);
+			for (const m of text.matchAll(/^(?:import|export) (?!type\b)[^;]*? from "(\.[^"]+)"/gm)) walk(join(dirname(file), `${m[1]}.ts`));
+		};
+		walk("src/ui/notebookView.ts");
+		assert.ok([...seen].some((f) => f.endsWith("notebookMarkdown.ts")), "the walk reached the drawing code");
 	});
 
-	it("takes every fence out, whatever its language or container", () => {
-		for (const src of ["```dataviewjs\nevil()\n```", "~~~dataviewjs\nevil()\n~~~", "> ```dataviewjs\n> evil()\n> ```", "1. ```dataviewjs\n   evil()\n   ```", "- > ~~~ dataviewjs\n  > evil()", "    ```dataviewjs\nevil()"]) {
-			const { text, slots } = run(src);
-			assert.ok(!/dataviewjs|evil|```|~~~/.test(text), `${src} -> ${text}`);
-			assert.equal(slots.length, 1, src);
-			assert.equal(slots[0].kind, "fence");
+	it("the tree has no way to say anything but what the drawing code knows", () => {
+		const known = new Set(["heading", "paragraph", "code", "math", "quote", "list", "table", "rule", "text", "wrap", "link", "attachment", "break"]);
+		const tags = new Set(["em", "strong", "del", "b", "i", "u", "sub", "sup", "kbd"]);
+		for (const src of HOSTILE) {
+			walkTree(parseMarkdown(src), (n) => {
+				assert.ok(known.has(n.k), `${src} made ${n.k}`);
+				if (n.k === "wrap") assert.ok(tags.has(n.tag), n.tag);
+				if (n.k === "link") assert.ok(/^(?:https?:|mailto:)/i.test(n.href), n.href);
+			});
 		}
 	});
 
-	it("keeps the fence's code and language for the view to draw", () => {
-		const { text, slots } = run("before\n\n- ```python\n  print(1)\n  ```\n\nafter");
-		assert.equal(text, `before\n\n- ${slots[0].token}\n\nafter`);
-		assert.deepEqual({ ...slots[0], token: "" }, { kind: "fence", token: "", code: "  print(1)", language: "python" });
+	it("shows hostile text, so nothing silently disappears", () => {
+		const shown = (src: string) => {
+			const parts: string[] = [];
+			walkTree(parseMarkdown(src), (n) => {
+				if (n.k === "text") parts.push(n.text);
+				else if (n.k === "code") parts.push("code" in n ? n.code : n.text);
+				else if (n.k === "attachment") parts.push(n.alt);
+				else if (n.k === "math") parts.push(n.tex);
+			});
+			return parts.join("");
+		};
+		for (const src of HOSTILE) assert.ok(shown(src).includes("EVIL"), `${JSON.stringify(src)} lost its text`);
 	});
 
-	it("a closing fence inside other text can't let a later fence through", () => {
-		const { text } = run("```\nx\n> ```\n```dataviewjs\nevil()\n```");
-		assert.ok(!/dataviewjs|evil|```/.test(text), text);
+	it("frontmatter is just a rule and text", () => {
+		for (const src of ["---\n$= EVIL()\n---\nx", "---\r\n$= EVIL()\r\n---\r\nx", "---\r$= EVIL()\r---\rx", "\uFEFF---\n$= EVIL()\n---\nx", "\n\n---\n$= EVIL()\n---\nx"]) {
+			assert.deepEqual(parseMarkdown(src), [{ k: "rule" }, { k: "heading", level: 2, content: [{ k: "text", text: "$= EVIL()" }] }, { k: "paragraph", content: [{ k: "text", text: "x" }] }], JSON.stringify(src));
+		}
+	});
+});
+
+describe("reading markdown", () => {
+	const inline = (src: string) => {
+		const [block] = parseMarkdown(src);
+		assert.equal(block.k, "paragraph", src);
+		return (block as Extract<Block, { k: "paragraph" }>).content;
+	};
+	const text = (t: string) => ({ k: "text", text: t });
+
+	it("headings, with and without closing marks, and underlines", () => {
+		assert.deepEqual(parseMarkdown("## Two ##"), [{ k: "heading", level: 2, content: [text("Two")] }]);
+		assert.deepEqual(parseMarkdown("Title\n==="), [{ k: "heading", level: 1, content: [text("Title")] }]);
+		assert.equal(parseMarkdown("#nospace")[0].k, "paragraph");
+		assert.equal(parseMarkdown("####### seven")[0].k, "paragraph");
 	});
 
-	it("takes inline code out, so processors that read <code> see only a token", () => {
-		const { text, slots } = run("a `$= dv.evil()` b ``c ` d`` e");
-		assert.ok(!text.includes("evil"), text);
-		assert.deepEqual(slots.map((s) => s.kind === "inline" && s.code), ["$= dv.evil()", "c ` d"]);
-		assert.equal(text, `a ${slots[0].token} b ${slots[1].token} e`);
+	it("emphasis, nested and unmatched", () => {
+		assert.deepEqual(plainTree(inline("**b** *i* ~~d~~ __s__ _e_")), [["strong", "b"], " ", ["em", "i"], " ", ["del", "d"], " ", ["strong", "s"], " ", ["em", "e"]]);
+		assert.deepEqual(plainTree(inline("***both***")), [["em", ["strong", "both"]]]);
+		assert.deepEqual(plainTree(inline("**a *b* c**")), [["strong", "a ", ["em", "b"], " c"]]);
+		assert.deepEqual(plainTree(inline("snake_case_name 2 * 3 * 4")), ["snake_case_name 2 * 3 * 4"]);
+		assert.deepEqual(plainTree(inline("*open only")), ["*open only"]);
 	});
 
-	it("leaves no backtick a markdown parser could pair up", () => {
-		for (const src of ["`open\n- `$= evil`", "`multi\nline`", "``` a`b\n`c", "\\``$= evil`"]) {
-			const out = clean(src).replace(/\\`/g, "");
-			assert.ok(!out.includes("`"), `${src} -> ${out}`);
+	it("Arabic emphasis pairs up", () => {
+		assert.deepEqual(plainTree(inline("هذا **مهم** جدا")), ["هذا ", ["strong", "مهم"], " جدا"]);
+	});
+
+	it("inline code keeps its text exactly and strips one pad", () => {
+		assert.deepEqual(inline("`a *b* <i>`"), [{ k: "code", text: "a *b* <i>" }]);
+		assert.deepEqual(inline("`` a`b ``"), [{ k: "code", text: "a`b" }]);
+		assert.deepEqual(inline("`unclosed"), [text("`unclosed")]);
+	});
+
+	it("math, without taking prices for it", () => {
+		assert.deepEqual(inline("$x^2$"), [{ k: "math", tex: "x^2", display: false }]);
+		assert.deepEqual(parseMarkdown("$$\na\nb\n$$"), [{ k: "math", tex: "\na\nb\n" }]);
+		assert.deepEqual(parseMarkdown("$$x$$"), [{ k: "math", tex: "x" }]);
+		assert.deepEqual(inline("costs $5 and $10"), [text("costs $5 and $10")]);
+		assert.deepEqual(inline("\\$x$"), [text("$x$")]);
+	});
+
+	it("takes network and link commands out of math, however they're escaped", () => {
+		assert.equal(safeTex("\\href{u}{x}"), "\\backslash{}href{u}{x}");
+		assert.equal(safeTex("\\\\\\require{u}"), "\\\\\\backslash{}require{u}");
+		assert.equal(safeTex("\\\\href"), "\\\\href");
+		assert.equal(safeTex("\\hrefx \\frac12"), "\\hrefx \\frac12");
+		for (const c of ["unicode", "style", "class", "cssId", "bbox", "mmlToken", "data", "html"]) assert.ok(safeTex(`\\${c}{x}`).startsWith("\\backslash{}"), c);
+	});
+
+	it("links only go to the web or mail, and everything else keeps its text", () => {
+		assert.deepEqual(plainTree(inline("[a](https://x.example)")), [["a:https://x.example", "a"]]);
+		assert.deepEqual(plainTree(inline('[a](<https://x.example/b c> "t")')), [["a:https://x.example/b c", "a"]]);
+		assert.deepEqual(plainTree(inline("see https://x.example/a_(b). <mailto:a@b.c>")), ["see ", ["a:https://x.example/a_(b", "https://x.example/a_(b"], "). ", ["a:mailto:a@b.c", "mailto:a@b.c"]]);
+		for (const bad of ["javascript:alert(1)", "obsidian://open?file=x", "data:text/html,x", "file:///etc/passwd", "rel/path.md", "app://x"]) {
+			assert.deepEqual(plainTree(inline(`[a](${bad})`)), ["a"], bad);
+		}
+		const [p] = parseMarkdown("[a][r] [r]\n\n[r]: https://x.example \"t\"") as Extract<Block, { k: "paragraph" }>[];
+		assert.deepEqual(plainTree(p.content), [["a:https://x.example", "a"], " ", ["a:https://x.example", "r"]]);
+	});
+
+	it("loads nothing: remote images become links, and vault embeds stay text", () => {
+		assert.deepEqual(plainTree(inline("![pic](https://x.example/a.png)")), [["a:https://x.example/a.png", "pic"]]);
+		assert.deepEqual(plainTree(inline("![pic](rel.png)")), ["pic"]);
+		assert.deepEqual(plainTree(inline("![[Private/secret]]")), ["![[Private/secret]]"]);
+		assert.deepEqual(inline("![a](attachment:a.png)"), [{ k: "attachment", name: "a.png", alt: "a" }]);
+	});
+
+	it("raw HTML is text, apart from a few plain tags that have no attributes", () => {
+		assert.deepEqual(plainTree(inline("<b>x</b> a<br>b <sub>1</sub>")), [["b", "x"], " a", "BR", "b ", ["sub", "1"]]);
+		for (const raw of ['<img src="x" onerror="y">', "<script>x</script>", '<a href="x">y</a>', '<b onclick="x">y</b>', "<code>y</code>", "<!-- y -->"]) {
+			assert.deepEqual(plainTree(inline(raw)), [raw], raw);
+		}
+		assert.deepEqual(plainTree(inline("<b>never closed")), ["<b>never closed"]);
+	});
+
+	it("entities are text once decoded, so they can't start anything", () => {
+		assert.deepEqual(inline("&lt;img&gt; &#96;x&#96; &#x26; &nope; &amp;lt;"), [text("<img> `x` & &nope; &lt;")]);
+	});
+
+	it("code blocks, fenced and indented, with odd line ends and closers", () => {
+		const code = (c: string, language = "") => [{ k: "code", code: c, language }];
+		assert.deepEqual(parseMarkdown("```python title\nx\n\ny\n```"), code("x\n\ny", "python"));
+		assert.deepEqual(parseMarkdown("~~~\r\nx\r\n~~~"), code("x"));
+		assert.deepEqual(parseMarkdown("````\n```\n````"), code("```"));
+		assert.deepEqual(parseMarkdown("```\nnever closed"), code("never closed"));
+		assert.deepEqual(parseMarkdown("  ```\n    x\n  ```"), code("  x"));
+		assert.deepEqual(parseMarkdown("    x\n\n\ty\n"), code("x\n\ny"));
+		assert.equal(parseMarkdown("``` a`b ```")[0].k, "paragraph");
+	});
+
+	it("lists: nested, ordered from any number, tasks, tight and loose", () => {
+		const [list] = parseMarkdown("3. a\n4. b\n   - c\n     d\n") as Extract<Block, { k: "list" }>[];
+		assert.equal(list.ordered, true);
+		assert.equal(list.start, 3);
+		assert.equal(list.tight, true);
+		assert.equal(list.items[1].blocks[1].k, "list");
+		const [tasks] = parseMarkdown("- [x] done\n- [ ] todo\n- [link](https://x.example)") as Extract<Block, { k: "list" }>[];
+		assert.deepEqual(tasks.items.map((i) => i.task), [true, false, null]);
+		assert.equal((parseMarkdown("- a\n\n- b") as Extract<Block, { k: "list" }>[])[0].tight, false);
+		assert.equal((parseMarkdown("- a
+- b
+
+1. c") as Extract<Block, { k: "list" }>[])[0].tight, true, "a different list after a blank line");
+		assert.equal(parseMarkdown("- - -")[0].k, "rule");
+		assert.deepEqual(parseMarkdown("text\n2. not a list").map((b) => b.k), ["paragraph"]);
+	});
+
+	it("quotes, with lazy lines and blocks inside", () => {
+		const [quote] = parseMarkdown("> a\nb\n> ```\n> c\n> ```") as Extract<Block, { k: "quote" }>[];
+		assert.deepEqual(quote.blocks.map((b) => b.k), ["paragraph", "code"]);
+	});
+
+	it("tables: alignment, escaped pipes, uneven rows", () => {
+		const [table] = parseMarkdown("| a | b | c |\n|:--|--:|:-:|\n| 1\\|2 | `x` |\n| 3 | 4 | 5 | 6 |\nnext") as Extract<Block, { k: "table" }>[];
+		assert.deepEqual(table.align, ["left", "right", "center"]);
+		assert.deepEqual(table.rows[0][0], [text("1|2")]);
+		assert.equal(table.rows[0].length, 2);
+		assert.equal(table.rows[1].length, 3);
+		assert.equal(parseMarkdown("a | b\n--- | ---\n1 | 2")[0].k, "table");
+		assert.equal(parseMarkdown("| a |\n| b |")[0].k, "paragraph");
+	});
+
+	it("line breaks: a soft one is a space, a hard one breaks", () => {
+		assert.deepEqual(plainTree(inline("a\nb  \nc\\\nd")), ["a b", "BR", "c", "BR", "d"]);
+	});
+
+	it("Obsidian's own syntax is plain text in a notebook", () => {
+		assert.deepEqual(plainTree(inline("[[Note]] ==mark== %%c%% #tag")), ["[[Note]] ==mark== %%c%% #tag"]);
+	});
+
+	it("hostile input stays cheap and bounded", () => {
+		const inputs = [
+			`${" ".repeat(90_000)}x`, `\`${"a ".repeat(45_000)}\``, "![".repeat(45_000), "[".repeat(90_000), "[a](".repeat(20_000), "<b".repeat(45_000), "<b>".repeat(30_000), "*a ".repeat(30_000), "*a_".repeat(30_000), "a*".repeat(45_000), "$".repeat(90_000), "$a ".repeat(30_000), "&".repeat(90_000), "\\".repeat(90_000),
+			"`".repeat(90_000), Array.from({ length: 400 }, (_, n) => "`".repeat(n + 1)).join(" "), "https://x/".concat(".".repeat(90_000), "y"), "$$x\n".repeat(100_000), "> ".repeat(45_000), "- ".repeat(45_000), "1. a\n".repeat(100_000), `${"|a".repeat(45_000)}\n${"|-".repeat(45_000)}`, "---\n".repeat(100_000), "# ".concat(" ".repeat(90_000), "x"), `[a]: ${"x".repeat(90_000)} "`, "```\n".repeat(100_000), "<".repeat(90_000), "*".repeat(90_000), `${"**a".repeat(30_000)}${"**".repeat(30_000)}`,
+		];
+		for (const src of inputs) {
+			const t0 = performance.now();
+			parseMarkdown(src);
+			const ms = performance.now() - t0;
+			assert.ok(ms < 1500, `${JSON.stringify(src.slice(0, 16))} took ${Math.round(ms)} ms`);
 		}
 	});
 
-	it("turns raw HTML into visible text", () => {
-		for (const src of ["<script>evil()</script>", '<img src=x onerror="evil()">', '<iframe src="https://evil.example"></iframe>', '<pre><code class="language-dataviewjs">evil()</code></pre>', "<!-- x -->", "<?php x ?>", "<style>*{display:none}</style>", '<a href="javascript:evil()">x</a>', "<b onclick=evil()>x</b>", "\\\\<script>", "<SCRIPT>", "- <svg onload=evil()>", "<https://evil.example>"]) {
-			assert.ok(!/<[a-zA-Z/!?]/.test(clean(src).replace("</b>", "")), `${src} -> ${clean(src)}`);
-		}
-		assert.equal(clean("<script>"), "&lt;script>");
-	});
-
-	it("keeps a few harmless tags with no attributes", () => {
-		assert.equal(clean("a<br>b <b>c</b> x<sub>1</sub> <br/>"), "a<br>b <b>c</b> x<sub>1</sub> <br/>");
-	});
-
-	it("loads nothing: every image becomes a link, and vault embeds become text", () => {
-		assert.equal(clean("![x](https://evil.example/p.png)"), "\\![x](https://evil.example/p.png)");
-		assert.equal(clean("![x][r]\n\n[r]: https://evil.example/p.png"), "\\![x][r]\n\n[r]: https://evil.example/p.png");
-		assert.equal(clean("![[Private/secret]]"), "\\!\\[\\[Private/secret]]");
-		assert.equal(clean("[[a]] [[1, 2], [3]]"), "\\[\\[a]] \\[\\[1, 2], [3]]");
-		assert.equal(clean("\\![x](https://a.example/p.png)"), "\\![x](https://a.example/p.png)", "an author's escape isn't undone");
-	});
-
-	it("an attachment becomes a slot the view fills from the cell", () => {
-		const { text, slots } = run("see ![fig 1](attachment:a.png) here");
-		assert.equal(text, `see ${slots[0].token} here`);
-		assert.deepEqual({ ...slots[0], token: "" }, { kind: "attachment", token: "", name: "a.png", alt: "fig 1" });
-	});
-
-	it("keeps math readable and safe whether or not the parser agrees it's math", () => {
-		assert.equal(clean("$a<b$ and $$x<y$$"), "$a< b$ and $$x< y$$");
-		assert.equal(clean("$$\n<script>\n$$"), "$$\n< script>\n$$");
-		assert.ok(!/<[a-z]/.test(clean("$ <img src=x>$")));
-		assert.ok(!clean("$![x](https://a.example/p.png)$").includes("$!["));
-		assert.ok(!clean("$`$= evil`$").replace(/\\`/g, "").includes("`"));
-	});
-
-	it("takes the network and link commands out, inside math or not", () => {
-		for (const cmd of ["\\href{javascript:evil()}{x}", "\\require{evil}", "\\unicode{x}", "\\style{x}{y}", "\\class{x}{y}", "\\cssId{x}{y}", "\\bbox[background-image:url(https://evil.example/x.png)]{x}"]) {
-			assert.ok(!/\\(href|require|unicode|style|class|cssId|bbox)/.test(clean(`$${cmd}$`)), cmd);
-			assert.ok(!/\\(href|require|unicode|style|class|cssId|bbox)/.test(clean(`$ ${cmd}\n$`)), cmd);
-		}
-		assert.equal(clean("$\\alpha + \\frac{1}{2}$"), "$\\alpha + \\frac{1}{2}$");
-	});
-
-	it("makes indented code that an inline query plugin would read harmless", () => {
-		assert.equal(clean("    $= evil()"), "    \\$= evil()");
-		assert.equal(clean(">     = evil"), ">     \\= evil");
-		assert.equal(clean("    print(1)"), "    print(1)");
-	});
-
-	it("handles Windows line ends", () => {
-		const { slots } = run("```py\r\nx\r\n```\r\n");
-		assert.equal(slots[0].kind === "fence" && slots[0].code, "x");
+	it("nesting past the limits stays as text instead of recursing", () => {
+		const depth = (blocks: Block[]): number => Math.max(0, ...blocks.map((b) => (b.k === "quote" ? 1 + depth(b.blocks) : b.k === "list" ? 1 + Math.max(...b.items.map((i) => depth(i.blocks))) : 0)));
+		assert.ok(depth(parseMarkdown(`${"> ".repeat(5000)}x`)) <= 40);
+		assert.ok(depth(parseMarkdown(Array.from({ length: 400 }, (_, n) => `${" ".repeat(n * 2)}- x`).join("\n"))) <= 40);
+		const wrapDepth = (nodes: Inline[]): number => Math.max(0, ...nodes.map((n) => (n.k === "wrap" ? 1 + wrapDepth(n.children) : 0)));
+		const [p] = parseMarkdown(`${"*a ".repeat(5000)}b${" a*".repeat(5000)}`) as Extract<Block, { k: "paragraph" }>[];
+		assert.ok(wrapDepth(p.content) <= 16);
 	});
 });
 
@@ -384,55 +531,6 @@ describe("the view path has no desktop-only code", () => {
 });
 
 describe("findings from the review of #21", () => {
-	const run = (src: string) => neutraliseMarkdown(src, "N");
-	const clean = (src: string) => run(src).text;
-
-	it("no tilde fence survives odd line ends or containers the scan doesn't know", () => {
-		for (const src of ["text\r~~~dataviewjs\rdv.paragraph(1)\r~~~\r", "~~~dataviewjs\r\r\nevil()\r\n~~~", "~~~dataviewjs \nevil()\n~~~", "x[^1]\n\n[^1]: ~~~dataviewjs\n    evil()\n", "a ~~~dataviewjs evil()", "a\f~~~dataviewjs\fevil()"]) {
-			assert.ok(!/(^|[^\\])~~/.test(clean(src)), JSON.stringify(src) + " -> " + JSON.stringify(clean(src)));
-		}
-		assert.equal(clean("~~strike~~"), "~~strike~~");
-	});
-
-	it("a safe tag starting an HTML block can't bring live HTML with it", () => {
-		for (const src of ['<hr>\\<img src="http://x.example/hr.png">', '<b>\n\\<img src="http://x.example/b.png">\\<code>$= dv.evil()\\</code>\n</b>', "\\\\\\<img src=x>"]) {
-			assert.ok(!/<(img|code|\/code)/.test(clean(src)), `${src} -> ${clean(src)}`);
-		}
-	});
-
-	it("a token can't become a tag name", () => {
-		assert.ok(!/<BCNB/.test(clean("<`x` a=b>")), clean("<`x` a=b>"));
-		assert.ok(!/<[^\s]/.test(clean("<\\`x <1a <$x <_y").replace(/&lt;/g, "")));
-	});
-
-	it("takes the query prefix off code indented inside any container", () => {
-		assert.equal(clean("-      $= evil()"), "-      \\$= evil()");
-		assert.equal(clean("1.      = x"), "1.      \\= x");
-		assert.equal(clean("> -     $= x"), "> -     \\$= x");
-		assert.equal(clean("[^1]:     $= x"), "[^1]:     \\$= x");
-		assert.equal(clean("    =\n    this.file.name"), "    \\=\n    this.file.name");
-		assert.equal(clean("-     =\n      this.file.name"), "-     \\=\n      this.file.name");
-		assert.equal(clean("    ==\n    x"), "    \\==\n    x");
-		assert.equal(clean("\u00a0\u00a0\u00a0\u00a0\u00a0$= x"), "\u00a0\u00a0\u00a0\u00a0\u00a0\\$= x");
-		assert.equal(clean("    \u3000= x"), "    \u3000\\= x");
-		assert.equal(clean("-\t  = x"), "-\t  \\= x");
-		assert.equal(clean(`[^${"a".repeat(101)}]:      $= x`), `[^${"a".repeat(101)}]:      \\$= x`);
-		assert.equal(clean("[^a\\]b]:      $= x"), "[^a\\]b]:      \\$= x");
-	});
-
-	it("leaves a heading underline alone", () => {
-		assert.equal(clean("Title\n==="), "Title\n===");
-		assert.equal(clean("a = b, $= c"), "a = b, $= c");
-	});
-
-	it("hostile lines stay cheap", () => {
-		for (const src of [`${" ".repeat(90_000)}x`, `\`${"a ".repeat(45_000)}\``, "![".repeat(45_000), "<b".repeat(45_000), `- ${" ".repeat(90_000)}x`, `\`\`\`${" ".repeat(90_000)}x`]) {
-			const t0 = performance.now();
-			clean(src);
-			assert.ok(performance.now() - t0 < 250, `${src.slice(0, 12)} took ${performance.now() - t0} ms`);
-		}
-	});
-
 	it("markdown too big to scan is flagged, by line or by cell", () => {
 		assert.equal(markdownTooLarge("short"), false);
 		assert.equal(markdownTooLarge("x".repeat(100_001)), true);
@@ -452,6 +550,6 @@ describe("findings from the review of #21", () => {
 	});
 
 	it("reads a file with a byte order mark", () => {
-		assert.deepEqual(opened(`﻿${nb([])}`).cells, []);
+		assert.deepEqual(opened(`\uFEFF${nb([])}`).cells, []);
 	});
 });
