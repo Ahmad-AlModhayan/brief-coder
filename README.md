@@ -46,17 +46,24 @@ Blocks that Obsidian or other plugins render, such as `mermaid`, `dataview`, `ta
 
 Brief Coder needs Obsidian 1.8.7 or newer.
 
-**With BRAT (until it's in the community directory)**
+**From Community plugins**
 
-1. Install **BRAT** from Settings → Community plugins.
-2. Run **BRAT: Add a beta plugin** and enter `Ahmad-AlModhayan/brief-coder`.
-3. Enable **Brief Coder** in Settings → Community plugins.
+1. Open Settings → Community plugins → Browse and search for **Brief Coder**.
+2. Select **Install**, then **Enable**.
 
 **Manually**
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/Ahmad-AlModhayan/brief-coder/releases/latest).
 2. Put them in `<your vault>/.obsidian/plugins/brief-coder/`.
 3. Reload Obsidian and enable **Brief Coder**.
+
+**With BRAT (optional)**
+
+BRAT gets a new GitHub release as soon as it's out, before the directory lists it.
+
+1. Install **BRAT** from Settings → Community plugins.
+2. Run **BRAT: Add a beta plugin** and enter `Ahmad-AlModhayan/brief-coder`.
+3. Enable **Brief Coder** in Settings → Community plugins.
 
 ### Moving from Obsidian Coder
 
@@ -168,6 +175,7 @@ Agents get six tools: `list_notes`, `search_notes` (Arabic-aware), `read_note`, 
 
 - **Code runs on your computer with your permissions**, the same as running it in a terminal. Only run code you trust, and use trusted folders if your vault contains notes from other people.
 - **Nothing runs on its own.** Opening, syncing or rendering a note or a notebook never runs its code.
+- **Why it needs filesystem and shell access:** running a program takes both, and Obsidian's plugin API can't start programs or write outside the vault. On desktop, `src/run/process.ts` uses Node's `fs` for the temporary files described below, and `child_process` to start the interpreter or compiler you installed, read your shell's PATH and stop a run. Scanners, including the community directory's, flag both. The agent bridge uses `fs` to read the folders you share with it and to save proposed changes in `<vault>/.coder/agent-changes`.
 - **Files outside the vault:** to run code, Brief Coder writes the block to a temporary folder in your system's temp directory and starts the installed interpreter or compiler there. Temporary folders are removed after each run. Build caches for C#, Scala, Nim and Crystal are kept per block and removed after 14 days unused.
 - **Clipboard:** Brief Coder writes to the clipboard only when you press a copy button or run a copy command, and never reads from it.
 - **Network:** Brief Coder itself makes no network requests and collects nothing. Code you run can use the network, like any program you run yourself. HTML previews run in a sandboxed frame with no access to Obsidian or your files.
@@ -255,6 +263,8 @@ npm test        # unit tests + runs real snippets in every language installed on
 - `bridge/coder-bridge.mjs`: the agent bridge (MCP over stdio, no dependencies).
 
 The test suite runs snippets in 32 languages end to end, and also covers Stop, the time limit, typed input, output limits, temporary-file cleanup, error messages, the bridge's scope rules, and accepting and reverting changesets. [docs/TESTING.md](docs/TESTING.md) records the last run inside Obsidian.
+
+To contribute, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Releasing:** run `npm version patch` (or `minor` / `major`), update `.github/RELEASE_NOTES.md` and [CHANGELOG.md](CHANGELOG.md), and push to `main`. GitHub Actions builds, tests and publishes the release with `main.js`, `manifest.json`, `styles.css` and `coder-bridge.mjs`.
 
