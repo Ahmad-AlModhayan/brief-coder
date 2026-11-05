@@ -179,7 +179,7 @@ Agents get six tools: `list_notes`, `search_notes` (Arabic-aware), `read_note`, 
 
 Brief Coder was built to keep Obsidian fast. Measured in Obsidian 1.13 and 1.14:
 
-- **Small:** about 122 KB, with no bundled libraries; CI fails a build over 150 KiB. The code editor and syntax colours reuse what Obsidian already ships. The Arabic interface is about 13 KB of that.
+- **Small:** about 123 KB, with no bundled libraries; CI fails a build over 150 KiB. The code editor and syntax colours reuse what Obsidian already ships. The Arabic interface is about 13 KB of that.
 - **Quick to load:** its own startup work is a few milliseconds.
   - Desktop-only modules load the first time you press Run.
   - File types are registered in one step, so the file list refreshes once instead of 70 times.
