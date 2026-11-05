@@ -16,6 +16,7 @@ tags have no `v` prefix, as Obsidian requires.
 - Jupyter notebooks (`.ipynb`, format 4) open in a read-only view on desktop and mobile: markdown, code with syntax colours, and saved text, images and errors. Brief Coder doesn't write to the file, and opening one never runs its code.
 - Saved HTML and scripts stay blocked until you press **Trust this notebook**, then show in a sandboxed frame. Trust is per notebook, can be revoked, and ends if the file changes.
 - Malformed files and other notebook formats get a clear message. Large notebooks draw only the cells near the screen.
+- Notebook markdown is drawn by Brief Coder itself, not by Obsidian's renderer, so no other plugin's processor sees it, trusted or not. Headings, emphasis, lists, tasks, quotes, tables, links, code, math and Arabic all show. Obsidian-only syntax (callouts, footnotes, `==highlight==`, `%%comments%%`) shows as plain text.
 - If another plugin handles `.ipynb`, it keeps it. If you listed `ipynb` under Code files, it stays in the text editor.
 - The agent bridge still can't read `.ipynb` files.
 - CI's size limit for `main.js` goes from 100 KiB to 150 KiB, and the README no longer promises "under 100 KB".

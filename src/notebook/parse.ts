@@ -116,5 +116,11 @@ export function parseNotebook(text: string): ParseResult {
 	if (!isObject(root) || typeof root.nbformat !== "number") return { ok: false, code: "not-notebook", reason: "no nbformat field" };
 	if (root.nbformat !== 4) return { ok: false, code: "version", reason: `nbformat ${root.nbformat}`, version: root.nbformat };
 	if (!Array.isArray(root.cells)) return { ok: false, code: "not-notebook", reason: "no cells" };
-	return { ok: true, notebook: { language: readLanguage(root.metadata), cells: root.cells.map(readCell) } };
+	try {
+		return { ok: true, notebook: { language: readLanguage(root.metadata), cells: root.cells.map(readCell) } };
+	} catch (e) {
+		// JSON.parse takes deeper nesting than JSON.stringify can write back out.
+		if (e instanceof RangeError) return { ok: false, code: "json", reason: "it's nested too deeply" };
+		throw e;
+	}
 }
