@@ -34,6 +34,8 @@ class BarChild extends MarkdownRenderChild {
 /** Reading view (and rendered embeds/callouts): add the Coder bar under code blocks. */
 export function readingViewProcessor(plugin: CoderPlugin) {
 	return (el: HTMLElement, ctx: MarkdownPostProcessorContext): void => {
+		// A notebook's view is read-only: its code never gets Run, whatever reaches the renderer.
+		if (ctx.sourcePath.toLowerCase().endsWith(".ipynb")) return;
 		const s = plugin.settings;
 		if (s.inlineCodeCopy) decorateInlineCode(el);
 		if (!s.showRunBar) return;

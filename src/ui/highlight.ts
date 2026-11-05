@@ -239,3 +239,25 @@ export const themeHighlighting: Extension = syntaxHighlighting(
 		{ tag: t.invalid, color: "var(--text-error)" },
 	]),
 );
+
+/** The look of every CodeMirror editor in the plugin, from the active theme. */
+export const editorTheme = EditorView.theme({
+	"&": { height: "100%", backgroundColor: "var(--background-primary)", color: "var(--text-normal)", fontSize: "var(--code-size, 0.9em)" },
+	"&.cm-focused": { outline: "none" },
+	".cm-scroller": { fontFamily: "var(--font-monospace)", lineHeight: "1.6", overflow: "auto" },
+	".cm-content": { caretColor: "var(--text-accent)", padding: "12px 0" },
+	".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--text-accent)" },
+	".cm-gutters": { backgroundColor: "var(--background-primary)", color: "var(--text-faint)", border: "none" },
+	".cm-activeLine": { backgroundColor: "var(--background-modifier-hover)" },
+	".cm-activeLineGutter": { backgroundColor: "transparent", color: "var(--text-muted)" },
+	"&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": { backgroundColor: "var(--text-selection) !important" },
+	".cm-selectionMatch": { backgroundColor: "var(--text-highlight-bg)" },
+	".cm-matchingBracket": { backgroundColor: "var(--background-modifier-active-hover)", outline: "1px solid var(--background-modifier-border-focus)" },
+	".cm-foldGutter span": { color: "var(--text-faint)" },
+	".cm-panels": { backgroundColor: "var(--background-secondary)", color: "var(--text-normal)" },
+	".cm-panels.cm-panels-top": { borderBottom: "1px solid var(--background-modifier-border)" },
+	".cm-searchMatch": { backgroundColor: "var(--text-highlight-bg)" },
+	".cm-searchMatch.cm-searchMatch-selected": { backgroundColor: "var(--text-highlight-bg-active)" },
+	".cm-textfield": { backgroundColor: "var(--background-modifier-form-field)", color: "var(--text-normal)", border: "1px solid var(--background-modifier-border)", borderRadius: "4px" },
+	".cm-button": { backgroundImage: "none", backgroundColor: "var(--interactive-normal)", color: "var(--text-normal)", border: "none", borderRadius: "4px" },
+});
