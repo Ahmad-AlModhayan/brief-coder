@@ -99,7 +99,7 @@ const AR: Record<string, string> = {
 	"Open these file types in Brief Coder": "فتح أنواع الملفات هذه في Brief Coder",
 	"Comma-separated extensions. Reload Obsidian after changing this list.": "امتدادات مفصولة بفواصل. أعد تحميل Obsidian بعد تغيير القائمة.",
 	"Line numbers": "أرقام الأسطر",
-	"Wrap text files": "لف الملفات النصية",
+	"Wrap text files": "التفاف الملفات النصية",
 	"{file} is over 5 MB: read-only.": "{file} أكبر من 5 ميجابايت: للقراءة فقط.",
 	"Wrap long lines": "التفاف الأسطر الطويلة",
 	"Tab size": "حجم المسافة البادئة",
