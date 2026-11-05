@@ -32,12 +32,13 @@ CI also fails if `main.js` goes over 150 KiB.
 ## Rules the tests enforce
 
 - Every `t("…")` string in `src/` needs Arabic text in `src/i18n.ts`, and the Arabic must keep every `{placeholder}`.
-- The bridge (`bridge/coder-bridge.mjs`) has no dependencies and its scope rules are tested in `tests/bridge.test.ts`.
+- The bridge's scope rules are tested in `tests/bridge.test.ts`.
 
 ## Pull requests
 
 - Keep each one to one change, and link the issue it closes.
 - Add a test for a bug fix or new behaviour.
+- Keep `bridge/coder-bridge.mjs` free of dependencies.
 - Say which systems you ran it on. CI covers Linux only, so Windows and macOS results need to come from you or a maintainer.
 - Don't change the version: a new version in `manifest.json` on `main` publishes a release.
 
