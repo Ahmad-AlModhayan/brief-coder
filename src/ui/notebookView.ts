@@ -1,16 +1,17 @@
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { Component, FileView, MarkdownRenderer, Notice, TFile, WorkspaceLeaf, setIcon } from "obsidian";
+import { Component, FileView, Notice, TFile, WorkspaceLeaf, setIcon } from "obsidian";
 import { sha256 } from "../agent/changes";
 import { isArabic, t } from "../i18n";
 import { languageForFence } from "../languages";
 import type CoderPlugin from "../main";
-import { MarkdownSlot, markdownTooLarge, neutraliseMarkdown } from "../notebook/markdown";
+import { markdownTooLarge, parseMarkdown } from "../notebook/markdown";
 import { imageSource, isHeldBack, planOutput } from "../notebook/outputs";
 import { MimeBundle, Notebook, NotebookCell, ParseResult, parseNotebook } from "../notebook/parse";
 import { isNotebookTrusted, revokeNotebook, trustNotebook } from "../notebook/trust";
 import { previewDocument } from "../run/inapp";
 import { editorTheme, languageFor, themeHighlighting } from "./highlight";
+import { drawMarkdownTree } from "./notebookMarkdown";
 
 export const VIEW_TYPE_NOTEBOOK = "coder-notebook-view";
 
@@ -298,69 +299,43 @@ export class NotebookView extends FileView {
 		});
 	}
 
-	/** Obsidian's renderer, fed only neutralised text (see neutraliseMarkdown), and swept once more after. */
+	/** Never Obsidian's markdown renderer, trusted or not: it would run other plugins' processors on this text. */
 	private async drawMarkdown(source: string, host: HTMLElement, attachments: Record<string, MimeBundle>, drawn: Component): Promise<void> {
-		if (markdownTooLarge(source)) {
-			note(host, t("This markdown is too large to format, so it shows as plain text."));
+		const plain = (reason: string) => {
+			host.empty();
+			note(host, reason);
 			host.createEl("pre", { cls: "coder-nb-raw", text: source.slice(0, 200_000) });
-			return;
-		}
-		const nonce = Math.random().toString(36).slice(2, 10).toUpperCase();
-		const { text, slots } = neutraliseMarkdown(source, nonce);
-		await MarkdownRenderer.render(this.app, text, host, this.file?.path ?? "", drawn);
-		if (!host.isConnected) return;
-		sweep(host);
-		this.fillSlots(host, slots, attachments, drawn);
-	}
-
-	private fillSlots(host: HTMLElement, slots: MarkdownSlot[], attachments: Record<string, MimeBundle>, drawn: Component): void {
-		if (!slots.length) return;
-		const byToken = new Map(slots.map((s) => [s.token, s]));
-		const pattern = new RegExp(`(${slots.map((s) => s.token).join("|")})`);
-		const doc = host.ownerDocument;
-		const walker = doc.createTreeWalker(host, NodeFilter.SHOW_TEXT);
-		const nodes: Text[] = [];
-		while (walker.nextNode()) if (pattern.test((walker.currentNode as Text).data)) nodes.push(walker.currentNode as Text);
-		for (const node of nodes) {
-			const frag = doc.createDocumentFragment();
-			for (const piece of node.data.split(pattern)) {
-				const slot = byToken.get(piece);
-				if (!slot) {
-					if (piece) frag.append(doc.createTextNode(piece));
-				} else if (slot.kind === "inline") {
-					const code = doc.createElement("code");
-					code.setAttribute("dir", "ltr");
-					code.textContent = slot.code;
-					frag.append(code);
-				} else if (slot.kind === "attachment") {
-					frag.append(this.attachmentNode(doc, slot, attachments));
-				} else {
-					const box = doc.createElement("div");
+		};
+		if (markdownTooLarge(source)) return plain(t("This markdown is too large to format, so it shows as plain text."));
+		try {
+			await drawMarkdownTree(host, parseMarkdown(source), {
+				code: (code, language) => {
+					const box = host.ownerDocument.createElement("div");
 					box.className = "coder-nb-code";
 					box.setAttribute("dir", "ltr");
-					this.mountCode(box, slot.code, languageForFence(slot.language)?.extensions[0] ?? slot.language, drawn);
-					frag.append(box);
-				}
-			}
-			const parent = node.parentElement;
-			// A block on its own shouldn't stay inside a <p>.
-			if (parent?.tagName === "P" && parent.childNodes.length === 1 && frag.querySelector("div")) parent.replaceWith(frag);
-			else node.replaceWith(frag);
+					this.mountCode(box, code, languageForFence(language)?.extensions[0] ?? language, drawn);
+					return box;
+				},
+				attachment: (name, alt) => this.attachmentNode(host.ownerDocument, name, alt, attachments),
+				cleanMath: sweep,
+			});
+		} catch {
+			plain(t("This markdown is too large to format, so it shows as plain text."));
 		}
 	}
 
-	private attachmentNode(doc: Document, slot: Extract<MarkdownSlot, { kind: "attachment" }>, attachments: Record<string, MimeBundle>): Node {
-		const bundle = attachments[slot.name];
+	private attachmentNode(doc: Document, name: string, alt: string, attachments: Record<string, MimeBundle>): Node {
+		const bundle = attachments[name];
 		for (const mime of bundle ? Object.keys(bundle) : []) {
 			const src = imageSource(mime, bundle[mime]);
 			if (!src) continue;
 			const img = doc.createElement("img");
 			img.className = "coder-nb-image";
-			img.alt = slot.alt;
+			img.alt = alt;
 			img.src = src;
 			return img;
 		}
-		return doc.createTextNode(slot.alt || slot.name);
+		return doc.createTextNode(alt || name);
 	}
 
 	/** A trusted output, in a frame with no same-origin access: it can't reach the vault, the page or Obsidian's API. */
@@ -396,7 +371,7 @@ function refusalText(parsed: Extract<ParseResult, { ok: false }>): string {
 	}
 }
 
-/** The last line of defence after the renderer: only inert elements and plain web links stay. */
+/** The last look at what MathJax made: only inert elements and plain web links stay. */
 function sweep(host: HTMLElement): void {
 	host.querySelectorAll(STRIPPED).forEach((el) => el.remove());
 	host.querySelectorAll("*").forEach((el) => {
