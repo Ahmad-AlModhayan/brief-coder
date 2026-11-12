@@ -1,6 +1,6 @@
 # Contributing to Brief Coder
 
-Bug reports and pull requests are welcome. Use [GitHub Issues](https://github.com/Ahmad-AlModhayan/brief-coder/issues) for bugs and ideas. Report security problems privately, as [SECURITY.md](SECURITY.md) describes.
+Bug reports and pull requests are welcome. Use [GitHub Issues](https://github.com/Ahmad-AlModhayan/brief-coder/issues) for bugs and ideas. Report security problems privately, as [SECURITY.md](SECURITY.md) describes. Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Set up
 
