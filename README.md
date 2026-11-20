@@ -246,6 +246,116 @@ Brief Coder runs code with the tools already on your computer. Install the langu
 **Do I need the agent bridge?**
 No. It's off by default and only matters if you use a local AI agent such as Claude Code. See [Agent bridge](#agent-bridge).
 
+## Architecture (C4 + UML)
+
+### System Context (C4 Level 1)
+
+```mermaid
+flowchart TB
+    user(["Obsidian User<br/>[Person]<br/>Runs code blocks, edits code files,<br/>views notebooks, reviews proposals"])
+    agent(["Local AI Agent<br/>[External Actor]<br/>MCP client reading shared folders<br/>and proposing held edits"])
+
+    bc["Brief Coder<br/>[Software System]<br/>Obsidian plugin (main.js) + optional stdio<br/>MCP bridge (coder-bridge.mjs); zero telemetry"]
+
+    obs["Obsidian Host App<br/>[External System]<br/>Vault API, CodeMirror 6, views, lifecycle"]:::ext
+    runtimes["Installed Language Runtimes<br/>[External Systems]<br/>Python, Node, Go, Rust, .NET, Java, Shell, 30+ more"]:::ext
+    vault[("Obsidian Vault Filesystem<br/>[External Storage]<br/>Notes, code files, notebooks, bridge JSON")]:::ext
+
+    user -->|"Writes notes, clicks Run/Copy, reviews diffs"| obs
+    obs -->|"Loads plugin UI & commands"| bc
+    agent -->|"Scoped read & propose tools [MCP / stdio]"| bc
+    bc -->|"Runs user-approved code [child_process]"| runtimes
+    bc -->|"Reads/writes notes & changesets [Vault API / fs]"| vault
+
+    classDef ext stroke-dasharray: 5 5,stroke-width:1.5px;
+```
+
+### Containers (C4 Level 2)
+
+```mermaid
+flowchart TB
+    user(["Obsidian User<br/>[Desktop / Mobile]"])
+    agent(["Local AI Agent<br/>[MCP Client]"])
+
+    subgraph bc_sys["Brief Coder"]
+        plugin["Brief Coder Plugin — main.js<br/>[TypeScript, Obsidian API, CodeMirror 6]<br/>Run/Copy bars, streaming output, code editor,<br/>notebook viewer, JS/HTML sandboxes, diff review"]
+        bridge["Agent Bridge — bridge/coder-bridge.mjs<br/>[Node.js 18+, Zero Dependencies]<br/>Standalone stdio MCP server enforcing folder<br/>scope and writing held proposals"]
+        bstate[("Bridge Config & Held Changesets<br/>[JSON Files in Vault]<br/>bridge.json policy & .coder/agent-changes/*.json<br/>with before/after snapshots & SHA-256")]
+        tcache[("Temp Execution Dir & Build Cache<br/>[OS Temp Filesystem]<br/>Per-run temp dirs (auto-cleaned) &<br/>14-day C#/Scala/Nim/Crystal caches")]
+    end
+
+    obs["Obsidian Vault API<br/>[External]"]:::ext
+    runtimes["Local Language Runtimes<br/>[External]"]:::ext
+
+    user --> plugin
+    plugin -->|"Views, extensions, accepted edits"| obs
+    plugin -->|"Writes bridge.json, re-checks & applies changesets"| bstate
+    plugin -->|"Stages snippets & build caches"| tcache
+    plugin -->|"Spawns/stops processes [child_process]"| runtimes
+    agent -->|"list/search/read/propose [MCP / stdio]"| bridge
+    bridge -->|"Reads policy per request, writes held JSON [fs]"| bstate
+
+    classDef ext stroke-dasharray: 5 5,stroke-width:1.5px;
+```
+
+### Runtime Safety: Held Agent Changeset Lifecycle (UML State)
+
+```mermaid
+stateDiagram-v2
+    state "skipped (not overwritten)" as skipped
+    state "kept user edit" as revert_skipped
+
+    [*] --> held : propose_change (bridge checks shared/private scope)
+    held --> rejected : User presses Reject (notes untouched)
+    held --> accepted : Accept (re-checks scope & before SHA-256 matches)
+    held --> skipped : Accept (file changed after proposal — "you win")
+    accepted --> reverted : Revert (file unchanged since accept)
+    accepted --> revert_skipped : Revert (user edited after accept — "you win")
+    rejected --> [*]
+    skipped --> [*]
+    reverted --> [*]
+    revert_skipped --> [*]
+```
+
+<details>
+<summary>Level 3 — Component Diagram: Brief Coder Obsidian Plugin (src/)</summary>
+
+```mermaid
+flowchart TB
+    user(["Obsidian User<br/>[Reading, Live Preview, Code, Notebook, Agent Views]"])
+
+    subgraph plugin_c["Brief Coder Plugin (src/)"]
+        entry["Entry & Settings<br/>[src/main.ts, settings.ts, i18n.ts]<br/>Commands, settings migration, EN/AR i18n, bridge.json sync"]
+        ui["UI Views & Editor Extensions<br/>[src/ui/*]<br/>Viewport Run/Copy bars, paged output, code/notebook/agent views"]
+        run["Execution Engine<br/>[src/run/*]<br/>Run sessions, desktop process runner, JS worker, HTML iframe, output buffer"]
+        langs["Language Registry<br/>[src/languages.ts]<br/>40+ languages, commands, boilerplate-free snippet wrappers"]
+        nb["Notebook Engine<br/>[src/notebook/*]<br/>Jupyter v4 parser, untrusted Markdown sanitizer, per-notebook trust"]
+        changes["Agent Changeset Controller<br/>[src/agent/changes.ts]<br/>Path/scope re-validator, diff engine, Accept/Reject/Revert"]
+        util["Parsing & Guard Utilities<br/>[src/util/*]<br/>Fence parser, trusted-folder guard, RTL/LTR text handling"]
+    end
+
+    obs["Obsidian API"]:::ext
+    runtimes["Local Runtimes"]:::ext
+    bstate[("Bridge Config & Changesets<br/>[JSON Files]")]:::ext
+
+    user --> ui
+    entry --> ui
+    entry --> obs
+    ui --> run
+    ui --> nb
+    ui --> changes
+    ui --> util
+    run --> langs
+    run -->|"child_process"| runtimes
+    changes --> bstate
+    changes -->|"Vault API"| obs
+    entry --> bstate
+
+    classDef ext stroke-dasharray: 5 5,stroke-width:1.5px;
+```
+
+</details>
+
 ## Development
 
 ```bash
