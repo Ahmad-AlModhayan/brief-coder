@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 545.5" width="960" height="545.5" role="img" aria-label="Brief Coder — System Context">
+  <title>Brief Coder — System Context</title>
+  <defs>
+    <clipPath id="canvas-clip">
+      <rect x="0.5" y="0.5" width="959" height="544.5" rx="12"/>
+    </clipPath>
+    <filter id="card-shadow" x="-6%" y="-6%" width="112%" height="118%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#000000" flood-opacity="0.30"/>
+    </filter>
+    <marker id="arrow-default" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#8e8980"/>
+    </marker>
+    <marker id="arrow-start-default" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#8e8980"/>
+    </marker>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#dcd8d1"/>
+    </marker>
+    <marker id="arrow-start-primary" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#dcd8d1"/>
+    </marker>
+    <marker id="arrow-positive" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#4cc897"/>
+    </marker>
+    <marker id="arrow-start-positive" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#4cc897"/>
+    </marker>
+    <marker id="arrow-info" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#7cc8ec"/>
+    </marker>
+    <marker id="arrow-start-info" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#7cc8ec"/>
+    </marker>
+    <marker id="arrow-warning" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#ffb547"/>
+    </marker>
+    <marker id="arrow-start-warning" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#ffb547"/>
+    </marker>
+    <marker id="arrow-critical" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#ff8a80"/>
+    </marker>
+    <marker id="arrow-start-critical" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#ff8a80"/>
+    </marker>
+    <marker id="arrow-neutral" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#b9b4ab"/>
+    </marker>
+    <marker id="arrow-start-neutral" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#b9b4ab"/>
+    </marker>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="544.5" rx="12" fill="#0e0d0b" stroke="#282622" stroke-width="1"/>
+  
+  <g clip-path="url(#canvas-clip)">
+    <rect x="0" y="0" width="960" height="69" fill="#151412"/>
+    <line x1="0" y1="69" x2="960" y2="69" stroke="#282622" stroke-width="1"/>
+    <rect x="20" y="16" width="3.5" height="36" rx="1.75" fill="#dcd8d1"/>
+    <rect x="34" y="14" width="193" height="18" rx="9" fill="#2a2925" stroke="#4d4a44" stroke-width="0.8"/>
+    <text x="130.5" y="26" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.5" font-weight="600" letter-spacing="0.6" fill="#e9e5de">C4 · LEVEL 1 · SYSTEM CONTEXT</text>
+    <text x="239" y="28" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#f2efe9">Brief Coder — System Context</text>
+    <text x="34" y="50" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a6a197">Zero-telemetry Obsidian plugin for running 40+ languages, editing code files, viewing notebooks, and holding local MCP agent proposals</text>
+  </g>
+  
+  <g class="edges">
+    <path d="M 283.5 178.5 L 283.5 186.3 Q 283.5 194.2 275.7 194.2 L 226.5 194.2 Q 218.5 194.2 218.5 202.2 L 218.5 234.5" fill="none" stroke="#8e8980" stroke-width="1.45" marker-end="url(#arrow-default)"/>
+    <path d="M 406.0 277.3 L 553.0 277.3" fill="none" stroke="#8e8980" stroke-width="1.45" marker-end="url(#arrow-default)"/>
+    <path d="M 676.5 178.5 L 676.5 210.8 Q 676.5 218.8 684.5 218.8 L 732.7 218.8 Q 740.5 218.8 740.5 226.7 L 740.5 234.5" fill="none" stroke="#8e8980" stroke-width="1.45" marker-end="url(#arrow-default)"/>
+    <path d="M 700.5 320.0 L 700.5 327.8 Q 700.5 335.7 692.7 335.7 L 291.5 335.7 Q 283.5 335.7 283.5 343.7 L 283.5 382.0" fill="none" stroke="#8e8980" stroke-width="1.45" marker-end="url(#arrow-default)"/>
+    <path d="M 780.5 320.0 L 780.5 352.3 Q 780.5 360.3 772.5 360.3 L 684.3 360.3 Q 676.5 360.3 676.5 368.2 L 676.5 376.0" fill="none" stroke="#8e8980" stroke-width="1.45" marker-end="url(#arrow-default)"/>
+  </g>
+  
+  <g class="node" data-id="user">
+    <rect x="96" y="93" width="375" height="85.5" rx="20" fill="#1b1a17" stroke="#34312c" stroke-width="1.35" filter="url(#card-shadow)"/>
+    <g transform="translate(108,104)"><circle cx="8" cy="5" r="2.8" stroke="#dcd8d1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M2.8 14c0-2.6 2.3-4.2 5.2-4.2s5.2 1.6 5.2 4.2" stroke="#dcd8d1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+    <text x="130" y="116.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#f2efe9">Obsidian User</text>
+    <rect x="110" y="124" width="160" height="16.5" rx="4" fill="#282621"/>
+    <text x="116" y="135.2" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" font-weight="500" fill="#cdc8be">Person · Desktop &amp; Mobile</text>
+    <text x="110" y="154.0" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.6" fill="#a6a197" opacity="1">Runs code blocks, edits files, views notebooks &amp; reviews diffs</text>
+  </g>
+  <g class="node" data-id="agent">
+    <rect x="489" y="93" width="375" height="85.5" rx="20" fill="#141311" stroke="#635f57" stroke-width="1.35" stroke-dasharray="4.5 3.5"/>
+    <g transform="translate(501,104)"><rect x="2.5" y="4" width="11" height="8.5" rx="2.2" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M8 2v2M5.8 8.2h.1M10.1 8.2h.1M6 10.6h4" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+    <text x="523" y="116.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#f2efe9">Local AI Agent</text>
+    <rect x="503" y="124" width="131" height="16.5" rx="4" fill="#282621"/>
+    <text x="509" y="135.2" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" font-weight="500" fill="#cdc8be">External Actor · MCP</text>
+    <text x="503" y="154.0" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.6" fill="#a6a197" opacity="1">Local MCP client reading shared folders &amp; proposing held edits</text>
+  </g>
+  <g class="node" data-id="obs">
+    <rect x="31" y="234.5" width="375" height="85.5" rx="10" fill="#141311" stroke="#635f57" stroke-width="1.25" stroke-dasharray="4.5 3.5"/>
+    <g transform="translate(43,245.5)"><rect x="2" y="2.5" width="12" height="8.5" rx="1.5" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M5.5 13.5h5M8 11v2.5" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+    <text x="65" y="258" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#f2efe9">Obsidian Host App</text>
+    <rect x="45" y="265.5" width="125" height="16.5" rx="4" fill="#282621"/>
+    <text x="51" y="276.7" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" font-weight="500" fill="#cdc8be">External Host · CM6</text>
+    <text x="45" y="295.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.6" fill="#a6a197" opacity="1">Vault API, CodeMirror 6 &amp; workspace views</text>
+  </g>
+  <g class="node" data-id="bc">
+    <rect x="553" y="234.5" width="375" height="85.5" rx="10" fill="#33312c" stroke="#9e9990" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <g transform="translate(565,245.5)"><path d="M5.5 5L2.5 8l3 3M10.5 5l3 3-3 3M8.8 4l-1.6 8" stroke="#f5f3ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+    <text x="587" y="258" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#f5f3ee">Brief Coder</text>
+    <rect x="567" y="265.5" width="207" height="16.5" rx="4" fill="#21201c"/>
+    <text x="573" y="276.7" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" font-weight="500" fill="#e2ded6">Software System · Plugin + Bridge</text>
+    <text x="567" y="295.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.6" fill="#f5f3ee" opacity="0.92">Obsidian plugin (main.js) &amp; opt-in stdio MCP bridge; zero network</text>
+  </g>
+  <g class="node" data-id="runtimes">
+    <rect x="96" y="382" width="375" height="85.5" rx="10" fill="#141311" stroke="#635f57" stroke-width="1.25" stroke-dasharray="4.5 3.5"/>
+    <g transform="translate(108,393)"><rect x="2" y="2.5" width="12" height="11" rx="1.8" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M5 6.5l2 1.8-2 1.8M8.5 10.2h2.8" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+    <text x="130" y="405.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#f2efe9">Language Runtimes</text>
+    <rect x="110" y="413" width="213" height="16.5" rx="4" fill="#282621"/>
+    <text x="116" y="424.2" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" font-weight="500" fill="#cdc8be">40+ Local Compilers &amp; Interpreters</text>
+    <text x="110" y="443.0" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.6" fill="#a6a197" opacity="1">Installed on desktop; invoked only on explicit Run</text>
+  </g>
+  <g class="node" data-id="vault">
+    
+    <path d="M 489 384 L 489 465.5 A 187.5 8 0 0 0 864 465.5 L 864 384 Z" fill="#141311" stroke="#635f57" stroke-width="1.25" stroke-dasharray="4.5 3.5"/>
+    <ellipse cx="676.5" cy="384" rx="187.5" ry="8" fill="#141311" stroke="#635f57" stroke-width="1.25" stroke-dasharray="4.5 3.5"/>
+    <g transform="translate(501,398)"><ellipse cx="8" cy="4.2" rx="5.2" ry="2" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M2.8 4.2v7.6c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2V4.2" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M2.8 8c0 1.1 2.3 2 5.2 2s5.2-.9 5.2-2" stroke="#858076" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+    <text x="523" y="410.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#f2efe9">Obsidian Vault FS</text>
+    <rect x="503" y="418" width="107" height="16.5" rx="4" fill="#282621"/>
+    <text x="509" y="429.2" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" font-weight="500" fill="#cdc8be">Local Filesystem</text>
+    <text x="503" y="448.0" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.6" fill="#a6a197" opacity="1">Notes, code files, .ipynb notebooks &amp; bridge JSON</text>
+  </g>
+  <g class="edge-labels">
+    
+    <rect x="187.5" y="185.2" width="127" height="18" rx="4.5" fill="#1d1c19" stroke="#3e3b35" stroke-width="0.9"/>
+    <text x="251.0" y="197.6" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#e3ded4">Notes, Run/Copy &amp; diffs</text>
+    
+    <rect x="420.0" y="268.3" width="119" height="18" rx="4.5" fill="#1d1c19" stroke="#3e3b35" stroke-width="0.9"/>
+    <text x="479.5" y="280.6" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#e3ded4">Loads UI &amp; commands</text>
+    
+    <rect x="628.5" y="209.8" width="160" height="18" rx="4.5" fill="#1d1c19" stroke="#3e3b35" stroke-width="0.9"/>
+    <text x="708.5" y="222.2" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#e3ded4">Read &amp; propose [MCP / stdio]</text>
+    
+    <rect x="396.5" y="326.7" width="191" height="18" rx="4.5" fill="#1d1c19" stroke="#3e3b35" stroke-width="0.9"/>
+    <text x="492.0" y="339.1" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#e3ded4">Runs approved code [child_process]</text>
+    
+    <rect x="616.0" y="351.3" width="225" height="18" rx="4.5" fill="#1d1c19" stroke="#3e3b35" stroke-width="0.9"/>
+    <text x="728.5" y="363.7" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#e3ded4">Reads/writes notes &amp; state [Vault API / fs]</text>
+  </g>
+  <g clip-path="url(#canvas-clip)">
+    <rect x="0" y="507.5" width="960" height="38" fill="#151412"/>
+    <line x1="0" y1="507.5" x2="960" y2="507.5" stroke="#282622" stroke-width="1"/>
+    <rect x="24" y="519.5" width="14" height="14" rx="3.5" fill="#33312c" stroke="#9e9990" stroke-width="1.2"/>
+    <text x="44" y="530.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#a6a197">Brief Coder Software System</text>
+    <path d="M 216 522.5 v 7.5 a 6 2.3 0 0 0 12 0 v -7.5 z" fill="#1b1a17" stroke="#a6a197" stroke-width="1.15"/><ellipse cx="222" cy="522.5" rx="6" ry="2.3" fill="#262420" stroke="#a6a197" stroke-width="1.15"/>
+    <text x="235" y="530.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#a6a197">Local Vault Storage</text>
+    <rect x="357" y="519.5" width="14" height="14" rx="3.5" fill="#141311" stroke="#635f57" stroke-width="1.2" stroke-dasharray="3 2"/>
+    <text x="377" y="530.5" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#a6a197">Obsidian Host / Local Runtimes / MCP Client</text>
+  </g>
+</svg>

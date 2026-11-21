@@ -1,0 +1,197 @@
+{
+  "product": "obsidian-coder",
+  "title": "Brief Coder Architecture Diagrams (C4 + UML)",
+  "diagrams": [
+    {
+      "id": "c4-context",
+      "kind": "c4",
+      "badge": "C4 · LEVEL 1 · SYSTEM CONTEXT",
+      "title": "Brief Coder — System Context",
+      "subtitle": "Zero-telemetry Obsidian plugin for running 40+ languages, editing code files, viewing notebooks, and holding local MCP agent proposals",
+      "rowGap": 56,
+      "rows": [
+        {
+          "nodes": [
+            { "id": "user", "shape": "person", "icon": "person", "title": "Obsidian User", "tech": "Person · Desktop & Mobile", "desc": "Runs code blocks, edits files, views notebooks & reviews diffs" },
+            { "id": "agent", "ext": true, "shape": "person", "icon": "agent", "title": "Local AI Agent", "tech": "External Actor · MCP", "desc": "Local MCP client reading shared folders & proposing held edits" }
+          ]
+        },
+        {
+          "nodes": [
+            { "id": "obs", "ext": true, "icon": "desktop", "title": "Obsidian Host App", "tech": "External Host · CM6", "desc": "Vault API, CodeMirror 6 & workspace views" },
+            { "id": "bc", "emphasis": "solid", "icon": "code", "title": "Brief Coder", "tech": "Software System · Plugin + Bridge", "desc": "Obsidian plugin (main.js) & opt-in stdio MCP bridge; zero network" }
+          ]
+        },
+        {
+          "nodes": [
+            { "id": "runtimes", "ext": true, "icon": "cli", "title": "Language Runtimes", "tech": "40+ Local Compilers & Interpreters", "desc": "Installed on desktop; invoked only on explicit Run" },
+            { "id": "vault", "ext": true, "shape": "db", "icon": "db", "title": "Obsidian Vault FS", "tech": "Local Filesystem", "desc": "Notes, code files, .ipynb notebooks & bridge JSON" }
+          ]
+        }
+      ],
+      "edges": [
+        { "from": "user", "to": "obs", "label": "Notes, Run/Copy & diffs" },
+        { "from": "obs", "to": "bc", "label": "Loads UI & commands" },
+        { "from": "agent", "to": "bc", "label": "Read & propose [MCP / stdio]" },
+        { "from": "bc", "to": "runtimes", "label": "Runs approved code [child_process]" },
+        { "from": "bc", "to": "vault", "label": "Reads/writes notes & state [Vault API / fs]" }
+      ],
+      "legend": [
+        { "kind": "emphasis", "label": "Brief Coder Software System" },
+        { "kind": "db", "label": "Local Vault Storage" },
+        { "kind": "ext", "label": "Obsidian Host / Local Runtimes / MCP Client" }
+      ]
+    },
+    {
+      "id": "c4-containers",
+      "kind": "c4",
+      "badge": "C4 · LEVEL 2 · CONTAINERS",
+      "title": "Brief Coder — Plugin & Stdio Agent Bridge Containers",
+      "subtitle": "Zero-dependency plugin bundle and standalone stdio MCP bridge coordinating strictly through vault JSON policy and held changesets",
+      "rowGap": 54,
+      "rows": [
+        {
+          "nodes": [
+            { "id": "user", "shape": "person", "icon": "person", "title": "Obsidian User", "tech": "Desktop · Mobile", "desc": "Runs snippets, edits code & reviews proposals" },
+            { "id": "agent", "ext": true, "shape": "person", "icon": "agent", "title": "Local AI Agent", "tech": "MCP Client · Local", "desc": "Starts coder-bridge.mjs over stdio" }
+          ]
+        },
+        {
+          "topSpace": 28,
+          "inset": 28,
+          "nodes": [
+            { "id": "plugin", "emphasis": "solid", "icon": "code", "title": "Brief Coder Plugin", "tech": "TypeScript · main.js", "desc": "Run/Copy, editor, notebooks, sandbox, diff UI" },
+            { "id": "bstate", "shape": "db", "icon": "db", "title": "Bridge State", "tech": "JSON in Vault", "desc": "bridge.json & .coder/ held changesets" },
+            { "id": "bridge", "icon": "bridge", "title": "Agent Bridge", "tech": "Node 18+ · coder-bridge.mjs", "desc": "Stdio MCP server enforcing folder scope" }
+          ]
+        },
+        {
+          "inset": 240,
+          "bottomGap": 56,
+          "nodes": [
+            { "id": "tcache", "shape": "db", "icon": "db", "title": "Temp Dir & Build Cache", "tech": "OS Temp FS", "desc": "Per-run temp files & 14-day compiled build cache" }
+          ],
+          "maxCardW": 360
+        },
+        {
+          "topSpace": 12,
+          "nodes": [
+            { "id": "runtimes", "ext": true, "icon": "cli", "title": "Local Runtimes", "tech": "Desktop Compilers", "desc": "Python, Node, Go, Rust, .NET, Java..." },
+            { "id": "obs", "ext": true, "icon": "desktop", "title": "Obsidian Vault API", "tech": "Notes · Trash · UI", "desc": "Host workspace & accepted note writes" }
+          ]
+        }
+      ],
+      "boundaries": [
+        { "id": "bc_sys", "depth": 0, "label": "Brief Coder", "nodes": ["plugin", "bstate", "bridge", "tcache"], "padX": 16, "padTop": 30, "padBot": 14 }
+      ],
+      "edges": [
+        { "from": "user", "to": "plugin", "label": "Runs & reviews" },
+        { "from": "agent", "to": "bridge", "label": "Tools [MCP / stdio]" },
+        { "from": "plugin", "to": "bstate", "label": "Policy & diffs", "bi": true },
+        { "from": "bridge", "to": "bstate", "label": "Held [fs]", "bi": true },
+        { "from": "plugin", "to": "tcache", "label": "Stages & caches" },
+        { "from": "plugin", "to": "runtimes", "label": "Spawns [child_process]", "laneX": 28, "labelPos": "bot", "laneEndDy": -4 },
+        { "from": "plugin", "to": "obs", "label": "Views & accepted edits", "laneX": 255, "labelPos": "bot", "laneEndDy": 6 }
+      ],
+      "legend": [
+        { "kind": "emphasis", "label": "Brief Coder Plugin (main.js)" },
+        { "kind": "solid", "label": "Opt-in Stdio MCP Bridge" },
+        { "kind": "db", "label": "Temp Cache / Vault JSON State" },
+        { "kind": "ext", "label": "External Runtime / Obsidian Host" }
+      ]
+    },
+    {
+      "id": "uml-changeset-state",
+      "kind": "state",
+      "badge": "UML · STATE MACHINE",
+      "title": "Brief Coder — Held Agent Changeset Lifecycle",
+      "subtitle": "The bridge never writes notes directly; Accept & Revert enforce SHA-256 content checks so human edits always win",
+      "height": 370,
+      "states": [
+        { "id": "start", "kind": "start", "cx": 42, "cy": 212, "caption": "propose" },
+        { "id": "held", "cx": 218, "cy": 212, "w": 164, "h": 70, "tone": "warning", "label": "held", "sub": ".coder/agent-changes/" },
+        { "id": "accepted", "cx": 500, "cy": 136, "w": 170, "h": 66, "tone": "positive", "label": "accepted", "sub": "Written via Vault API" },
+        { "id": "rejected", "cx": 500, "cy": 236, "w": 170, "h": 56, "tone": "neutral", "label": "rejected", "sub": "Notes untouched" },
+        { "id": "skipped", "cx": 500, "cy": 324, "w": 170, "h": 56, "tone": "neutral", "label": "skipped", "sub": "Changed — \"you win\"" },
+        { "id": "reverted", "cx": 784, "cy": 120, "w": 168, "h": 58, "tone": "info", "label": "reverted", "sub": "Original note restored" },
+        { "id": "rskip", "cx": 784, "cy": 226, "w": 168, "h": 58, "tone": "neutral", "label": "kept user edit", "sub": "Edited — \"you win\"" },
+        { "id": "end1", "kind": "end", "cx": 920, "cy": 120 },
+        { "id": "end2", "kind": "end", "cx": 920, "cy": 226 },
+        { "id": "end3", "kind": "end", "cx": 630, "cy": 236 },
+        { "id": "end4", "kind": "end", "cx": 630, "cy": 324 }
+      ],
+      "transitions": [
+        { "from": "start", "to": "held", "label": "propose_change", "lx": 88, "ly": 168 },
+        { "from": "held", "to": "accepted", "fromSide": "top", "toSide": "left", "via": [{ "x": 218, "y": 136 }], "label": "Accept (scope & SHA-256 match)", "tone": "positive", "lx": 304, "ly": 110 },
+        { "from": "held", "to": "rejected", "fromSide": "right", "toSide": "left", "via": [{ "x": 356, "y": 212 }, { "x": 356, "y": 236 }], "label": "Reject", "lx": 356, "ly": 192 },
+        { "from": "held", "to": "skipped", "fromSide": "bottom", "toSide": "left", "via": [{ "x": 218, "y": 324 }], "label": "Accept (file drifted)", "dashed": true, "lx": 304, "ly": 300 },
+        { "from": "accepted", "to": "reverted", "fromSide": "right", "toSide": "left", "fromOffset": -12, "via": [{ "x": 642, "y": 124 }, { "x": 642, "y": 120 }], "label": "Revert (unchanged)", "tone": "info", "lx": 642, "ly": 98 },
+        { "from": "accepted", "to": "rskip", "fromSide": "right", "toSide": "left", "fromOffset": 14, "via": [{ "x": 642, "y": 150 }, { "x": 642, "y": 226 }], "label": "Revert (user edited)", "dashed": true, "lx": 642, "ly": 184 },
+        { "from": "reverted", "to": "end1", "fromSide": "right", "toSide": "left" },
+        { "from": "rskip", "to": "end2", "fromSide": "right", "toSide": "left" },
+        { "from": "rejected", "to": "end3", "fromSide": "right", "toSide": "left" },
+        { "from": "skipped", "to": "end4", "fromSide": "right", "toSide": "left" }
+      ]
+    },
+    {
+      "id": "c4-components-plugin",
+      "kind": "c4",
+      "badge": "C4 · LEVEL 3 · COMPONENTS",
+      "title": "Brief Coder — Obsidian Plugin Components (src/)",
+      "subtitle": "Lazy-loaded desktop process runners, sandboxed JS/HTML execution, virtualized Jupyter v4 viewer, and held changeset review",
+      "rowGap": 54,
+      "rows": [
+        {
+          "nodes": [
+            { "id": "user", "shape": "person", "icon": "person", "title": "Obsidian User", "tech": "Reading · Live Preview · Code · Notebook", "desc": "Clicks Run/Copy, edits code files & reviews agent diffs" }
+          ],
+          "maxCardW": 420
+        },
+        {
+          "topSpace": 26,
+          "inset": 32,
+          "nodes": [
+            { "id": "entry", "emphasis": "solid", "icon": "code", "title": "Entry, Settings & UI Views", "tech": "main.ts · settings.ts · i18n.ts · src/ui/*", "desc": "Commands, EN/AR i18n, Run/Copy bars, editors & Agent changes view" }
+          ],
+          "maxCardW": 500
+        },
+        {
+          "inset": 32,
+          "bottomGap": 56,
+          "nodes": [
+            { "id": "run", "icon": "cli", "title": "Execution & Languages", "tech": "src/run/* · languages.ts", "desc": "Process runner, JS worker, HTML sandbox & 40+ langs" },
+            { "id": "nb", "icon": "book", "title": "Notebooks & Guards", "tech": "src/notebook/* · util/*", "desc": "Jupyter v4 virtualizer, trust store & trusted folders" },
+            { "id": "changes", "icon": "bridge", "title": "Agent Changesets", "tech": "src/agent/changes.ts", "desc": "Scope re-check, diff & Accept / Reject / Revert" }
+          ]
+        },
+        {
+          "topSpace": 12,
+          "nodes": [
+            { "id": "runtimes", "ext": true, "icon": "cli", "title": "Local Runtimes", "tech": "child_process", "desc": "Installed desktop toolchains" },
+            { "id": "obs", "ext": true, "icon": "desktop", "title": "Obsidian Vault API", "tech": "External Host", "desc": "Views, commands & accepted writes" },
+            { "id": "bstate", "ext": true, "shape": "db", "icon": "db", "title": "Bridge JSON & Changesets", "tech": "bridge.json · .coder/", "desc": "Shared folder scope & proposals" }
+          ]
+        }
+      ],
+      "boundaries": [
+        { "id": "plugin_c", "depth": 0, "label": "Brief Coder Plugin · src/", "nodes": ["entry", "run", "nb", "changes"], "padX": 16, "padTop": 30, "padBot": 14 }
+      ],
+      "edges": [
+        { "from": "user", "to": "entry", "label": "Run/Copy & review" },
+        { "from": "entry", "to": "run", "label": "Starts / stops runs" },
+        { "from": "entry", "to": "nb", "label": "Parses & trusts" },
+        { "from": "entry", "to": "changes", "label": "Reviews diffs" },
+        { "from": "run", "to": "runtimes", "label": "Spawns runs" },
+        { "from": "nb", "to": "obs", "label": "Reads .ipynb" },
+        { "from": "changes", "to": "obs", "label": "Writes accepted" },
+        { "from": "changes", "to": "bstate", "label": "Reads / updates" }
+      ],
+      "legend": [
+        { "kind": "emphasis", "label": "Plugin Entry & UI Surface" },
+        { "kind": "solid", "label": "Plugin Subsystem" },
+        { "kind": "db", "label": "Vault JSON State" },
+        { "kind": "ext", "label": "Local Runtimes / Obsidian Host" }
+      ]
+    }
+  ]
+}
