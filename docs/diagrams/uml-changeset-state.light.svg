@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 408" width="960" height="408" role="img" aria-label="Brief Coder — Held Agent Changeset Lifecycle">
+  <title>Brief Coder — Held Agent Changeset Lifecycle</title>
+  <defs>
+    <clipPath id="canvas-clip">
+      <rect x="0.5" y="0.5" width="959" height="407" rx="12"/>
+    </clipPath>
+    <filter id="card-shadow" x="-6%" y="-6%" width="112%" height="118%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#000000" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arrow-default" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#6f6b63"/>
+    </marker>
+    <marker id="arrow-start-default" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#6f6b63"/>
+    </marker>
+    <marker id="arrow-primary" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#3a3835"/>
+    </marker>
+    <marker id="arrow-start-primary" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#3a3835"/>
+    </marker>
+    <marker id="arrow-positive" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#0b7550"/>
+    </marker>
+    <marker id="arrow-start-positive" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#0b7550"/>
+    </marker>
+    <marker id="arrow-info" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#0a6b8f"/>
+    </marker>
+    <marker id="arrow-start-info" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#0a6b8f"/>
+    </marker>
+    <marker id="arrow-warning" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#9a5e00"/>
+    </marker>
+    <marker id="arrow-start-warning" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#9a5e00"/>
+    </marker>
+    <marker id="arrow-critical" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#c4322a"/>
+    </marker>
+    <marker id="arrow-start-critical" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#c4322a"/>
+    </marker>
+    <marker id="arrow-neutral" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" fill="#5f5c57"/>
+    </marker>
+    <marker id="arrow-start-neutral" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M 9 1.5 L 1 5 L 9 8.5 z" fill="#5f5c57"/>
+    </marker>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="407" rx="12" fill="#f5f4f0" stroke="#e2dfd7" stroke-width="1"/>
+  
+  <g clip-path="url(#canvas-clip)">
+    <rect x="0" y="0" width="960" height="69" fill="#fbfaf7"/>
+    <line x1="0" y1="69" x2="960" y2="69" stroke="#e2dfd7" stroke-width="1"/>
+    <rect x="20" y="16" width="3.5" height="36" rx="1.75" fill="#3a3835"/>
+    <rect x="34" y="14" width="133" height="18" rx="9" fill="#ecebe7" stroke="#cbc7be" stroke-width="0.8"/>
+    <text x="100.5" y="26" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.5" font-weight="600" letter-spacing="0.6" fill="#2b2925">UML · STATE MACHINE</text>
+    <text x="179" y="28" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#1b1a17">Brief Coder — Held Agent Changeset Lifecycle</text>
+    <text x="34" y="50" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" fill="#656159">The bridge never writes notes directly; Accept &amp; Revert enforce SHA-256 content checks so human edits always win</text>
+  </g>
+  <g class="transitions"><path d="M 50.0 212.0 L 136.0 212.0" fill="none" stroke="#6f6b63" stroke-width="1.5" marker-end="url(#arrow-default)"/>
+    <path d="M 218.0 177.0 L 218.0 146.0 Q 218.0 136.0 228.0 136.0 L 415.0 136.0" fill="none" stroke="#0b7550" stroke-width="1.5" marker-end="url(#arrow-positive)"/>
+    <path d="M 300.0 212.0 L 346.0 212.0 Q 356.0 212.0 356.0 222.0 L 356.0 226.0 Q 356.0 236.0 366.0 236.0 L 415.0 236.0" fill="none" stroke="#6f6b63" stroke-width="1.5" marker-end="url(#arrow-default)"/>
+    <path d="M 218.0 247.0 L 218.0 314.0 Q 218.0 324.0 228.0 324.0 L 415.0 324.0" fill="none" stroke="#6f6b63" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow-default)"/>
+    <path d="M 585.0 124.0 L 640.0 124.0 Q 642.0 124.0 642.0 122.0 L 642.0 122.0 Q 642.0 120.0 644.0 120.0 L 700.0 120.0" fill="none" stroke="#0a6b8f" stroke-width="1.5" marker-end="url(#arrow-info)"/>
+    <path d="M 585.0 150.0 L 632.0 150.0 Q 642.0 150.0 642.0 160.0 L 642.0 216.0 Q 642.0 226.0 652.0 226.0 L 700.0 226.0" fill="none" stroke="#6f6b63" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow-default)"/>
+    <path d="M 868.0 120.0 L 909.0 120.0" fill="none" stroke="#6f6b63" stroke-width="1.5" marker-end="url(#arrow-default)"/>
+    <path d="M 868.0 226.0 L 909.0 226.0" fill="none" stroke="#6f6b63" stroke-width="1.5" marker-end="url(#arrow-default)"/>
+    <path d="M 585.0 236.0 L 619.0 236.0" fill="none" stroke="#6f6b63" stroke-width="1.5" marker-end="url(#arrow-default)"/>
+    <path d="M 585.0 324.0 L 619.0 324.0" fill="none" stroke="#6f6b63" stroke-width="1.5" marker-end="url(#arrow-default)"/></g>
+  <g><circle cx="42" cy="212" r="8" fill="#3a3835"/><text x="42" y="234" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" fill="#656159">propose</text></g>
+  <g>
+    <rect x="136" y="177" width="164" height="70" rx="12" fill="#fdf0d8" stroke="#e6c58b" stroke-width="1.4" filter="url(#card-shadow)"/>
+    <rect x="137" y="187" width="3.2" height="50" rx="1.6" fill="#9a5e00"/>
+    <text x="218" y="206.5" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#5a3600">held</text>
+    <text x="218" y="221.5" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" fill="#656159">.coder/agent-changes/</text>
+  </g>
+  <g>
+    <rect x="415" y="103" width="170" height="66" rx="12" fill="#e2f1e9" stroke="#a3d6ba" stroke-width="1.4" filter="url(#card-shadow)"/>
+    <rect x="416" y="113" width="3.2" height="46" rx="1.6" fill="#0b7550"/>
+    <text x="500" y="130.5" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#05432d">accepted</text>
+    <text x="500" y="145.5" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" fill="#656159">Written via Vault API</text>
+  </g>
+  <g>
+    <rect x="415" y="208" width="170" height="56" rx="12" fill="#eceae4" stroke="#ccc8bf" stroke-width="1.4" filter="url(#card-shadow)"/>
+    <rect x="416" y="218" width="3.2" height="36" rx="1.6" fill="#5f5c57"/>
+    <text x="500" y="230.5" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#2b2925">rejected</text>
+    <text x="500" y="245.5" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" fill="#656159">Notes untouched</text>
+  </g>
+  <g>
+    <rect x="415" y="296" width="170" height="56" rx="12" fill="#eceae4" stroke="#ccc8bf" stroke-width="1.4" filter="url(#card-shadow)"/>
+    <rect x="416" y="306" width="3.2" height="36" rx="1.6" fill="#5f5c57"/>
+    <text x="500" y="318.5" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#2b2925">skipped</text>
+    <text x="500" y="333.5" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" fill="#656159">Changed — &quot;you win&quot;</text>
+  </g>
+  <g>
+    <rect x="700" y="91" width="168" height="58" rx="12" fill="#dff0fa" stroke="#9fd0ea" stroke-width="1.4" filter="url(#card-shadow)"/>
+    <rect x="701" y="101" width="3.2" height="38" rx="1.6" fill="#0a6b8f"/>
+    <text x="784" y="114.5" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#0b3d52">reverted</text>
+    <text x="784" y="129.5" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" fill="#656159">Original note restored</text>
+  </g>
+  <g>
+    <rect x="700" y="197" width="168" height="58" rx="12" fill="#eceae4" stroke="#ccc8bf" stroke-width="1.4" filter="url(#card-shadow)"/>
+    <rect x="701" y="207" width="3.2" height="38" rx="1.6" fill="#5f5c57"/>
+    <text x="784" y="220.5" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12.2" font-weight="700" fill="#2b2925">kept user edit</text>
+    <text x="784" y="235.5" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.3" fill="#656159">Edited — &quot;you win&quot;</text>
+  </g><g><circle cx="920" cy="120" r="10.5" fill="none" stroke="#6f6b63" stroke-width="1.8"/><circle cx="920" cy="120" r="5.5" fill="#6f6b63"/></g><g><circle cx="920" cy="226" r="10.5" fill="none" stroke="#6f6b63" stroke-width="1.8"/><circle cx="920" cy="226" r="5.5" fill="#6f6b63"/></g><g><circle cx="630" cy="236" r="10.5" fill="none" stroke="#6f6b63" stroke-width="1.8"/><circle cx="630" cy="236" r="5.5" fill="#6f6b63"/></g><g><circle cx="630" cy="324" r="10.5" fill="none" stroke="#6f6b63" stroke-width="1.8"/><circle cx="630" cy="324" r="5.5" fill="#6f6b63"/></g>
+  <g class="transition-labels">
+    <rect x="42.5" y="158.0" width="91" height="20" rx="4.5" fill="#ffffff" stroke="#d8d4ca" stroke-width="0.9"/>
+    <text x="88.0" y="171.4" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#33302b">propose_change</text>
+    <rect x="217.0" y="100.0" width="174" height="20" rx="4.5" fill="#ffffff" stroke="#d8d4ca" stroke-width="0.9"/>
+    <text x="304.0" y="113.4" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#33302b">Accept (scope &amp; SHA-256 match)</text>
+    <rect x="334.0" y="182.0" width="44" height="20" rx="4.5" fill="#ffffff" stroke="#d8d4ca" stroke-width="0.9"/>
+    <text x="356.0" y="195.4" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#33302b">Reject</text>
+    <rect x="248.0" y="290.0" width="112" height="20" rx="4.5" fill="#ffffff" stroke="#d8d4ca" stroke-width="0.9"/>
+    <text x="304.0" y="303.4" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#33302b">Accept (file drifted)</text>
+    <rect x="587.0" y="88.0" width="110" height="20" rx="4.5" fill="#ffffff" stroke="#d8d4ca" stroke-width="0.9"/>
+    <text x="642.0" y="101.4" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#33302b">Revert (unchanged)</text>
+    <rect x="584.5" y="174.0" width="115" height="20" rx="4.5" fill="#ffffff" stroke="#d8d4ca" stroke-width="0.9"/>
+    <text x="642.0" y="187.4" text-anchor="middle" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.6" font-weight="600" fill="#33302b">Revert (user edited)</text></g>
+  <g clip-path="url(#canvas-clip)">
+    <rect x="0" y="370" width="960" height="38" fill="#fbfaf7"/>
+    <line x1="0" y1="370" x2="960" y2="370" stroke="#e2dfd7" stroke-width="1"/>
+    <circle cx="31" cy="389" r="5.5" fill="#3a3835"/>
+    <text x="44" y="393" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#656159">Entry Trigger</text>
+    <rect x="137" y="382" width="14" height="14" rx="3.5" fill="#fdf0d8" stroke="#e6c58b" stroke-width="1.2"/>
+    <text x="157" y="393" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#656159">Held / Awaiting Human Review</text>
+    <rect x="334" y="382" width="14" height="14" rx="3.5" fill="#e2f1e9" stroke="#a3d6ba" stroke-width="1.2"/>
+    <text x="354" y="393" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#656159">Confirmed / Committed State</text>
+    <rect x="522" y="382" width="14" height="14" rx="3.5" fill="#eceae4" stroke="#ccc8bf" stroke-width="1.2"/>
+    <text x="542" y="393" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#656159">Reverted / Rejected / Safe Skip</text>
+    <circle cx="732" cy="389" r="6.5" fill="none" stroke="#6f6b63" stroke-width="1.4"/><circle cx="732" cy="389" r="3.5" fill="#6f6b63"/>
+    <text x="745" y="393" font-family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" fill="#656159">Terminal State</text>
+  </g>
+</svg>

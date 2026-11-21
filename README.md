@@ -250,110 +250,40 @@ No. It's off by default and only matters if you use a local AI agent such as Cla
 
 ### System Context (C4 Level 1)
 
-```mermaid
-flowchart TB
-    user(["<b>Obsidian User</b><br/><i>Person</i><br/>Runs code blocks, edits files,<br/>views notebooks, reviews diffs"])
-    agent(["<b>Local AI Agent</b><br/><i>External Actor</i><br/>MCP client proposing held edits"]):::ext
-
-    obs("<b>Obsidian Host App</b><br/><i>[External System]</i><br/>Vault API, CodeMirror 6, views"):::ext
-    bc("<b>Brief Coder</b><br/><i>[Software System]</i><br/>Obsidian plugin (main.js) &amp; optional<br/>stdio MCP bridge; zero telemetry")
-
-    runtimes("<b>Language Runtimes</b><br/><i>[External Systems]</i><br/>40+ local compilers &amp; interpreters"):::ext
-    vault[("<b>Obsidian Vault FS</b><br/><i>[External Storage]</i><br/>Notes, code, notebooks, bridge JSON")]:::ext
-
-    user -->|"Writes notes, clicks Run/Copy"| obs
-    obs -->|"Loads plugin UI &amp; commands"| bc
-    agent -->|"Scoped read &amp; propose<br/>[MCP / stdio]"| bc
-    bc -->|"Runs approved code<br/>[child_process]"| runtimes
-    bc -->|"Reads/writes notes &amp; state<br/>[Vault API / fs]"| vault
-
-    classDef ext stroke-dasharray:5 5,stroke-width:1.5px;
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/c4-context.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/c4-context.light.svg">
+  <img alt="Brief Coder System Context (C4 Level 1)" src="docs/diagrams/c4-context.light.svg" width="100%">
+</picture>
 
 ### Containers (C4 Level 2)
 
-```mermaid
-flowchart TB
-    user(["<b>Obsidian User</b><br/><i>Desktop / Mobile</i>"])
-    agent(["<b>Local AI Agent</b><br/><i>MCP Client</i>"]):::ext
-
-    subgraph bc_sys["Brief Coder"]
-        direction TB
-        plugin("<b>Brief Coder Plugin</b><br/><i>[TypeScript — main.js]</i><br/>Run/Copy, editor, notebooks,<br/>JS/HTML sandbox, diff UI")
-        bridge("<b>Agent Bridge</b><br/><i>[Node.js 18+ — coder-bridge.mjs]</i><br/>Stdio MCP server enforcing<br/>folder scope &amp; proposals")
-        tcache[("<b>Temp Dir &amp; Build Cache</b><br/><i>[OS Temp FS]</i><br/>Per-run temp &amp; 14-day cache")]
-        bstate[("<b>Bridge Config &amp; Changesets</b><br/><i>[JSON in Vault]</i><br/>bridge.json &amp; held proposals")]
-    end
-
-    runtimes("<b>Local Runtimes</b><br/><i>[Desktop Compilers]</i>"):::ext
-    obs("<b>Obsidian Vault API</b><br/><i>[Notes, Trash, UI]</i>"):::ext
-
-    user -->|"Runs &amp; reviews"| plugin
-    agent -->|"Tools [MCP / stdio]"| bridge
-    plugin -->|"Stages &amp; caches"| tcache
-    plugin -->|"Policy &amp; updates"| bstate
-    bridge -->|"Policy &amp; held [fs]"| bstate
-    tcache ~~~ runtimes
-    tcache ~~~ obs
-    plugin -->|"Spawns [child_process]"| runtimes
-    plugin -->|"Views &amp; accepted edits"| obs
-
-    style bc_sys fill:none,stroke:#8b949e,stroke-width:1.5px,stroke-dasharray:5 3
-    classDef ext stroke-dasharray:5 5,stroke-width:1.5px;
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/c4-containers.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/c4-containers.light.svg">
+  <img alt="Brief Coder Plugin and Agent Bridge Containers (C4 Level 2)" src="docs/diagrams/c4-containers.light.svg" width="100%">
+</picture>
 
 ### Runtime Safety: Held Agent Changeset Lifecycle (UML State)
 
-```mermaid
-stateDiagram-v2
-    state "skipped (not overwritten)" as skipped
-    state "kept user edit" as revert_skipped
-
-    [*] --> held : propose_change (bridge checks shared/private scope)
-    held --> rejected : User presses Reject (notes untouched)
-    held --> accepted : Accept (re-checks scope & before SHA-256 matches)
-    held --> skipped : Accept (file changed after proposal — "you win")
-    accepted --> reverted : Revert (file unchanged since accept)
-    accepted --> revert_skipped : Revert (user edited after accept — "you win")
-    rejected --> [*]
-    skipped --> [*]
-    reverted --> [*]
-    revert_skipped --> [*]
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/uml-changeset-state.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/uml-changeset-state.light.svg">
+  <img alt="Brief Coder Held Agent Changeset Lifecycle (UML State Machine)" src="docs/diagrams/uml-changeset-state.light.svg" width="100%">
+</picture>
 
 <details>
 <summary>Level 3 — Component Diagram: Brief Coder Obsidian Plugin (src/)</summary>
 
-```mermaid
-flowchart TB
-    user(["<b>Obsidian User</b><br/><i>Reading, Live Preview, Code, Notebook &amp; Agent Views</i>"])
-
-    subgraph plugin_c["Brief Coder Plugin (src/)"]
-        direction TB
-        entry("<b>Entry, Settings &amp; UI Views</b><br/><i>[src/main.ts, settings.ts, i18n.ts, src/ui/*]</i><br/>Commands, EN/AR i18n, Run/Copy bars, editors, diff UI")
-        run("<b>Execution &amp; Languages</b><br/><i>[src/run/*, languages.ts]</i><br/>Process runner, JS worker,<br/>HTML sandbox, 40+ langs")
-        nb("<b>Notebooks &amp; Guards</b><br/><i>[src/notebook/*, util/*]</i><br/>Jupyter v4, trust store,<br/>fences, trusted folders")
-        changes("<b>Agent Changesets</b><br/><i>[src/agent/changes.ts]</i><br/>Scope re-check, diff,<br/>Accept / Reject / Revert")
-    end
-
-    runtimes("<b>Local Runtimes</b><br/><i>[child_process]</i>"):::ext
-    obs("<b>Obsidian Vault API</b><br/><i>[External Host]</i>"):::ext
-    bstate[("<b>Bridge JSON &amp; Changesets</b><br/><i>[bridge.json, .coder/]</i>")]:::ext
-
-    user -->|"Run/Copy &amp; review"| entry
-    entry -->|"Starts/stops runs"| run
-    entry -->|"Parses &amp; trusts"| nb
-    entry -->|"Reviews diffs"| changes
-    run -->|"Spawns runs"| runtimes
-    entry -->|"Views &amp; commands"| obs
-    changes -->|"Writes accepted"| obs
-    changes -->|"Reads/updates"| bstate
-
-    style plugin_c fill:none,stroke:#8b949e,stroke-width:1.5px,stroke-dasharray:5 3
-    classDef ext stroke-dasharray:5 5,stroke-width:1.5px;
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/c4-components-plugin.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/c4-components-plugin.light.svg">
+  <img alt="Brief Coder Obsidian Plugin Components (C4 Level 3)" src="docs/diagrams/c4-components-plugin.light.svg" width="100%">
+</picture>
 
 </details>
+
+> Diagram source: [`docs/diagrams/architecture.json`](docs/diagrams/architecture.json) (compiled into dual-theme Light & Dark SVGs).
 
 ## Development
 
