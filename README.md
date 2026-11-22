@@ -246,6 +246,45 @@ Brief Coder runs code with the tools already on your computer. Install the langu
 **Do I need the agent bridge?**
 No. It's off by default and only matters if you use a local AI agent such as Claude Code. See [Agent bridge](#agent-bridge).
 
+## Architecture (C4 + UML)
+
+### System Context (C4 Level 1)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/c4-context.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/c4-context.light.svg">
+  <img alt="Brief Coder System Context (C4 Level 1)" src="docs/diagrams/c4-context.light.svg" width="100%">
+</picture>
+
+### Containers (C4 Level 2)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/c4-containers.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/c4-containers.light.svg">
+  <img alt="Brief Coder Plugin and Agent Bridge Containers (C4 Level 2)" src="docs/diagrams/c4-containers.light.svg" width="100%">
+</picture>
+
+### Runtime Safety: Held Agent Changeset Lifecycle (UML State)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/uml-changeset-state.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/uml-changeset-state.light.svg">
+  <img alt="Brief Coder Held Agent Changeset Lifecycle (UML State Machine)" src="docs/diagrams/uml-changeset-state.light.svg" width="100%">
+</picture>
+
+<details>
+<summary>Level 3 — Component Diagram: Brief Coder Obsidian Plugin (src/)</summary>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/c4-components-plugin.dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/diagrams/c4-components-plugin.light.svg">
+  <img alt="Brief Coder Obsidian Plugin Components (C4 Level 3)" src="docs/diagrams/c4-components-plugin.light.svg" width="100%">
+</picture>
+
+</details>
+
+> Diagram source: [`docs/diagrams/architecture.json`](docs/diagrams/architecture.json) (compiled into dual-theme Light & Dark SVGs).
+
 ## Development
 
 ```bash
