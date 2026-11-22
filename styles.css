@@ -634,3 +634,7 @@ body:not(.is-mobile) .coder-view-output .coder-output {
 	max-width: 100%;
 	overflow-x: auto;
 }
+.coder-nb-md .task-list-item-checkbox {
+	display: inline-block;
+	vertical-align: middle;
+}
